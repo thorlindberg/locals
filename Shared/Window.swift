@@ -2,6 +2,7 @@ import SwiftUI
 
 struct Window: View {
     @State var inspector: Bool = true
+    @State var time: String = ""
     var body: some View {
         NavigationView {
             List {
@@ -69,12 +70,19 @@ struct Window: View {
                 }
             }
             .navigationTitle("")
+            .onAppear {
+                var hours = String(Calendar.current.component(.hour, from: Date()))
+                var minutes = String(Calendar.current.component(.minute, from: Date()))
+                if hours.count == 1 { hours = "0" + hours }
+                if minutes.count == 1 { minutes = "0" + minutes }
+                self.time = hours + "." + minutes
+            }
             .toolbar {
                 ToolbarItem(placement: .navigation) {
                     Menu {
                         //
                     } label: {
-                        Text("Welcome to Xlocal")
+                        Text("\(time) - Welcome to Xlocal")
                             .font(.system(size: 10))
                     }
                     .background(Color("StatusColor"))
@@ -85,7 +93,8 @@ struct Window: View {
                 ToolbarItemGroup(placement: .automatic) {
                     TextField("􀊫 Search", text: /*@START_MENU_TOKEN@*//*@PLACEHOLDER=Value@*/.constant("")/*@END_MENU_TOKEN@*/)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .frame(minWidth: 205)
+                        .frame(minWidth: 170)
+                    /*
                     Button(action: {
                         //
                     }) {
@@ -96,6 +105,7 @@ struct Window: View {
                     }) {
                         Image(systemName: "square.and.arrow.up")
                     }
+                    */
                     Toggle(isOn: $inspector) {
                         Image(systemName: "rectangle.rightthird.inset.fill")
                     }
