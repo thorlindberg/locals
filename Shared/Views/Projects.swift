@@ -55,6 +55,7 @@ struct Projects: View {
                         Text("Cancel")
                     }
                     .padding(.trailing)
+                    .keyboardShortcut(.escape)
                 }
                 TextField("Unique project name", text: $filename)
                     .textFieldStyle(RoundedBorderTextFieldStyle())

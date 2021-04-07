@@ -87,61 +87,67 @@ struct Sidebar: View {
             List {
                 if toggle == "languages" {
                     ForEach(data.translations.indices, id: \.self) { index in
-                        if data.base != data.translations[index].language {
-                            if data.translations[index].target {
-                                NavigationLink(destination:
-                                    Editor(selection: $selection, status: $status, progress: $progress, data: $data,
-                                           query: $query, entry: $entry, inspector: $inspector),
-                                    tag: data.translations[index].language,
-                                    selection: Binding(
-                                        get: { data.target },
-                                        set: { if $0 != nil { data.target = $0! } }
-                                    )
-                                ) {
-                                    Text("\(data.translations[index].language)")
-                                }
-                                .frame(height: 20)
+                        if data.translations[index].target {
+                            NavigationLink(destination:
+                                Editor(selection: $selection, status: $status, progress: $progress, data: $data,
+                                       query: $query, entry: $entry, inspector: $inspector),
+                                tag: data.translations[index].language,
+                                selection: Binding(
+                                    get: { data.target },
+                                    set: { if $0 != nil { data.target = $0! } }
+                                )
+                            ) {
+                                Text("\(data.translations[index].language)")
                             }
+                            .frame(height: 20)
                         }
                     }
                 }
                 if toggle == "editing" {
-                    Button(action: { // CURRENTLY SELECTS BASE LANGUAGE, WHICH IT SHOULD NOT!!!
-                        if data.translations.allSatisfy({ $0.target }) {
-                            data.translations.indices.forEach { index in
-                                data.translations[index].target = false
-                            }
-                        } else {
-                            data.translations.indices.forEach { index in
-                                data.translations[index].target = true
-                            }
-                        }
-                    }) {
-                        if data.translations.allSatisfy { $0.target } {
+                    HStack {
+                        if data.translations.allSatisfy({$0.target}) {
                             Text("Unselect all")
                                 .foregroundColor(.accentColor)
                         } else {
                             Text("Select all")
                         }
-                    }
-                    ForEach(data.translations.indices, id: \.self) { index in
-                        if data.base != data.translations[index].language {
-                            HStack {
-                                if data.translations[index].target {
-                                    Text("\(data.translations[index].language)")
-                                        .foregroundColor(.accentColor)
+                        Spacer()
+                        Toggle(isOn: Binding(
+                            get: { data.translations.allSatisfy({$0.target}) },
+                            set: { _,_ in
+                                if data.translations.allSatisfy({$0.target}) {
+                                    data.translations.indices.forEach { index in
+                                        data.translations[index].target = false
+                                    }
                                 } else {
-                                    Text("\(data.translations[index].language)")
+                                    data.translations.indices.forEach { index in
+                                        data.translations[index].target = true
+                                    }
                                 }
-                                Spacer()
-                                Toggle(isOn: Binding(
-                                    get: { data.translations[index].target },
-                                    set: { data.translations[index].target = $0 }
-                                )) {
-                                    Text("")
-                                }
-                                .toggleStyle(CheckboxToggleStyle())
+                                Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data)
                             }
+                        )) {
+                            Text("")
+                        }
+                        .toggleStyle(CheckboxToggleStyle())
+                    }
+                    Divider()
+                    ForEach(data.translations.indices, id: \.self) { index in
+                        HStack {
+                            if data.translations[index].target {
+                                Text("\(data.translations[index].language)")
+                                    .foregroundColor(.accentColor)
+                            } else {
+                                Text("\(data.translations[index].language)")
+                            }
+                            Spacer()
+                            Toggle(isOn: Binding(
+                                get: { data.translations[index].target },
+                                set: { data.translations[index].target = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
+                            )) {
+                                Text("")
+                            }
+                            .toggleStyle(CheckboxToggleStyle())
                         }
                     }
                 }
@@ -186,7 +192,7 @@ struct Sidebar: View {
                 if toggle == "project" {
                     Picker("Base", selection: Binding(
                         get: { data.base },
-                        set: { data.base = $0 }
+                        set: { data.base = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
                     )) {
                         ForEach(data.translations, id: \.self) { translations in
                             Text("\(translations.language)").tag(translations.language)
