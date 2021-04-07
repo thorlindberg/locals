@@ -13,7 +13,6 @@ struct Projects: View {
     
     @State var files: [String] = []
     @State var filename: String = ""
-    @State var rename: String = ""
     
     var body: some View {
         VStack(spacing: 0) {
