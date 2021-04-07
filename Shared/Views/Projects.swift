@@ -1,22 +1,37 @@
 import SwiftUI
 
 struct Projects: View {
+    
     @Binding var projects: Bool
+    @Binding var selection: String
+    @Binding var status: [String]
+    @Binding var progress: CGFloat
+    @Binding var data: Storage.Format
+    @Binding var query: String
+    @Binding var entry: String
+    @Binding var inspector: Bool
+    
+    @State var files: [String] = []
+    @State var filename: String = ""
+    @State var rename: String = ""
+    
     var body: some View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(spacing: 15) {
-                    ForEach(0 ..< 100) { _ in
+                    ForEach(files, id: \.self) { file in
                         ZStack {
                             Rectangle()
                                 .opacity(0.05)
                                 .cornerRadius(10)
                                 .frame(minHeight: 50)
                             HStack(spacing: 15) {
-                                Text("PROJECT NAME")
+                                Text("\(file)")
                                     .foregroundColor(.accentColor)
                                 Spacer()
                                 Button(action: {
+                                    self.selection = file
+                                    self.data = Storage(status: $status, progress: $progress).read(status: status, selection: file)
                                     self.projects.toggle()
                                 }) {
                                     Text("Open")
@@ -31,21 +46,38 @@ struct Projects: View {
             }
             Divider()
             HStack(spacing: 0) {
-                Button(action: { // ONLY SHOW IF PROJECTS ARE OPENED FROM SIDEBAR
-                    self.projects.toggle()
-                }) {
-                    Text("Cancel")
+                if selection != "" {
+                    Button(action: {
+                        self.projects.toggle()
+                    }) {
+                        Text("Cancel")
+                    }
+                    .padding(.trailing)
                 }
-                TextField("Unique project name", text: /*@START_MENU_TOKEN@*//*@PLACEHOLDER=Value@*/.constant("")/*@END_MENU_TOKEN@*/)
+                TextField("Unique project name", text: $filename)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding(.horizontal)
                 Button(action: {
+                    self.selection = filename
+                    self.filename = ""
+                    Storage(status: $status, progress: $progress).write(
+                        status: status,
+                        selection: selection,
+                        data: Storage(status: $status, progress: $progress).data
+                    )
+                    self.data = Storage(status: $status, progress: $progress).read(status: status, selection: selection)
                     self.projects.toggle()
                 }) {
                     Text("Create")
                 }
+                .keyboardShortcut(.defaultAction)
+                .disabled(files.contains(filename) || filename == "" || filename.hasPrefix("."))
+                .padding(.leading)
             }
             .padding()
         }
+        .onAppear {
+            self.files = Storage(status: $status, progress: $progress).identify(status: status)
+        }
     }
+    
 }

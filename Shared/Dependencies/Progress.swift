@@ -20,11 +20,11 @@ struct Progress {
     
     func load(string: String) {
         self.loading()
-        self.status.append("\(Calendar.current.component(.hour, from: Date())).\(Calendar.current.component(.minute, from: Date())) : \(string)")
+        self.status.append("\(Time().current()) - \(string)")
     }
     
     func log(string: String) {
-        self.status.append("\(Calendar.current.component(.hour, from: Date())).\(Calendar.current.component(.minute, from: Date())) : \(string)")
+        self.status.append("\(Time().current()) - \(string)")
     }
     
 }

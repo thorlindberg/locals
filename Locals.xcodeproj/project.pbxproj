@@ -100,9 +100,9 @@
 			isa = PBXGroup;
 			children = (
 				7EDD72A2261DA6DC0038EEC1 /* Storage.swift */,
-				7EDD72A6261DA6E10038EEC1 /* Progress.swift */,
 				7EDD72A9261DA6EC0038EEC1 /* Translate.swift */,
 				7EDD72AC261DA6F10038EEC1 /* Coder.swift */,
+				7EDD72A6261DA6E10038EEC1 /* Progress.swift */,
 				7EDD72B3261DABF60038EEC1 /* Time.swift */,
 			);
 			path = Dependencies;
@@ -319,7 +319,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				MARKETING_VERSION = 0.5;
-				PRODUCT_BUNDLE_IDENTIFIER = thorskjold.Locals;
+				PRODUCT_BUNDLE_IDENTIFIER = Thorskjold.Locals;
 				PRODUCT_NAME = Locals;
 				SDKROOT = macosx;
 				SWIFT_VERSION = 5.0;
@@ -342,7 +342,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				MARKETING_VERSION = 0.5;
-				PRODUCT_BUNDLE_IDENTIFIER = thorskjold.Locals;
+				PRODUCT_BUNDLE_IDENTIFIER = Thorskjold.Locals;
 				PRODUCT_NAME = Locals;
 				SDKROOT = macosx;
 				SWIFT_VERSION = 5.0;

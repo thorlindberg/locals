@@ -1,11 +1,34 @@
 import SwiftUI
 
 struct Sidebar: View {
+    
     @Binding var projects: Bool
+    @Binding var selection: String
+    @Binding var status: [String]
+    @Binding var progress: CGFloat
+    @Binding var data: Storage.Format
+    @Binding var query: String
+    @Binding var entry: String
+    @Binding var inspector: Bool
+    
     var body: some View {
         List {
-            NavigationLink(destination: Editor()) {
-                Text("Language")
+            ForEach(data.translations.indices, id: \.self) { index in
+                if data.base != data.translations[index].language {
+                    if data.translations[index].target {
+                        NavigationLink(destination:
+                            Editor(selection: $selection, status: $status, progress: $progress, data: $data, query: $query, entry: $entry, inspector: $inspector),
+                            tag: data.translations[index].language,
+                            selection: Binding(
+                                get: { data.target },
+                                set: { if $0 != nil { data.target = $0! } }
+                            )
+                        ) {
+                            Text("\(data.translations[index].language)")
+                        }
+                        .frame(height: 20)
+                    }
+                }
             }
         }
         .listStyle(SidebarListStyle())
@@ -24,4 +47,5 @@ struct Sidebar: View {
             }
         }
     }
+    
 }
