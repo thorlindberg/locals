@@ -2,6 +2,7 @@ import SwiftUI
 
 struct Window: View {
     
+    @State var toggle: String = "files"
     @State var projects: Bool = true
     @State var selection: String = ""
     @State var status: [String] = ["\(Time().current()) - Welcome to Locals"]
@@ -13,14 +14,14 @@ struct Window: View {
     
     var body: some View {
         NavigationView {
-            Sidebar(projects: $projects, selection: $selection, status: $status, progress: $progress, data: $data,
+            Sidebar(toggle: $toggle, projects: $projects, selection: $selection, status: $status, progress: $progress, data: $data,
                     query: $query, entry: $entry, inspector: $inspector)
-                .frame(minWidth: 230)
+                .frame(minWidth: 220)
             Editor(selection: $selection, status: $status, progress: $progress, data: $data, query: $query, entry: $entry, inspector: $inspector)
         }
         .frame(minWidth: 980, minHeight: 500)
         .sheet(isPresented: $projects) {
-            Projects(projects: $projects, selection: $selection, status: $status, progress: $progress,
+            Projects(toggle: $toggle, projects: $projects, selection: $selection, status: $status, progress: $progress,
                      data: $data, query: $query, entry: $entry, inspector: $inspector)
                 .frame(width: 600, height: 400)
         }

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct Projects: View {
     
+    @Binding var toggle: String
     @Binding var projects: Bool
     @Binding var selection: String
     @Binding var status: [String]
@@ -31,6 +32,7 @@ struct Projects: View {
                                 Button(action: {
                                     self.selection = file
                                     self.data = Storage(status: $status, progress: $progress).read(status: status, selection: file)
+                                    self.toggle = "languages"
                                     self.projects.toggle()
                                 }) {
                                     Text("Open")
@@ -47,6 +49,7 @@ struct Projects: View {
             HStack(spacing: 0) {
                 if selection != "" {
                     Button(action: {
+                        self.toggle = "languages"
                         self.projects.toggle()
                     }) {
                         Text("Cancel")
@@ -64,6 +67,7 @@ struct Projects: View {
                         data: Storage(status: $status, progress: $progress).data
                     )
                     self.data = Storage(status: $status, progress: $progress).read(status: status, selection: selection)
+                    self.toggle = "languages"
                     self.projects.toggle()
                 }) {
                     Text("Create")
