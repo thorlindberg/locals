@@ -46,7 +46,7 @@ struct Storage {
                 language: "English (Australia)",
                 abbreviation: "(en-AU)",
                 request: "en",
-                target: true,
+                target: false,
                 texts: [:]
             ),
             Format.Translations(
@@ -54,7 +54,7 @@ struct Storage {
                 language: "English (India)",
                 abbreviation: "(en-IN)",
                 request: "en",
-                target: true,
+                target: false,
                 texts: [:]
             ),
             Format.Translations(
@@ -62,7 +62,7 @@ struct Storage {
                 language: "Chinese Simplified",
                 abbreviation: "(zh-Hans)",
                 request: "zh",
-                target: true,
+                target: false,
                 texts: [:]
             ),
             Format.Translations(
@@ -70,7 +70,7 @@ struct Storage {
                 language: "Chinese Traditional",
                 abbreviation: "(zh-Hant)",
                 request: "zh",
-                target: true,
+                target: false,
                 texts: [:]
             ),
             Format.Translations(
@@ -78,7 +78,7 @@ struct Storage {
                 language: "Chinese (Hong Kong)",
                 abbreviation: "(zh-HK)",
                 request: "zh",
-                target: true,
+                target: false,
                 texts: [:]
             ),
             Format.Translations(
@@ -102,7 +102,7 @@ struct Storage {
                 language: "Spanish (Latin America)",
                 abbreviation: "(es-419)",
                 request: "es",
-                target: true,
+                target: false,
                 texts: [:]
             ),
             Format.Translations(
@@ -118,7 +118,7 @@ struct Storage {
                 language: "French (Canada)",
                 abbreviation: "(fr-CA)",
                 request: "fr",
-                target: true,
+                target: false,
                 texts: [:]
             ),
             Format.Translations(
@@ -134,7 +134,7 @@ struct Storage {
                 language: "Russian",
                 abbreviation: "(ru)",
                 request: "ru",
-                target: true,
+                target: false,
                 texts: [:]
             ),
             Format.Translations(
@@ -142,7 +142,7 @@ struct Storage {
                 language: "Portuguese (Brazil)",
                 abbreviation: "(pt-BR)",
                 request: "pt",
-                target: true,
+                target: false,
                 texts: [:]
             ),
             Format.Translations(
@@ -150,7 +150,7 @@ struct Storage {
                 language: "Portuguese (Portugal)",
                 abbreviation: "(pt-PT)",
                 request: "pt",
-                target: true,
+                target: false,
                 texts: [:]
             ),
             Format.Translations(
@@ -166,7 +166,7 @@ struct Storage {
                 language: "Korean",
                 abbreviation: "(ko)",
                 request: "ko",
-                target: true,
+                target: false,
                 texts: [:]
             ),
             Format.Translations(
@@ -174,7 +174,7 @@ struct Storage {
                 language: "Turkish",
                 abbreviation: "(tr)",
                 request: "tr",
-                target: true,
+                target: false,
                 texts: [:]
             ),
             Format.Translations(
@@ -182,7 +182,7 @@ struct Storage {
                 language: "Dutch",
                 abbreviation: "(nl)",
                 request: "næ",
-                target: true,
+                target: false,
                 texts: [:]
             ),
             Format.Translations(
@@ -190,7 +190,7 @@ struct Storage {
                 language: "Arabic",
                 abbreviation: "(ar)",
                 request: "ar",
-                target: true,
+                target: false,
                 texts: [:]
             ),
             Format.Translations(
@@ -198,7 +198,7 @@ struct Storage {
                 language: "Thai",
                 abbreviation: "(th)",
                 request: "th",
-                target: true,
+                target: false,
                 texts: [:]
             ),
             Format.Translations(
@@ -222,7 +222,7 @@ struct Storage {
                 language: "Vietnamese",
                 abbreviation: "(vi)",
                 request: "vi",
-                target: true,
+                target: false,
                 texts: [:]
             ),
             Format.Translations(
@@ -238,7 +238,7 @@ struct Storage {
                 language: "Polish",
                 abbreviation: "(pl)",
                 request: "pl",
-                target: true,
+                target: false,
                 texts: [:]
             ),
             Format.Translations(
@@ -254,7 +254,7 @@ struct Storage {
                 language: "Indonesian",
                 abbreviation: "(id)",
                 request: "id",
-                target: true,
+                target: false,
                 texts: [:]
             ),
             Format.Translations(
@@ -262,7 +262,7 @@ struct Storage {
                 language: "Hebrew",
                 abbreviation: "(he)",
                 request: "iw",
-                target: true,
+                target: false,
                 texts: [:]
             ),
             Format.Translations(
@@ -270,7 +270,7 @@ struct Storage {
                 language: "Greek",
                 abbreviation: "(el)",
                 request: "el",
-                target: true,
+                target: false,
                 texts: [:]
             ),
             Format.Translations(
@@ -278,7 +278,7 @@ struct Storage {
                 language: "Romanian",
                 abbreviation: "(ro)",
                 request: "ro",
-                target: true,
+                target: false,
                 texts: [:]
             ),
             Format.Translations(
@@ -286,7 +286,7 @@ struct Storage {
                 language: "Hungarian",
                 abbreviation: "(hu)",
                 request: "hu",
-                target: true,
+                target: false,
                 texts: [:]
             ),
             Format.Translations(
@@ -294,7 +294,7 @@ struct Storage {
                 language: "Czech",
                 abbreviation: "(cs)",
                 request: "cs",
-                target: true,
+                target: false,
                 texts: [:]
             ),
             Format.Translations(
@@ -302,7 +302,7 @@ struct Storage {
                 language: "Catalan",
                 abbreviation: "(ca)",
                 request: "ca",
-                target: true,
+                target: false,
                 texts: [:]
             ),
             Format.Translations(
@@ -310,7 +310,7 @@ struct Storage {
                 language: "Slovak",
                 abbreviation: "(sk)",
                 request: "sk",
-                target: true,
+                target: false,
                 texts: [:]
             ),
             Format.Translations(
@@ -318,7 +318,7 @@ struct Storage {
                 language: "Ukranian",
                 abbreviation: "(uk)",
                 request: "uk",
-                target: true,
+                target: false,
                 texts: [:]
             ),
             Format.Translations(
@@ -326,7 +326,7 @@ struct Storage {
                 language: "Croatian",
                 abbreviation: "(hr)",
                 request: "hr",
-                target: true,
+                target: false,
                 texts: [:]
             ),
             Format.Translations(
@@ -334,7 +334,7 @@ struct Storage {
                 language: "Malay",
                 abbreviation: "(ms)",
                 request: "ms",
-                target: true,
+                target: false,
                 texts: [:]
             ),
             Format.Translations(
@@ -342,7 +342,7 @@ struct Storage {
                 language: "Hindi",
                 abbreviation: "(hi)",
                 request: "hi",
-                target: true,
+                target: false,
                 texts: [:]
             )
         ]

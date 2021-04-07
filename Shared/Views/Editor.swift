@@ -25,7 +25,7 @@ struct Editor: View {
                                         if string.lowercased().hasPrefix(query.lowercased()) {
                                             ZStack {
                                                 Rectangle()
-                                                    .foregroundColor(Color("ModeColor"))
+                                                    .opacity(0.07)
                                                     .cornerRadius(10)
                                                 HStack {
                                                     HStack(spacing: 15) {
@@ -124,25 +124,27 @@ struct Editor: View {
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .frame(width: 180)
                         .help("Add a unique string for translation")
-                    HStack {
-                        Spacer()
-                        Button(action: {
-                            withAnimation {
-                                data.translations.indices.forEach { index in
-                                    data.translations[index].texts[entry] = Storage.Format.Text(translation: "", pinned: false)
+                    if entry != "" {
+                        HStack {
+                            Spacer()
+                            Button(action: {
+                                withAnimation {
+                                    data.translations.indices.forEach { index in
+                                        data.translations[index].texts[entry] = Storage.Format.Text(translation: "", pinned: false)
+                                    }
+                                    Storage(status: $status, progress: $progress).write(
+                                        status: status,
+                                        selection: selection,
+                                        data: data
+                                    )
+                                    self.entry = ""
                                 }
-                                Storage(status: $status, progress: $progress).write(
-                                    status: status,
-                                    selection: selection,
-                                    data: data
-                                )
-                                self.entry = ""
+                            }) {
+                                Image(systemName: "arrow.right.circle.fill")
                             }
-                        }) {
-                            Image(systemName: "arrow.right.circle.fill")
+                            .keyboardShortcut(.defaultAction)
+                            .disabled(entry == "" || data.translations.filter{$0.language == data.target}[0].texts.keys.contains(entry))
                         }
-                        .keyboardShortcut(.defaultAction)
-                        .disabled(entry == "" || data.translations.filter{$0.language == data.target}[0].texts.keys.contains(entry))
                     }
                 }
                 Button(action: {
