@@ -17,7 +17,6 @@
 		7EDD72AA261DA6EC0038EEC1 /* Translate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EDD72A9261DA6EC0038EEC1 /* Translate.swift */; };
 		7EDD72AD261DA6F10038EEC1 /* Coder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EDD72AC261DA6F10038EEC1 /* Coder.swift */; };
 		7EDD72B4261DABF60038EEC1 /* Time.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EDD72B3261DABF60038EEC1 /* Time.swift */; };
-		7EDD72B8261DAE2D0038EEC1 /* Projects.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EDD72B7261DAE2D0038EEC1 /* Projects.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -34,7 +33,6 @@
 		7EDD72A9261DA6EC0038EEC1 /* Translate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Translate.swift; sourceTree = "<group>"; };
 		7EDD72AC261DA6F10038EEC1 /* Coder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coder.swift; sourceTree = "<group>"; };
 		7EDD72B3261DABF60038EEC1 /* Time.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Time.swift; sourceTree = "<group>"; };
-		7EDD72B7261DAE2D0038EEC1 /* Projects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Projects.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -89,7 +87,6 @@
 			isa = PBXGroup;
 			children = (
 				7E232D84261CFCEC00BC5E1D /* Window.swift */,
-				7EDD72B7261DAE2D0038EEC1 /* Projects.swift */,
 				7EDD729A261DA5670038EEC1 /* Sidebar.swift */,
 				7EDD729D261DA59B0038EEC1 /* Editor.swift */,
 			);
@@ -183,7 +180,6 @@
 				7EDD72AD261DA6F10038EEC1 /* Coder.swift in Sources */,
 				7EDD72AA261DA6EC0038EEC1 /* Translate.swift in Sources */,
 				7EDD729E261DA59B0038EEC1 /* Editor.swift in Sources */,
-				7EDD72B8261DAE2D0038EEC1 /* Projects.swift in Sources */,
 				7E232D97261CFCED00BC5E1D /* LocalsApp.swift in Sources */,
 				7EDD72A3261DA6DC0038EEC1 /* Storage.swift in Sources */,
 			);

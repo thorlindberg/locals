@@ -3,7 +3,6 @@ import SwiftUI
 struct Sidebar: View {
     
     @Binding var toggle: String
-    @Binding var projects: Bool
     @Binding var selection: String
     @Binding var status: [String]
     @Binding var progress: CGFloat
@@ -13,77 +12,144 @@ struct Sidebar: View {
     @Binding var inspector: Bool
     
     @State var rename: String = ""
+    @State var files: [String] = []
+    @State var filename: String = ""
     
     var body: some View {
         VStack(spacing: 0) {
             Divider()
             HStack(spacing: 0) {
-                if toggle == "languages" {
-                    Image(systemName: "textformat.alt")
-                        .foregroundColor(.accentColor)
+                if toggle == "projects" {
+                    Image(systemName: "folder.fill").foregroundColor(.accentColor)
                 } else {
-                    Image(systemName: "textformat.alt")
-                        .onTapGesture {
-                            withAnimation {
-                                self.toggle = "languages"
-                            }
-                        }
+                    Image(systemName: "folder").onTapGesture { self.toggle = "projects" }
+                }
+                Spacer()
+                if toggle == "languages" {
+                    Image(systemName: "textformat.alt").foregroundColor(.accentColor)
+                } else {
+                    if selection == "" {
+                        Image(systemName: "textformat.alt").opacity(0.3)
+                    } else {
+                        Image(systemName: "textformat.alt").onTapGesture { self.toggle = "languages" }
+                    }
                 }
                 Spacer()
                 if toggle == "editing" {
-                    Image(systemName: "slider.horizontal.3")
-                        .foregroundColor(.accentColor)
+                    Image(systemName: "slider.horizontal.3").foregroundColor(.accentColor)
                 } else {
-                    Image(systemName: "slider.horizontal.3")
-                        .onTapGesture {
-                            withAnimation {
-                                self.toggle = "editing"
-                            }
-                        }
+                    if selection == "" {
+                        Image(systemName: "slider.horizontal.3").opacity(0.3)
+                    } else {
+                        Image(systemName: "slider.horizontal.3").onTapGesture { self.toggle = "editing" }
+                    }
                 }
                 Spacer()
-                if toggle == "process" {
-                    Image(systemName: "slider.horizontal.below.square.fill.and.square")
-                        .foregroundColor(.accentColor)
-                        .help("Process translations")
+                if toggle == "filter" {
+                    Image(systemName: "slider.horizontal.below.square.fill.and.square").foregroundColor(.accentColor)
                 } else {
-                    Image(systemName: "slider.horizontal.below.square.fill.and.square")
-                        .onTapGesture {
-                            withAnimation {
-                                self.toggle = "process"
-                            }
-                        }
+                    if selection == "" {
+                        Image(systemName: "slider.horizontal.below.square.fill.and.square").opacity(0.3)
+                    } else {
+                        Image(systemName: "slider.horizontal.below.square.fill.and.square").onTapGesture { self.toggle = "filter" }
+                    }
                 }
                 Spacer()
-                if toggle == "project" {
-                    Image(systemName: "info.circle.fill")
-                        .foregroundColor(.accentColor)
+                if toggle == "help" {
+                    Image(systemName: "info.circle.fill").foregroundColor(.accentColor)
                 } else {
-                    Image(systemName: "info.circle")
-                        .onTapGesture {
-                            withAnimation {
-                                self.toggle = "project"
-                            }
-                        }
-                }
-                Spacer()
-                if toggle == "files" {
-                    Image(systemName: "folder.fill")
-                        .foregroundColor(.accentColor)
-                } else {
-                    Image(systemName: "folder")
-                        .onTapGesture {
-                            withAnimation {
-                                self.toggle = "files"
-                                self.projects.toggle()
-                            }
-                        }
+                    if selection == "" {
+                        Image(systemName: "info.circle").opacity(0.3)
+                    } else {
+                        Image(systemName: "info.circle").onTapGesture { self.toggle = "help" }
+                    }
                 }
             }
             .frame(height: 27)
             .padding(.horizontal)
             Divider()
             List {
+                if toggle == "projects" {
+                    Section(header: Text("")) {
+                        if selection != "" {
+                            Label("\(selection)", systemImage: "doc.fill")
+                            HStack {
+                                TextField("\(selection).localproj", text: $rename)
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                                Button(action: {
+                                    withAnimation {
+                                        Storage(status: $status, progress: $progress).rename(status: status, selection: selection, rename: rename)
+                                        self.selection = self.rename
+                                        self.rename = ""
+                                    }
+                                }) {
+                                    Text("Rename")
+                                }
+                                .disabled(files.contains(rename) || rename == "" || rename.hasPrefix("."))
+                                .keyboardShortcut(.defaultAction)
+                            }
+                            Picker("Base", selection: Binding(
+                                get: { data.base },
+                                set: { data.base = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
+                            )) {
+                                ForEach(data.translations, id: \.self) { translations in
+                                    Text("\(translations.language)").tag(translations.language)
+                                }
+                            }
+                            Button(action: {
+                                withAnimation {
+                                    Storage(status: $status, progress: $progress).remove(
+                                        status: status,
+                                        selection: selection
+                                    )
+                                    self.selection = ""
+                                    self.files = Storage(status: $status, progress: $progress).identify(status: status)
+                                }
+                            }) {
+                                Text("Delete")
+                            }
+                            Divider()
+                        }
+                        HStack(spacing: 0) {
+                            TextField("Unique project name", text: $filename)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                            Button(action: {
+                                self.selection = filename
+                                self.filename = ""
+                                Storage(status: $status, progress: $progress).write(
+                                    status: status,
+                                    selection: selection,
+                                    data: Storage(status: $status, progress: $progress).data
+                                )
+                                self.data = Storage(status: $status, progress: $progress).read(status: status, selection: selection)
+                                self.files = Storage(status: $status, progress: $progress).identify(status: status)
+                            }) {
+                                Text("Create")
+                            }
+                            .keyboardShortcut(.defaultAction)
+                            .disabled(files.contains(filename) || filename == "" || filename.hasPrefix("."))
+                            .padding(.leading)
+                        }
+                        .padding(.bottom)
+                        ForEach(files, id: \.self) { file in
+                            if file != selection {
+                                HStack {
+                                    if file == selection {
+                                        Label("\(file)", systemImage: "doc.fill")
+                                            .foregroundColor(.accentColor)
+                                    } else {
+                                        Label("\(file)", systemImage: "doc.fill")
+                                    }
+                                }
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    self.selection = file
+                                    self.data = Storage(status: $status, progress: $progress).read(status: status, selection: file)
+                                }
+                            }
+                        }
+                    }
+                }
                 if toggle == "languages" {
                     Section(header: Text("")) {
                         ForEach(data.translations.indices, id: \.self) { index in
@@ -154,7 +220,7 @@ struct Sidebar: View {
                         }
                     }
                 }
-                if toggle == "process" {
+                if toggle == "filter" {
                     Section(header: Text("")) {
                         TextField("􀊫 Search", text: $query)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -194,52 +260,23 @@ struct Sidebar: View {
                         .help("Import strings from an Xcode project folder")
                     }
                 }
-                if toggle == "project" {
+                if toggle == "help" {
                     Section(header: Text("")) {
-                        HStack {
-                            TextField("\(selection).localproj", text: $rename)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                            Button(action: {
-                                withAnimation {
-                                    Storage(status: $status, progress: $progress).rename(status: status, selection: selection, rename: rename)
-                                    self.selection = self.rename
-                                    self.rename = ""
-                                }
-                            }) {
-                                Text("Rename")
-                            }
-                            // .disabled(Storage(status: $status, progress: $progress).identify(status: status).contains(rename) || rename == "" || rename.hasPrefix("."))
-                            .keyboardShortcut(.defaultAction)
-                        }
-                        Picker("Base", selection: Binding(
-                            get: { data.base },
-                            set: { data.base = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
-                        )) {
-                            ForEach(data.translations, id: \.self) { translations in
-                                Text("\(translations.language)").tag(translations.language)
-                            }
-                        }
-                        Button(action: {
-                            withAnimation {
-                                Storage(status: $status, progress: $progress).remove(
-                                    status: status,
-                                    selection: selection
-                                )
-                            }
-                        }) {
-                            Text("Delete")
-                        }
+                        // INFO ON HOW TO USE THE APP
                     }
                 }
             }
             .listStyle(SidebarListStyle())
+        }
+        .onAppear {
+            self.files = Storage(status: $status, progress: $progress).identify(status: status)
         }
         .toolbar {
             ToolbarItemGroup(placement: .automatic) {
                 Button(action: {
                     NSApp.keyWindow?.firstResponder?.tryToPerform(#selector(NSSplitViewController.toggleSidebar(_:)), with: nil)
                 }) {
-                    Image(systemName: "rectangle.leftthird.inset.fill")
+                    Image(systemName: "sidebar.left")
                 }
             }
         }
