@@ -21,6 +21,16 @@ struct Sidebar: View {
         VStack(spacing: 0) {
             Divider()
             HStack(spacing: 0) {
+                if toggle == "help" {
+                    Image(systemName: "info.circle.fill").foregroundColor(.accentColor)
+                } else {
+                    if selection == "" {
+                        Image(systemName: "info.circle").opacity(0.3)
+                    } else {
+                        Image(systemName: "info.circle").onTapGesture { self.toggle = "help" }
+                    }
+                }
+                Spacer()
                 if toggle == "projects" {
                     Image(systemName: "folder.fill").foregroundColor(.accentColor)
                 } else {
@@ -56,21 +66,16 @@ struct Sidebar: View {
                         Image(systemName: "magnifyingglass").onTapGesture { self.toggle = "filter" }
                     }
                 }
-                Spacer()
-                if toggle == "help" {
-                    Image(systemName: "info.circle.fill").foregroundColor(.accentColor)
-                } else {
-                    if selection == "" {
-                        Image(systemName: "info.circle").opacity(0.3)
-                    } else {
-                        Image(systemName: "info.circle").onTapGesture { self.toggle = "help" }
-                    }
-                }
             }
             .frame(height: 27)
             .padding(.horizontal)
             Divider()
             List {
+                if toggle == "help" {
+                    Section(header: Text("")) {
+                        // INFO ON HOW TO USE THE APP
+                    }
+                }
                 if toggle == "projects" {
                     Section(header: Text("")) {
                         HStack(spacing: 0) {
@@ -165,6 +170,9 @@ struct Sidebar: View {
                             }
                         }
                     }
+                    .onAppear {
+                        self.files = Storage(status: $status, progress: $progress).identify(status: status)
+                    }
                 }
                 if toggle == "languages" {
                     Section(header: Text("")) {
@@ -245,6 +253,11 @@ struct Sidebar: View {
                             }
                         }
                     }
+                    .onAppear {
+                        if data.target == "" && data.translations.filter({$0.target}).count != 0 {
+                            self.data.target = data.translations.filter({$0.target})[0].language
+                        }
+                    }
                 }
                 if toggle == "add" {
                     Section(header: Text("")) {
@@ -318,6 +331,7 @@ struct Sidebar: View {
                                 }
                             }
                         }
+                        // DRAG-AND-DROP PROJECT IMPORT
                     }
                 }
                 if toggle == "filter" {
@@ -327,25 +341,99 @@ struct Sidebar: View {
                             .frame(minWidth: 160)
                         Divider()
                             .padding(.vertical)
-                    }
-                }
-                if toggle == "help" {
-                    Section(header: Text("")) {
-                        // INFO ON HOW TO USE THE APP
+                        HStack {
+                            Text("Single-line strings")
+                            Spacer()
+                            Toggle(isOn: Binding(
+                                get: { data.filters.singleline },
+                                set: { data.filters.singleline = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
+                            )) {
+                                Text("")
+                            }
+                            .toggleStyle(CheckboxToggleStyle())
+                        }
+                        HStack {
+                            Text("Multi-line strings")
+                            Spacer()
+                            Toggle(isOn: Binding(
+                                get: { data.filters.multiline },
+                                set: { data.filters.multiline = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
+                            )) {
+                                Text("")
+                            }
+                            .toggleStyle(CheckboxToggleStyle())
+                        }
+                        HStack {
+                            Text("Parenthesis")
+                            Spacer()
+                            Toggle(isOn: Binding(
+                                get: { data.filters.parenthesis },
+                                set: { data.filters.parenthesis = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
+                            )) {
+                                Text("")
+                            }
+                            .toggleStyle(CheckboxToggleStyle())
+                        }
+                        HStack {
+                            Text("Nummerical-only")
+                            Spacer()
+                            Toggle(isOn: Binding(
+                                get: { data.filters.nummerical },
+                                set: { data.filters.nummerical = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
+                            )) {
+                                Text("")
+                            }
+                            .toggleStyle(CheckboxToggleStyle())
+                        }
+                        HStack {
+                            Text("Symbols-only")
+                            Spacer()
+                            Toggle(isOn: Binding(
+                                get: { data.filters.symbols },
+                                set: { data.filters.symbols = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
+                            )) {
+                                Text("")
+                            }
+                            .toggleStyle(CheckboxToggleStyle())
+                        }
+                        Divider()
+                            .padding(.vertical)
+                        Picker("Base", selection: Binding(
+                            get: { data.styles.font },
+                            set: { data.styles.font = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
+                        )) {
+                            Text("Default").tag("Default")
+                            Text("Helvetica Neue").tag("Helvetica Neue")
+                            Text("Helvetica").tag("Helvetica")
+                        }
+                        // FONT SIZE
+                        Picker("Weight", selection: Binding(
+                            get: { data.styles.weight },
+                            set: { data.styles.weight = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
+                        )) {
+                            Text("Normal").tag("Normal")
+                            Text("Bold").tag("Bold")
+                            Text("Light").tag("Light")
+                        }
+                        Picker("Color", selection: Binding(
+                            get: { data.styles.color },
+                            set: { data.styles.color = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
+                        )) {
+                            Text("Accent").tag("Accent")
+                            Text("Red").tag("Red")
+                            Text("Blue").tag("Blue")
+                        }
                     }
                 }
             }
             .listStyle(SidebarListStyle())
-        }
-        .onAppear {
-            self.files = Storage(status: $status, progress: $progress).identify(status: status)
         }
         .toolbar {
             ToolbarItemGroup(placement: .automatic) {
                 Button(action: {
                     NSApp.keyWindow?.firstResponder?.tryToPerform(#selector(NSSplitViewController.toggleSidebar(_:)), with: nil)
                 }) {
-                    Image(systemName: "sidebar.left")
+                    Image(systemName: "rectangle.leftthird.inset.fill")
                 }
             }
         }

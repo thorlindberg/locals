@@ -11,7 +11,24 @@ struct Storage {
         
         var base: String
         var target: String
+        var filters: Filters
+        var styles: Styles
         var translations: [Translations]
+        
+        struct Filters: Hashable {
+            var singleline: Bool
+            var multiline: Bool
+            var parenthesis: Bool
+            var nummerical: Bool
+            var symbols: Bool
+        }
+        
+        struct Styles: Hashable {
+            var font: String
+            var size: CGFloat
+            var weight: String
+            var color: String
+        }
         
         struct Translations: Hashable {
             let id: String
@@ -32,6 +49,18 @@ struct Storage {
     var data = Format(
         base: "English (United Kingdom)",
         target: "",
+        filters: Format.Filters(
+            singleline: true,
+            multiline: true,
+            parenthesis: true,
+            nummerical: true,
+            symbols: true
+        ),
+        styles: Format.Styles(
+            font: "Default",
+            size: 12,
+            weight: "Normal",
+            color: "Accent"),
         translations: [
             Format.Translations(
                 id: "1",
@@ -413,6 +442,23 @@ struct Storage {
                         targets.append(target)
                     }
                     
+                } else if "filters" == line[0] {
+                    
+                    // "filters" : singleline : multiline : parenthesis : nummerical : symbols ;
+                    baseData.filters.singleline = Bool(line[1])!
+                    baseData.filters.multiline = Bool(line[2])!
+                    baseData.filters.parenthesis = Bool(line[3])!
+                    baseData.filters.nummerical = Bool(line[4])!
+                    baseData.filters.symbols = Bool(line[5])!
+                    
+                } else if "styles" == line[0] {
+                    
+                    // "styles" : font : size : weight : color ;
+                    baseData.styles.font = line[1]
+                    baseData.styles.size = CGFloat(Int(line[2])!)
+                    baseData.styles.weight = line[3]
+                    baseData.styles.color = line[4]
+                    
                 } else {
                     
                     // id : pinned : string : translation ;
@@ -469,6 +515,23 @@ struct Storage {
         } else {
             output += targets.joined(separator: " , ")
         }
+        output += " ; "
+        
+        // "filters" : singleline : multiline : parenthesis : nummerical : symbols ;
+        output += "filters : "
+        output += String(data.filters.singleline) + " : "
+        output += String(data.filters.multiline) + " : "
+        output += String(data.filters.parenthesis) + " : "
+        output += String(data.filters.nummerical) + " : "
+        output += String(data.filters.symbols)
+        output += " ; "
+        
+        // "styles" : font : size : weight : color ;
+        output += "styles : "
+        output += data.styles.font + " : "
+        output += String(Int(data.styles.size)) + " : "
+        output += data.styles.weight + " : "
+        output += data.styles.color
         output += " ; "
         
         // id : pinned : string : translation ;
