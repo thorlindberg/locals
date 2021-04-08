@@ -12,6 +12,8 @@ struct Sidebar: View {
     @Binding var inspector: Bool
     
     @State var rename: String = ""
+    @State var renaming: Bool = false
+    @State var editing: Bool = false
     @State var files: [String] = []
     @State var filename: String = ""
     
@@ -26,32 +28,32 @@ struct Sidebar: View {
                 }
                 Spacer()
                 if toggle == "languages" {
-                    Image(systemName: "textformat.alt").foregroundColor(.accentColor)
+                    Image(systemName: "globe").foregroundColor(.accentColor)
                 } else {
                     if selection == "" {
-                        Image(systemName: "textformat.alt").opacity(0.3)
+                        Image(systemName: "globe").opacity(0.3)
                     } else {
-                        Image(systemName: "textformat.alt").onTapGesture { self.toggle = "languages" }
+                        Image(systemName: "globe").onTapGesture { self.toggle = "languages" }
                     }
                 }
                 Spacer()
-                if toggle == "editing" {
-                    Image(systemName: "slider.horizontal.3").foregroundColor(.accentColor)
+                if toggle == "add" {
+                    Image(systemName: "plus").foregroundColor(.accentColor)
                 } else {
-                    if selection == "" {
-                        Image(systemName: "slider.horizontal.3").opacity(0.3)
+                    if selection == "" || data.target == "" {
+                        Image(systemName: "plus").opacity(0.3)
                     } else {
-                        Image(systemName: "slider.horizontal.3").onTapGesture { self.toggle = "editing" }
+                        Image(systemName: "plus").onTapGesture { self.toggle = "add" }
                     }
                 }
                 Spacer()
                 if toggle == "filter" {
-                    Image(systemName: "slider.horizontal.below.square.fill.and.square").foregroundColor(.accentColor)
+                    Image(systemName: "magnifyingglass").foregroundColor(.accentColor)
                 } else {
-                    if selection == "" {
-                        Image(systemName: "slider.horizontal.below.square.fill.and.square").opacity(0.3)
+                    if selection == "" || data.target == "" {
+                        Image(systemName: "magnifyingglass").opacity(0.3)
                     } else {
-                        Image(systemName: "slider.horizontal.below.square.fill.and.square").onTapGesture { self.toggle = "filter" }
+                        Image(systemName: "magnifyingglass").onTapGesture { self.toggle = "filter" }
                     }
                 }
                 Spacer()
@@ -71,45 +73,6 @@ struct Sidebar: View {
             List {
                 if toggle == "projects" {
                     Section(header: Text("")) {
-                        if selection != "" {
-                            Label("\(selection)", systemImage: "doc.fill")
-                            HStack {
-                                TextField("\(selection).localproj", text: $rename)
-                                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                                Button(action: {
-                                    withAnimation {
-                                        Storage(status: $status, progress: $progress).rename(status: status, selection: selection, rename: rename)
-                                        self.selection = self.rename
-                                        self.rename = ""
-                                    }
-                                }) {
-                                    Text("Rename")
-                                }
-                                .disabled(files.contains(rename) || rename == "" || rename.hasPrefix("."))
-                                .keyboardShortcut(.defaultAction)
-                            }
-                            Picker("Base", selection: Binding(
-                                get: { data.base },
-                                set: { data.base = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
-                            )) {
-                                ForEach(data.translations, id: \.self) { translations in
-                                    Text("\(translations.language)").tag(translations.language)
-                                }
-                            }
-                            Button(action: {
-                                withAnimation {
-                                    Storage(status: $status, progress: $progress).remove(
-                                        status: status,
-                                        selection: selection
-                                    )
-                                    self.selection = ""
-                                    self.files = Storage(status: $status, progress: $progress).identify(status: status)
-                                }
-                            }) {
-                                Text("Delete")
-                            }
-                            Divider()
-                        }
                         HStack(spacing: 0) {
                             TextField("Unique project name", text: $filename)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -123,6 +86,7 @@ struct Sidebar: View {
                                 )
                                 self.data = Storage(status: $status, progress: $progress).read(status: status, selection: selection)
                                 self.files = Storage(status: $status, progress: $progress).identify(status: status)
+                                self.toggle = "languages"
                             }) {
                                 Text("Create")
                             }
@@ -132,99 +96,166 @@ struct Sidebar: View {
                         }
                         .padding(.bottom)
                         ForEach(files, id: \.self) { file in
-                            if file != selection {
+                            NavigationLink(destination:
+                                Editor(selection: $selection, status: $status, progress: $progress, data: $data,
+                                       query: $query, entry: $entry, inspector: $inspector),
+                                tag: file,
+                                selection: Binding(
+                                    get: { selection },
+                                    set: { if $0 != nil { self.selection = $0! } ; self.toggle = "languages" ; self.data = Storage(status: $status, progress: $progress).read(status: status, selection: file) }
+                                )
+                            ) {
                                 HStack {
-                                    if file == selection {
-                                        Label("\(file)", systemImage: "doc.fill")
-                                            .foregroundColor(.accentColor)
-                                    } else {
-                                        Label("\(file)", systemImage: "doc.fill")
+                                    Image("File")
+                                        .resizable()
+                                        .frame(width: 20, height: 20)
+                                    Text(file)
+                                    Spacer()
+                                }
+                            }
+                            .frame(height: 20)
+                            .contextMenu {
+                                Button(action: {
+                                    self.renaming.toggle()
+                                }) {
+                                    Text("Rename")
+                                }
+                                Button(action: {
+                                    withAnimation {
+                                        Storage(status: $status, progress: $progress).remove(
+                                            status: status,
+                                            selection: file
+                                        )
+                                        if file == selection {
+                                            self.selection = ""
+                                        }
+                                        self.files = Storage(status: $status, progress: $progress).identify(status: status)
+                                    }
+                                }) {
+                                    Text("Delete")
+                                }
+                            }
+                            .sheet(isPresented: $renaming) {
+                                VStack {
+                                    TextField("\(file).localproj", text: $rename)
+                                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    HStack {
+                                        Button(action: {
+                                            self.renaming.toggle()
+                                        }) {
+                                            Text("Cancel")
+                                        }
+                                        Spacer()
+                                        Button(action: {
+                                            withAnimation {
+                                                Storage(status: $status, progress: $progress).rename(status: status, selection: file, rename: rename)
+                                                self.selection = self.rename
+                                                self.rename = ""
+                                                self.files = Storage(status: $status, progress: $progress).identify(status: status)
+                                                self.renaming.toggle()
+                                            }
+                                        }) {
+                                            Text("Rename")
+                                        }
+                                        .disabled(files.contains(rename) || rename == "" || rename.hasPrefix("."))
+                                        .keyboardShortcut(.defaultAction)
                                     }
                                 }
-                                .contentShape(Rectangle())
-                                .onTapGesture {
-                                    self.selection = file
-                                    self.data = Storage(status: $status, progress: $progress).read(status: status, selection: file)
-                                }
+                                .padding()
                             }
                         }
                     }
                 }
                 if toggle == "languages" {
                     Section(header: Text("")) {
-                        ForEach(data.translations.indices, id: \.self) { index in
-                            if data.translations[index].target {
-                                NavigationLink(destination:
-                                    Editor(selection: $selection, status: $status, progress: $progress, data: $data,
-                                           query: $query, entry: $entry, inspector: $inspector),
-                                    tag: data.translations[index].language,
-                                    selection: Binding(
-                                        get: { data.target },
-                                        set: { if $0 != nil { data.target = $0! } }
-                                    )
-                                ) {
-                                    Text("\(data.translations[index].language)")
-                                }
-                                .frame(height: 20)
-                            }
-                        }
-                    }
-                }
-                if toggle == "editing" {
-                    Section(header: Text("")) {
                         HStack {
-                            if data.translations.allSatisfy({$0.target}) {
-                                Text("Unselect all")
-                                    .foregroundColor(.accentColor)
-                            } else {
-                                Text("Select all")
-                            }
+                            Text("Edit languages")
                             Spacer()
-                            Toggle(isOn: Binding(
-                                get: { data.translations.allSatisfy({$0.target}) },
-                                set: { _,_ in
-                                    if data.translations.allSatisfy({$0.target}) {
-                                        data.translations.indices.forEach { index in
-                                            data.translations[index].target = false
-                                        }
-                                    } else {
-                                        data.translations.indices.forEach { index in
-                                            data.translations[index].target = true
-                                        }
-                                    }
-                                    Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data)
-                                }
-                            )) {
+                            Toggle(isOn: $editing) {
                                 Text("")
                             }
-                            .toggleStyle(CheckboxToggleStyle())
                         }
-                        Divider()
-                        ForEach(data.translations.indices, id: \.self) { index in
+                        if editing {
                             HStack {
-                                if data.translations[index].target {
-                                    Text("\(data.translations[index].language)")
+                                if data.translations.allSatisfy({$0.target}) {
+                                    Text("Select all")
                                         .foregroundColor(.accentColor)
                                 } else {
-                                    Text("\(data.translations[index].language)")
+                                    Text("Select all")
                                 }
                                 Spacer()
                                 Toggle(isOn: Binding(
-                                    get: { data.translations[index].target },
-                                    set: { data.translations[index].target = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
+                                    get: { data.translations.allSatisfy({$0.target}) },
+                                    set: { _,_ in
+                                        if data.translations.allSatisfy({$0.target}) {
+                                            data.translations.indices.forEach { index in
+                                                if index != 0 {
+                                                    data.translations[index].target = false
+                                                }
+                                            }
+                                        } else {
+                                            data.translations.indices.forEach { index in
+                                                data.translations[index].target = true
+                                            }
+                                        }
+                                        Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data)
+                                    }
                                 )) {
                                     Text("")
                                 }
                                 .toggleStyle(CheckboxToggleStyle())
                             }
                         }
+                        Divider()
+                            .padding(.vertical)
+                        ForEach(data.translations.indices, id: \.self) { index in
+                            if editing {
+                                HStack {
+                                    if data.translations[index].target {
+                                        Text("\(data.translations[index].language)")
+                                            .foregroundColor(.accentColor)
+                                    } else {
+                                        Text("\(data.translations[index].language)")
+                                    }
+                                    Spacer()
+                                    Toggle(isOn: Binding(
+                                        get: { data.translations[index].target },
+                                        set: { data.translations[index].target = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
+                                    )) {
+                                        Text("")
+                                    }
+                                    .toggleStyle(CheckboxToggleStyle())
+                                    .disabled(data.translations[index].target && data.translations.filter({$0.target}).count == 1)
+                                }
+                            } else {
+                                if data.translations[index].target {
+                                    NavigationLink(destination:
+                                        Editor(selection: $selection, status: $status, progress: $progress, data: $data,
+                                               query: $query, entry: $entry, inspector: $inspector),
+                                        tag: data.translations[index].language,
+                                        selection: Binding(
+                                            get: { data.target },
+                                            set: { if $0 != nil { data.target = $0! } }
+                                        )
+                                    ) {
+                                        Text("\(data.translations[index].language)")
+                                    }
+                                    .frame(height: 20)
+                                }
+                            }
+                        }
                     }
                 }
-                if toggle == "filter" {
+                if toggle == "add" {
                     Section(header: Text("")) {
-                        TextField("􀊫 Search", text: $query)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .frame(minWidth: 160)
+                        Picker("Base", selection: Binding(
+                            get: { data.base },
+                            set: { data.base = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
+                        )) {
+                            ForEach(data.translations, id: \.self) { translations in
+                                Text("\(translations.language)").tag(translations.language)
+                            }
+                        }
                         Button(action: {
                             withAnimation {
                                 Progress(status: $status, progress: $progress).load(string: "Translating strings to \(data.target)...")
@@ -258,6 +289,44 @@ struct Sidebar: View {
                             Image(systemName: "folder.fill.badge.plus")
                         }
                         .help("Import strings from an Xcode project folder")
+                        ZStack {
+                            TextField("Unique string", text: $entry)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .frame(width: 180)
+                                .disabled(selection == "" || data.target == "")
+                                .help("Add a unique string for translation")
+                            if entry != "" {
+                                HStack {
+                                    Spacer()
+                                    Button(action: {
+                                        withAnimation {
+                                            data.translations.indices.forEach { index in
+                                                data.translations[index].texts[entry] = Storage.Format.Text(translation: "", pinned: false)
+                                            }
+                                            Storage(status: $status, progress: $progress).write(
+                                                status: status,
+                                                selection: selection,
+                                                data: data
+                                            )
+                                            self.entry = ""
+                                        }
+                                    }) {
+                                        Image(systemName: "arrow.right.circle.fill")
+                                    }
+                                    .keyboardShortcut(.defaultAction)
+                                    .disabled(entry == "" || data.translations.filter({$0.language == data.target})[0].texts.keys.contains(entry))
+                                }
+                            }
+                        }
+                    }
+                }
+                if toggle == "filter" {
+                    Section(header: Text("")) {
+                        TextField("􀊫 Search strings", text: $query)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .frame(minWidth: 160)
+                        Divider()
+                            .padding(.vertical)
                     }
                 }
                 if toggle == "help" {

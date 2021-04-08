@@ -98,9 +98,9 @@ struct Editor: View {
                 }
             }
         }
-        .navigationTitle("")
+        .navigationTitle(selection + ".localproj")
         .toolbar {
-            ToolbarItemGroup(placement: .navigation) {
+            ToolbarItemGroup(placement: .automatic) {
                 Menu {
                     ForEach(status.indices.reversed(), id: \.self) { index in
                         Text("\(status[index])")
@@ -112,40 +112,9 @@ struct Editor: View {
                         .font(.system(size: 10))
                 }
                 .background(Color("StatusColor"))
-                .frame(width: 320)
                 .cornerRadius(5)
+                .frame(width: 320)
                 .help("View project changelog, and revert to a previous version")
-            }
-            ToolbarItemGroup(placement: .automatic) {
-                ZStack {
-                    TextField("Unique string", text: $entry)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .frame(width: 180)
-                        .disabled(selection == "" || data.target == "")
-                        .help("Add a unique string for translation")
-                    if entry != "" {
-                        HStack {
-                            Spacer()
-                            Button(action: {
-                                withAnimation {
-                                    data.translations.indices.forEach { index in
-                                        data.translations[index].texts[entry] = Storage.Format.Text(translation: "", pinned: false)
-                                    }
-                                    Storage(status: $status, progress: $progress).write(
-                                        status: status,
-                                        selection: selection,
-                                        data: data
-                                    )
-                                    self.entry = ""
-                                }
-                            }) {
-                                Image(systemName: "arrow.right.circle.fill")
-                            }
-                            .keyboardShortcut(.defaultAction)
-                            .disabled(entry == "" || data.translations.filter{$0.language == data.target}[0].texts.keys.contains(entry))
-                        }
-                    }
-                }
                 Button(action: {
                     Coder(data: $data, status: $status, progress: $progress).encode()
                 }) {
