@@ -24,11 +24,7 @@ struct Sidebar: View {
                 if toggle == "help" {
                     Image(systemName: "info.circle.fill").foregroundColor(.accentColor)
                 } else {
-                    if selection == "" {
-                        Image(systemName: "info.circle").opacity(0.3)
-                    } else {
-                        Image(systemName: "info.circle").onTapGesture { self.toggle = "help" }
-                    }
+                    Image(systemName: "info.circle").onTapGesture { self.toggle = "help" }
                 }
                 Spacer()
                 if toggle == "projects" {
@@ -70,36 +66,39 @@ struct Sidebar: View {
             .frame(height: 27)
             .padding(.horizontal)
             Divider()
-            List {
-                if toggle == "help" {
+            if toggle == "help" {
+                List {
                     Section(header: Text("")) {
                         // INFO ON HOW TO USE THE APP
                     }
                 }
-                if toggle == "projects" {
+                .listStyle(SidebarListStyle())
+            }
+            if toggle == "projects" {
+                HStack {
+                    TextField("Unique project name", text: $filename)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                    Button(action: {
+                        self.selection = filename
+                        self.filename = ""
+                        Storage(status: $status, progress: $progress).write(
+                            status: status,
+                            selection: selection,
+                            data: Storage(status: $status, progress: $progress).data
+                        )
+                        self.data = Storage(status: $status, progress: $progress).read(status: status, selection: selection)
+                        self.files = Storage(status: $status, progress: $progress).identify(status: status)
+                        self.toggle = "languages"
+                    }) {
+                        Image(systemName: "plus")
+                    }
+                    .keyboardShortcut(.defaultAction)
+                    .disabled(files.contains(filename) || filename == "" || filename.hasPrefix("."))
+                }
+                .padding()
+                Divider()
+                List {
                     Section(header: Text("")) {
-                        HStack(spacing: 0) {
-                            TextField("Unique project name", text: $filename)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                            Button(action: {
-                                self.selection = filename
-                                self.filename = ""
-                                Storage(status: $status, progress: $progress).write(
-                                    status: status,
-                                    selection: selection,
-                                    data: Storage(status: $status, progress: $progress).data
-                                )
-                                self.data = Storage(status: $status, progress: $progress).read(status: status, selection: selection)
-                                self.files = Storage(status: $status, progress: $progress).identify(status: status)
-                                self.toggle = "languages"
-                            }) {
-                                Text("Create")
-                            }
-                            .keyboardShortcut(.defaultAction)
-                            .disabled(files.contains(filename) || filename == "" || filename.hasPrefix("."))
-                            .padding(.leading)
-                        }
-                        .padding(.bottom)
                         ForEach(files, id: \.self) { file in
                             NavigationLink(destination:
                                 Editor(selection: $selection, status: $status, progress: $progress, data: $data,
@@ -170,52 +169,57 @@ struct Sidebar: View {
                             }
                         }
                     }
-                    .onAppear {
-                        self.files = Storage(status: $status, progress: $progress).identify(status: status)
+                }
+                .listStyle(SidebarListStyle())
+                .onAppear {
+                    self.files = Storage(status: $status, progress: $progress).identify(status: status)
+                }
+            }
+            if toggle == "languages" {
+                HStack {
+                    Text("Edit languages")
+                    Spacer()
+                    Toggle(isOn: $editing) {
+                        Text("")
                     }
                 }
-                if toggle == "languages" {
-                    Section(header: Text("")) {
-                        HStack {
-                            Text("Edit languages")
-                            Spacer()
-                            Toggle(isOn: $editing) {
-                                Text("")
-                            }
+                .padding()
+                if editing {
+                    HStack {
+                        if data.translations.allSatisfy({$0.target}) {
+                            Text("Select all")
+                                .foregroundColor(.accentColor)
+                        } else {
+                            Text("Select all")
                         }
-                        if editing {
-                            HStack {
+                        Spacer()
+                        Toggle(isOn: Binding(
+                            get: { data.translations.allSatisfy({$0.target}) },
+                            set: { _,_ in
                                 if data.translations.allSatisfy({$0.target}) {
-                                    Text("Select all")
-                                        .foregroundColor(.accentColor)
-                                } else {
-                                    Text("Select all")
-                                }
-                                Spacer()
-                                Toggle(isOn: Binding(
-                                    get: { data.translations.allSatisfy({$0.target}) },
-                                    set: { _,_ in
-                                        if data.translations.allSatisfy({$0.target}) {
-                                            data.translations.indices.forEach { index in
-                                                if index != 0 {
-                                                    data.translations[index].target = false
-                                                }
-                                            }
-                                        } else {
-                                            data.translations.indices.forEach { index in
-                                                data.translations[index].target = true
-                                            }
+                                    data.translations.indices.forEach { index in
+                                        if index != 0 {
+                                            data.translations[index].target = false
                                         }
-                                        Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data)
                                     }
-                                )) {
-                                    Text("")
+                                } else {
+                                    data.translations.indices.forEach { index in
+                                        data.translations[index].target = true
+                                    }
                                 }
-                                .toggleStyle(CheckboxToggleStyle())
+                                Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data)
                             }
+                        )) {
+                            Text("")
                         }
-                        Divider()
-                            .padding(.vertical)
+                        .toggleStyle(CheckboxToggleStyle())
+                    }
+                    .padding(.horizontal)
+                    .padding(.bottom)
+                }
+                Divider()
+                List {
+                    Section(header: Text("")) {
                         ForEach(data.translations.indices, id: \.self) { index in
                             if editing {
                                 HStack {
@@ -253,13 +257,41 @@ struct Sidebar: View {
                             }
                         }
                     }
-                    .onAppear {
-                        if data.target == "" && data.translations.filter({$0.target}).count != 0 {
-                            self.data.target = data.translations.filter({$0.target})[0].language
-                        }
+                }
+                .listStyle(SidebarListStyle())
+                .onAppear {
+                    if data.target == "" && data.translations.filter({$0.target}).count != 0 {
+                        self.data.target = data.translations.filter({$0.target})[0].language
                     }
                 }
-                if toggle == "add" {
+            }
+            if toggle == "add" {
+                HStack {
+                    TextField("Unique string", text: $entry)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .disabled(selection == "" || data.target == "")
+                        .help("Add a unique string for translation")
+                    Button(action: {
+                        withAnimation {
+                            data.translations.indices.forEach { index in
+                                data.translations[index].texts[entry] = Storage.Format.Text(translation: "", pinned: false)
+                            }
+                            Storage(status: $status, progress: $progress).write(
+                                status: status,
+                                selection: selection,
+                                data: data
+                            )
+                            self.entry = ""
+                        }
+                    }) {
+                        Image(systemName: "arrow.right.circle.fill")
+                    }
+                    .keyboardShortcut(.defaultAction)
+                    .disabled(entry == "" || data.translations.filter({$0.language == data.target})[0].texts.keys.contains(entry))
+                }
+                .padding()
+                Divider()
+                List {
                     Section(header: Text("")) {
                         Picker("Base", selection: Binding(
                             get: { data.base },
@@ -302,45 +334,18 @@ struct Sidebar: View {
                             Image(systemName: "folder.fill.badge.plus")
                         }
                         .help("Import strings from an Xcode project folder")
-                        ZStack {
-                            TextField("Unique string", text: $entry)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                .frame(width: 180)
-                                .disabled(selection == "" || data.target == "")
-                                .help("Add a unique string for translation")
-                            if entry != "" {
-                                HStack {
-                                    Spacer()
-                                    Button(action: {
-                                        withAnimation {
-                                            data.translations.indices.forEach { index in
-                                                data.translations[index].texts[entry] = Storage.Format.Text(translation: "", pinned: false)
-                                            }
-                                            Storage(status: $status, progress: $progress).write(
-                                                status: status,
-                                                selection: selection,
-                                                data: data
-                                            )
-                                            self.entry = ""
-                                        }
-                                    }) {
-                                        Image(systemName: "arrow.right.circle.fill")
-                                    }
-                                    .keyboardShortcut(.defaultAction)
-                                    .disabled(entry == "" || data.translations.filter({$0.language == data.target})[0].texts.keys.contains(entry))
-                                }
-                            }
-                        }
                         // DRAG-AND-DROP PROJECT IMPORT
                     }
                 }
-                if toggle == "filter" {
+                .listStyle(SidebarListStyle())
+            }
+            if toggle == "filter" {
+                TextField("􀊫 Search strings", text: $query)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding()
+                Divider()
+                List {
                     Section(header: Text("")) {
-                        TextField("􀊫 Search strings", text: $query)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .frame(minWidth: 160)
-                        Divider()
-                            .padding(.vertical)
                         HStack {
                             Text("Single-line strings")
                             Spacer()
@@ -406,7 +411,14 @@ struct Sidebar: View {
                             Text("Helvetica Neue").tag("Helvetica Neue")
                             Text("Helvetica").tag("Helvetica")
                         }
-                        // FONT SIZE
+                        Picker("Size", selection: Binding(
+                            get: { data.styles.size },
+                            set: { data.styles.size = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
+                        )) {
+                            Text("12").tag(12)
+                            Text("14").tag(14)
+                            Text("16").tag(16)
+                        }
                         Picker("Weight", selection: Binding(
                             get: { data.styles.weight },
                             set: { data.styles.weight = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
@@ -425,8 +437,8 @@ struct Sidebar: View {
                         }
                     }
                 }
+                .listStyle(SidebarListStyle())
             }
-            .listStyle(SidebarListStyle())
         }
         .toolbar {
             ToolbarItemGroup(placement: .automatic) {

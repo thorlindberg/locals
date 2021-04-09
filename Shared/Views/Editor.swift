@@ -4,7 +4,12 @@ struct Header: View {
     @Binding var data: Storage.Format
     var body: some View {
         if data.target != "" {
-            Text("\(data.base) to \(data.target)")
+            HStack {
+                Text("\(data.base)")
+                Text("􀆊")
+                Text("\(data.target)")
+                    .foregroundColor(.accentColor)
+            }
         } else {
             Text("")
         }
