@@ -17,6 +17,14 @@ struct Sidebar: View {
     @State var files: [String] = []
     @State var filename: String = ""
     
+    let fonts: [String] = [
+        "American Typewriter", "Andale Mono", "Arial", "Avenir", "Baskerville", "Big Caslon", "Bodoni 72",
+        "Bradley Hand", "Calibri", "Cambria", "Chalkboard", "Chalkduster", "Charter", "Cochin", "Copperplate",
+        "Courier", "Didot", "Futura", "Geneva", "Georgia", "Gill Sans", "Helvetica", "Helvetica Neue", "Impact",
+        "Lucida Grande", "Luminari", "Marker Felt", "Menlo", "Monaco", "Noteworthy", "Optima", "Palatino", "Papyrus",
+        "Phosphate", "Rockwell", "San Francisco", "Skia", "Tahoma", "Times", "Times New Roman", "Verdana"
+    ]
+    
     var body: some View {
         VStack(spacing: 0) {
             Divider()
@@ -415,9 +423,11 @@ struct Sidebar: View {
                             get: { data.styles.font },
                             set: { data.styles.font = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
                         )) {
-                            Text("San Francisco").tag("San Francisco")
-                            Text("Helvetica Neue").tag("Helvetica Neue")
-                            Text("Helvetica").tag("Helvetica")
+                            ForEach(fonts, id: \.self) { font in
+                                Text(font)
+                                    .font(.custom(font, size: 14))
+                                    .tag(font)
+                            }
                         }
                     }
                     HStack {
@@ -470,16 +480,13 @@ struct Sidebar: View {
                             set: { data.styles.color = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
                         )) {
                             Text("Accent").foregroundColor(.accentColor).tag(Color.accentColor)
-                            Text("Black").foregroundColor(.black).tag(Color.black)
                             Text("Blue").foregroundColor(.blue).tag(Color.blue)
-                            Text("Clear").foregroundColor(.clear).tag(Color.clear)
                             Text("Gray").foregroundColor(.gray).tag(Color.gray)
                             Text("Green").foregroundColor(.green).tag(Color.green)
                             Text("Orange").foregroundColor(.orange).tag(Color.orange)
                             Text("Pink").foregroundColor(.pink).tag(Color.pink)
                             Text("Purple").foregroundColor(.purple).tag(Color.purple)
                             Text("Red").foregroundColor(.red).tag(Color.red)
-                            Text("White").foregroundColor(.white).tag(Color.white)
                             Text("Yellow").foregroundColor(.yellow).tag(Color.yellow)
                         }
                     }

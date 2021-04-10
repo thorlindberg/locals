@@ -466,16 +466,13 @@ struct Storage {
                     if line[3] == "Light" { baseData.styles.weight = Font.Weight.light }
                     if line[3] == "Ultra light" { baseData.styles.weight = Font.Weight.ultraLight }
                     if line[4] == "Accent" { baseData.styles.color = Color.accentColor }
-                    if line[4] == "Black" { baseData.styles.color = Color.black }
                     if line[4] == "Blue" { baseData.styles.color = Color.blue }
-                    if line[4] == "Clear" { baseData.styles.color = Color.clear }
                     if line[4] == "Gray" { baseData.styles.color = Color.gray }
                     if line[4] == "Green" { baseData.styles.color = Color.green }
                     if line[4] == "Orange" { baseData.styles.color = Color.orange }
                     if line[4] == "Pink" { baseData.styles.color = Color.pink }
                     if line[4] == "Purple" { baseData.styles.color = Color.purple }
                     if line[4] == "Red" { baseData.styles.color = Color.red }
-                    if line[4] == "White" { baseData.styles.color = Color.white }
                     if line[4] == "Yellow" { baseData.styles.color = Color.yellow }
                     
                 } else {
@@ -559,16 +556,13 @@ struct Storage {
         if data.styles.weight == Font.Weight.light { output += "Light" + " : " }
         if data.styles.weight == Font.Weight.ultraLight { output += "Ultra light" + " : " }
         if data.styles.color == Color.accentColor { output += "Accent" }
-        if data.styles.color == Color.black { output += "Black" }
         if data.styles.color == Color.blue { output += "Blue" }
-        if data.styles.color == Color.clear { output += "Clear" }
         if data.styles.color == Color.gray { output += "Gray" }
         if data.styles.color == Color.green { output += "Green" }
         if data.styles.color == Color.orange { output += "Orange" }
         if data.styles.color == Color.pink { output += "Pink" }
         if data.styles.color == Color.purple { output += "Purple" }
         if data.styles.color == Color.red { output += "Red" }
-        if data.styles.color == Color.white { output += "White" }
         if data.styles.color == Color.yellow { output += "Yellow" }
         output += " ; "
         

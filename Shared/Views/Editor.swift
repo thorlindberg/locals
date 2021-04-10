@@ -41,7 +41,7 @@ struct Editor: View {
                                             Rectangle()
                                                 .opacity(0.07)
                                                 .cornerRadius(10)
-                                            HStack(alignment: .top, spacing: 15) {
+                                            HStack(alignment: .center, spacing: 15) {
                                                 Image(systemName: "xmark.circle.fill")
                                                     .opacity(0.2)
                                                     .onTapGesture {
