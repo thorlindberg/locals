@@ -8,7 +8,6 @@ struct Header: View {
                 Text("\(data.base)")
                 Text("􀆊")
                 Text("\(data.target)")
-                    .foregroundColor(.accentColor)
             }
         } else {
             Text("")
@@ -42,7 +41,6 @@ struct Editor: View {
                                             Rectangle()
                                                 .opacity(0.07)
                                                 .cornerRadius(10)
-                                                .frame(minHeight: 50)
                                             HStack(alignment: .top, spacing: 15) {
                                                 Image(systemName: "xmark.circle.fill")
                                                     .opacity(0.2)
@@ -59,7 +57,9 @@ struct Editor: View {
                                                         }
                                                     }
                                                 Text("\(string)")
-                                                    .foregroundColor(.accentColor)
+                                                    .font(.custom(data.styles.font, size: data.styles.size))
+                                                    .fontWeight(data.styles.weight)
+                                                    .foregroundColor(data.styles.color)
                                                 Divider()
                                                 TextField("Translation", text: Binding(
                                                     get: { data.translations[index].texts[string]!.translation },

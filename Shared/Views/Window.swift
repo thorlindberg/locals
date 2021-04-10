@@ -6,7 +6,7 @@ struct Window: View {
     @State var selection: String = ""
     @State var status: [String] = ["\(Time().current()) - Welcome to Locals"]
     @State var progress: CGFloat = CGFloat.zero
-    @State var data: Storage.Format = Storage.Format(base: "", target: "", filters: Storage.Format.Filters(singleline: true, multiline: true, parenthesis: true, nummerical: true, symbols: true), styles: Storage.Format.Styles(font: "Default", size: 12, weight: "Normal", color: "Accent"), translations: [])
+    @State var data: Storage.Format = Storage.Format(base: "", target: "", filters: Storage.Format.Filters(singleline: true, multiline: true, parenthesis: true, nummerical: true, symbols: true), styles: Storage.Format.Styles(font: "San Francisco", size: CGFloat(14), weight: Font.Weight.regular, color: Color.accentColor), translations: [])
     @State var query: String = ""
     @State var entry: String = ""
     @State var inspector: Bool = true

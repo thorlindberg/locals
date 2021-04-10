@@ -26,8 +26,8 @@ struct Storage {
         struct Styles: Hashable {
             var font: String
             var size: CGFloat
-            var weight: String
-            var color: String
+            var weight: Font.Weight
+            var color: Color
         }
         
         struct Translations: Hashable {
@@ -57,10 +57,10 @@ struct Storage {
             symbols: true
         ),
         styles: Format.Styles(
-            font: "Default",
-            size: 12,
-            weight: "Normal",
-            color: "Accent"),
+            font: "San Francisco",
+            size: CGFloat(14),
+            weight: Font.Weight.regular,
+            color: Color.accentColor),
         translations: [
             Format.Translations(
                 id: "1",
@@ -390,11 +390,11 @@ struct Storage {
                 }
             }
         } catch {
-            Progress(status: $status, progress: $progress).log(string: "Failed to identify project files in internal applicaton storage")
+            Progress(status: $status, progress: $progress).log(string: "Failed to identify projects")
             return identified
         }
         
-        Progress(status: $status, progress: $progress).log(string: "Identified project files in internal application storage")
+        Progress(status: $status, progress: $progress).log(string: "Identified projects")
         return identified
     
     }
@@ -408,7 +408,7 @@ struct Storage {
             try FileManager.default.moveItem(atPath: current, toPath: new)
             Progress(status: $status, progress: $progress).load(string: "Project \"\(selection)\" renamed to \"\(rename)\"")
         } catch {
-            Progress(status: $status, progress: $progress).load(string: "Unable to rename the file")
+            Progress(status: $status, progress: $progress).load(string: "Unable to rename the project")
         }
         
     }
@@ -456,8 +456,27 @@ struct Storage {
                     // "styles" : font : size : weight : color ;
                     baseData.styles.font = line[1]
                     baseData.styles.size = CGFloat(Int(line[2])!)
-                    baseData.styles.weight = line[3]
-                    baseData.styles.color = line[4]
+                    if line[3] == "Regular" { baseData.styles.weight = Font.Weight.regular }
+                    if line[3] == "Heavy" { baseData.styles.weight = Font.Weight.heavy }
+                    if line[3] == "Black" { baseData.styles.weight = Font.Weight.black }
+                    if line[3] == "Bold" { baseData.styles.weight = Font.Weight.bold }
+                    if line[3] == "Semi-bold" { baseData.styles.weight = Font.Weight.semibold }
+                    if line[3] == "Medium" { baseData.styles.weight = Font.Weight.medium }
+                    if line[3] == "Thin" { baseData.styles.weight = Font.Weight.thin }
+                    if line[3] == "Light" { baseData.styles.weight = Font.Weight.light }
+                    if line[3] == "Ultra light" { baseData.styles.weight = Font.Weight.ultraLight }
+                    if line[4] == "Accent" { baseData.styles.color = Color.accentColor }
+                    if line[4] == "Black" { baseData.styles.color = Color.black }
+                    if line[4] == "Blue" { baseData.styles.color = Color.blue }
+                    if line[4] == "Clear" { baseData.styles.color = Color.clear }
+                    if line[4] == "Gray" { baseData.styles.color = Color.gray }
+                    if line[4] == "Green" { baseData.styles.color = Color.green }
+                    if line[4] == "Orange" { baseData.styles.color = Color.orange }
+                    if line[4] == "Pink" { baseData.styles.color = Color.pink }
+                    if line[4] == "Purple" { baseData.styles.color = Color.purple }
+                    if line[4] == "Red" { baseData.styles.color = Color.red }
+                    if line[4] == "White" { baseData.styles.color = Color.white }
+                    if line[4] == "Yellow" { baseData.styles.color = Color.yellow }
                     
                 } else {
                     
@@ -485,11 +504,11 @@ struct Storage {
                 
             }
             
-            Progress(status: $status, progress: $progress).log(string: "Project \"\(selection)\" read from internal application storage")
+            Progress(status: $status, progress: $progress).log(string: "Read project \"\(selection)\"")
             return baseData
             
         } catch {
-            Progress(status: $status, progress: $progress).log(string: "Unable to read the file")
+            Progress(status: $status, progress: $progress).log(string: "Unable to read project")
             return baseData
         }
         
@@ -530,8 +549,27 @@ struct Storage {
         output += "styles : "
         output += data.styles.font + " : "
         output += String(Int(data.styles.size)) + " : "
-        output += data.styles.weight + " : "
-        output += data.styles.color
+        if data.styles.weight == Font.Weight.regular { output += "Regular" + " : " }
+        if data.styles.weight == Font.Weight.heavy { output += "Heavy" + " : " }
+        if data.styles.weight == Font.Weight.black { output += "Black" + " : " }
+        if data.styles.weight == Font.Weight.bold { output += "Bold" + " : " }
+        if data.styles.weight == Font.Weight.semibold { output += "Semi-bold" + " : " }
+        if data.styles.weight == Font.Weight.medium { output += "Medium" + " : " }
+        if data.styles.weight == Font.Weight.thin { output += "Thin" + " : " }
+        if data.styles.weight == Font.Weight.light { output += "Light" + " : " }
+        if data.styles.weight == Font.Weight.ultraLight { output += "Ultra light" + " : " }
+        if data.styles.color == Color.accentColor { output += "Accent" }
+        if data.styles.color == Color.black { output += "Black" }
+        if data.styles.color == Color.blue { output += "Blue" }
+        if data.styles.color == Color.clear { output += "Clear" }
+        if data.styles.color == Color.gray { output += "Gray" }
+        if data.styles.color == Color.green { output += "Green" }
+        if data.styles.color == Color.orange { output += "Orange" }
+        if data.styles.color == Color.pink { output += "Pink" }
+        if data.styles.color == Color.purple { output += "Purple" }
+        if data.styles.color == Color.red { output += "Red" }
+        if data.styles.color == Color.white { output += "White" }
+        if data.styles.color == Color.yellow { output += "Yellow" }
         output += " ; "
         
         // id : pinned : string : translation ;
@@ -566,10 +604,10 @@ struct Storage {
             let fileManager = FileManager.default
             let filePath = (self.folder.absoluteString + selection + ".localproj").replacingOccurrences(of: "file://", with: "")
             try fileManager.removeItem(atPath: filePath)
-            Progress(status: $status, progress: $progress).load(string: "Project \"\(selection)\" removed from internal application storage")
+            Progress(status: $status, progress: $progress).load(string: "Project \"\(selection)\" deleted")
         }
         catch {
-            Progress(status: $status, progress: $progress).load(string: "File could not be removed")
+            Progress(status: $status, progress: $progress).load(string: "Project could not be deleted")
         }
         
     }

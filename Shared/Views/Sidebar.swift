@@ -24,13 +24,13 @@ struct Sidebar: View {
                 if toggle == "help" {
                     Image(systemName: "info.circle.fill").foregroundColor(.accentColor)
                 } else {
-                    Image(systemName: "info.circle").onTapGesture { self.toggle = "help" }
+                    Image(systemName: "info.circle").contentShape(Rectangle()).onTapGesture { self.toggle = "help" }
                 }
                 Spacer()
                 if toggle == "projects" {
                     Image(systemName: "folder.fill").foregroundColor(.accentColor)
                 } else {
-                    Image(systemName: "folder").onTapGesture { self.toggle = "projects" }
+                    Image(systemName: "folder").contentShape(Rectangle()).onTapGesture { self.toggle = "projects" }
                 }
                 Spacer()
                 if toggle == "languages" {
@@ -39,7 +39,7 @@ struct Sidebar: View {
                     if selection == "" {
                         Image(systemName: "globe").opacity(0.3)
                     } else {
-                        Image(systemName: "globe").onTapGesture { self.toggle = "languages" }
+                        Image(systemName: "globe").contentShape(Rectangle()).onTapGesture { self.toggle = "languages" }
                     }
                 }
                 Spacer()
@@ -49,7 +49,7 @@ struct Sidebar: View {
                     if selection == "" || data.target == "" {
                         Image(systemName: "plus").opacity(0.3)
                     } else {
-                        Image(systemName: "plus").onTapGesture { self.toggle = "add" }
+                        Image(systemName: "plus").contentShape(Rectangle()).onTapGesture { self.toggle = "add" }
                     }
                 }
                 Spacer()
@@ -59,7 +59,7 @@ struct Sidebar: View {
                     if selection == "" || data.target == "" {
                         Image(systemName: "magnifyingglass").opacity(0.3)
                     } else {
-                        Image(systemName: "magnifyingglass").onTapGesture { self.toggle = "filter" }
+                        Image(systemName: "magnifyingglass").contentShape(Rectangle()).onTapGesture { self.toggle = "filter" }
                     }
                 }
             }
@@ -344,100 +344,148 @@ struct Sidebar: View {
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding()
                 Divider()
-                List {
-                    Section(header: Text("")) {
-                        HStack {
-                            Text("Single-line strings")
-                            Spacer()
-                            Toggle(isOn: Binding(
-                                get: { data.filters.singleline },
-                                set: { data.filters.singleline = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
-                            )) {
-                                Text("")
-                            }
-                            .toggleStyle(CheckboxToggleStyle())
+                VStack {
+                    HStack {
+                        Text("Single-line strings")
+                        Spacer()
+                        Toggle(isOn: Binding(
+                            get: { data.filters.singleline },
+                            set: { data.filters.singleline = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
+                        )) {
+                            Text("")
                         }
-                        HStack {
-                            Text("Multi-line strings")
-                            Spacer()
-                            Toggle(isOn: Binding(
-                                get: { data.filters.multiline },
-                                set: { data.filters.multiline = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
-                            )) {
-                                Text("")
-                            }
-                            .toggleStyle(CheckboxToggleStyle())
+                        .toggleStyle(CheckboxToggleStyle())
+                    }
+                    HStack {
+                        Text("Multi-line strings")
+                        Spacer()
+                        Toggle(isOn: Binding(
+                            get: { data.filters.multiline },
+                            set: { data.filters.multiline = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
+                        )) {
+                            Text("")
                         }
-                        HStack {
-                            Text("Parenthesis")
-                            Spacer()
-                            Toggle(isOn: Binding(
-                                get: { data.filters.parenthesis },
-                                set: { data.filters.parenthesis = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
-                            )) {
-                                Text("")
-                            }
-                            .toggleStyle(CheckboxToggleStyle())
+                        .toggleStyle(CheckboxToggleStyle())
+                    }
+                    HStack {
+                        Text("Parenthesis")
+                        Spacer()
+                        Toggle(isOn: Binding(
+                            get: { data.filters.parenthesis },
+                            set: { data.filters.parenthesis = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
+                        )) {
+                            Text("")
                         }
-                        HStack {
-                            Text("Nummerical-only")
-                            Spacer()
-                            Toggle(isOn: Binding(
-                                get: { data.filters.nummerical },
-                                set: { data.filters.nummerical = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
-                            )) {
-                                Text("")
-                            }
-                            .toggleStyle(CheckboxToggleStyle())
+                        .toggleStyle(CheckboxToggleStyle())
+                    }
+                    HStack {
+                        Text("Nummerical-only")
+                        Spacer()
+                        Toggle(isOn: Binding(
+                            get: { data.filters.nummerical },
+                            set: { data.filters.nummerical = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
+                        )) {
+                            Text("")
                         }
-                        HStack {
-                            Text("Symbols-only")
-                            Spacer()
-                            Toggle(isOn: Binding(
-                                get: { data.filters.symbols },
-                                set: { data.filters.symbols = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
-                            )) {
-                                Text("")
-                            }
-                            .toggleStyle(CheckboxToggleStyle())
+                        .toggleStyle(CheckboxToggleStyle())
+                    }
+                    HStack {
+                        Text("Symbols-only")
+                        Spacer()
+                        Toggle(isOn: Binding(
+                            get: { data.filters.symbols },
+                            set: { data.filters.symbols = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
+                        )) {
+                            Text("")
                         }
-                        Divider()
-                            .padding(.vertical)
-                        Picker("Base", selection: Binding(
+                        .toggleStyle(CheckboxToggleStyle())
+                    }
+                }
+                .padding()
+                Divider()
+                VStack {
+                    HStack {
+                        HStack {
+                            Text("Font")
+                            Spacer()
+                        }
+                        .frame(width: 55)
+                        Spacer()
+                        Picker("", selection: Binding(
                             get: { data.styles.font },
                             set: { data.styles.font = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
                         )) {
-                            Text("Default").tag("Default")
+                            Text("San Francisco").tag("San Francisco")
                             Text("Helvetica Neue").tag("Helvetica Neue")
                             Text("Helvetica").tag("Helvetica")
                         }
-                        Picker("Size", selection: Binding(
+                    }
+                    HStack {
+                        HStack {
+                            Text("Size")
+                            Spacer()
+                        }
+                        .frame(width: 55)
+                        Spacer()
+                        Picker("", selection: Binding(
                             get: { data.styles.size },
                             set: { data.styles.size = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
                         )) {
-                            Text("12").tag(12)
-                            Text("14").tag(14)
-                            Text("16").tag(16)
+                            ForEach(Array(stride(from: 6, to: 102, by: 2)), id: \.self) { size in
+                                Text(String(size)).tag(CGFloat(size))
+                            }
                         }
-                        Picker("Weight", selection: Binding(
+                    }
+                    HStack {
+                        HStack {
+                            Text("Weight")
+                            Spacer()
+                        }
+                        .frame(width: 55)
+                        Spacer()
+                        Picker("", selection: Binding(
                             get: { data.styles.weight },
                             set: { data.styles.weight = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
                         )) {
-                            Text("Normal").tag("Normal")
-                            Text("Bold").tag("Bold")
-                            Text("Light").tag("Light")
+                            Text("Regular").tag(Font.Weight.regular)
+                            Text("Heavy").tag(Font.Weight.heavy)
+                            Text("Black").tag(Font.Weight.black)
+                            Text("Bold").tag(Font.Weight.bold)
+                            Text("Semi-bold").tag(Font.Weight.semibold)
+                            Text("Medium").tag(Font.Weight.medium)
+                            Text("Thin").tag(Font.Weight.thin)
+                            Text("Light").tag(Font.Weight.light)
+                            Text("Ultra light").tag(Font.Weight.ultraLight)
                         }
-                        Picker("Color", selection: Binding(
+                    }
+                    HStack {
+                        HStack {
+                            Text("Color")
+                            Spacer()
+                        }
+                        .frame(width: 55)
+                        Spacer()
+                        Picker("", selection: Binding(
                             get: { data.styles.color },
                             set: { data.styles.color = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
                         )) {
-                            Text("Accent").tag("Accent")
-                            Text("Red").tag("Red")
-                            Text("Blue").tag("Blue")
+                            Text("Accent").foregroundColor(.accentColor).tag(Color.accentColor)
+                            Text("Black").foregroundColor(.black).tag(Color.black)
+                            Text("Blue").foregroundColor(.blue).tag(Color.blue)
+                            Text("Clear").foregroundColor(.clear).tag(Color.clear)
+                            Text("Gray").foregroundColor(.gray).tag(Color.gray)
+                            Text("Green").foregroundColor(.green).tag(Color.green)
+                            Text("Orange").foregroundColor(.orange).tag(Color.orange)
+                            Text("Pink").foregroundColor(.pink).tag(Color.pink)
+                            Text("Purple").foregroundColor(.purple).tag(Color.purple)
+                            Text("Red").foregroundColor(.red).tag(Color.red)
+                            Text("White").foregroundColor(.white).tag(Color.white)
+                            Text("Yellow").foregroundColor(.yellow).tag(Color.yellow)
                         }
                     }
                 }
-                .listStyle(SidebarListStyle())
+                .padding()
+                Spacer()
             }
         }
         .toolbar {
