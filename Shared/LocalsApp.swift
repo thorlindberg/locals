@@ -6,5 +6,9 @@ struct LocalsApp: App {
         WindowGroup {
             Window()
         }
+        .windowStyle(HiddenTitleBarWindowStyle())
+        .commands {
+            SidebarCommands()
+        }
     }
 }

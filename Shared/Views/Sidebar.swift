@@ -18,6 +18,8 @@ struct Sidebar: View {
     @State var files: [String] = []
     @State var filename: String = ""
     
+    @State var menu: String = ""
+    
     let fonts: [String] = [
         "American Typewriter", "Andale Mono", "Arial", "Avenir", "Baskerville", "Big Caslon", "Bodoni 72",
         "Bradley Hand", "Calibri", "Cambria", "Chalkboard", "Chalkduster", "Charter", "Cochin", "Copperplate",
@@ -33,32 +35,72 @@ struct Sidebar: View {
                 if toggle == "help" {
                     Image(systemName: "info.circle.fill").foregroundColor(.accentColor)
                 } else {
-                    Image(systemName: "info.circle").contentShape(Rectangle()).onTapGesture { self.toggle = "help" }
+                    ZStack {
+                        if menu == "help" {
+                            Image(systemName: "info.circle").foregroundColor(.accentColor)
+                        } else {
+                            Image(systemName: "info.circle")
+                        }
+                    }
+                    .onTapGesture { self.toggle = "help" }
+                    .onHover { hovering in
+                        self.menu = hovering ? "help" : ""
+                    }
                 }
                 Spacer()
                 if toggle == "projects" {
                     Image(systemName: "folder.fill").foregroundColor(.accentColor)
                 } else {
-                    Image(systemName: "folder").contentShape(Rectangle()).onTapGesture { self.toggle = "projects" }
+                    ZStack {
+                        if menu == "projects" {
+                            Image(systemName: "folder").foregroundColor(.accentColor)
+                        } else {
+                            Image(systemName: "folder")
+                        }
+                    }
+                    .onTapGesture { self.toggle = "projects" }
+                    .onHover { hovering in
+                        self.menu = hovering ? "projects" : ""
+                    }
                 }
                 Spacer()
-                if toggle == "languages" {
+                if selection == "" {
+                    Image(systemName: "textformat").opacity(0.25)
+                } else if toggle == "languages" {
                     Image(systemName: "textformat").foregroundColor(.accentColor)
-                } else if selection == "" {
-                    Image(systemName: "textformat").opacity(0.3)
                 } else {
-                    Image(systemName: "textformat").contentShape(Rectangle()).onTapGesture { self.toggle = "languages" }
+                    ZStack {
+                        if menu == "languages" {
+                            Image(systemName: "textformat").foregroundColor(.accentColor)
+                        } else {
+                            Image(systemName: "textformat")
+                        }
+                    }
+                    .onTapGesture { self.toggle = "languages" }
+                    .onHover { hovering in
+                        self.menu = hovering ? "languages" : ""
+                    }
                 }
                 Spacer()
-                if toggle == "filter" {
+                if selection == "" {
+                    Image(systemName: "magnifyingglass").opacity(0.25)
+                } else if toggle == "filter" {
                     Image(systemName: "magnifyingglass").foregroundColor(.accentColor)
-                } else if selection == "" || data.target == "" {
-                    Image(systemName: "magnifyingglass").opacity(0.3)
                 } else {
-                    Image(systemName: "magnifyingglass").contentShape(Rectangle()).onTapGesture { self.toggle = "filter" }
+                    ZStack {
+                        if menu == "filter" {
+                            Image(systemName: "magnifyingglass").foregroundColor(.accentColor)
+                        } else {
+                            Image(systemName: "magnifyingglass")
+                        }
+                    }
+                    .onTapGesture { self.toggle = "filter" }
+                    .onHover { hovering in
+                        self.menu = hovering ? "filter" : ""
+                    }
                 }
             }
-            .frame(height: 27)
+            .frame(height: 26)
             .padding(.horizontal)
             Divider()
             if toggle == "help" {

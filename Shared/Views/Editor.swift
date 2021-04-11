@@ -1,5 +1,12 @@
 import SwiftUI
 
+extension NSTextField {
+    open override var focusRingType: NSFocusRingType {
+        get { .none }
+        set { }
+    }
+}
+
 struct VisualEffect: NSViewRepresentable {
     
   func makeNSView(context: Context) -> NSVisualEffectView {
@@ -40,17 +47,20 @@ struct Editor: View {
     @Binding var entry: String
     @Binding var inspector: Bool
     
-    @State var highlighting: String = ""
+    @State var xmark: String = ""
+    @State var pin: String = ""
+    @State var row: String = ""
+    @State var checking: Bool = false
+    @State var clear: Bool = false
     
     var body: some View {
         ZStack {
-            VStack(spacing: 0) {
-                Divider()
+            if selection != "" && data.target != "" {
                 List {
                     Section(header: Header(data: $data)) {
                         Spacer()
                             .frame(height: 10)
-                        VStack(spacing: 0) {
+                        LazyVStack(spacing: 0) {
                             ForEach(data.translations.indices, id: \.self) { index in
                                 if data.translations[index].language == data.target {
                                     let strings = Array(data.translations[index].texts.keys)
@@ -64,9 +74,20 @@ struct Editor: View {
                                                     .opacity((string % 2 == 0) ? 0.03 : 0)
                                                     .cornerRadius(6)
                                                 HStack(alignment: .center, spacing: 15) {
-                                                    if strings[string] == highlighting {
-                                                        Image(systemName: "xmark.circle.fill")
-                                                            .opacity(0.25)
+                                                    HStack {
+                                                        if strings[string] == row {
+                                                            ZStack {
+                                                                if strings[string] == xmark {
+                                                                    Image(systemName: "xmark.circle.fill")
+                                                                        .foregroundColor(data.styles.color)
+                                                                } else {
+                                                                    Image(systemName: "xmark.circle.fill")
+                                                                        .opacity(0.25)
+                                                                }
+                                                            }
+                                                            .onHover { hovering in
+                                                                self.xmark = hovering ? strings[string] : ""
+                                                            }
                                                             .onTapGesture {
                                                                 data.translations.indices.forEach { t in
                                                                     data.translations[t].texts.keys.forEach { s in
@@ -84,11 +105,11 @@ struct Editor: View {
                                                                     data: data
                                                                 )
                                                             }
-                                                    }
-                                                    HStack {
-                                                        Text("\(data.translations[index].texts[strings[string]]!.order)")
-                                                            .fontWeight(.light)
-                                                            .opacity(0.25)
+                                                        } else {
+                                                            Text("\(data.translations[index].texts[strings[string]]!.order)")
+                                                                .fontWeight(.light)
+                                                                .opacity(0.25)
+                                                        }
                                                         Spacer()
                                                     }
                                                     .frame(width: CGFloat(5 + (10 * String(data.translations[index].texts.values.map({$0.order}).max()!).count)))
@@ -109,12 +130,23 @@ struct Editor: View {
                                                     Spacer()
                                                     ZStack {
                                                         if data.translations[index].texts[strings[string]]!.pinned {
+                                                            if strings[string] == pin {
+                                                                Image(systemName: "pin.fill")
+                                                                    .opacity(0.25)
+                                                            } else {
+                                                                Image(systemName: "pin.fill")
+                                                                    .foregroundColor(data.styles.color)
+                                                            }
+                                                        } else if strings[string] == pin {
                                                             Image(systemName: "pin.fill")
                                                                 .foregroundColor(data.styles.color)
-                                                        } else if strings[string] == highlighting {
+                                                        } else if strings[string] == row {
                                                             Image(systemName: "pin.fill")
                                                                 .opacity(0.25)
                                                         }
+                                                    }
+                                                    .onHover { hovering in
+                                                        self.pin = hovering ? strings[string] : ""
                                                     }
                                                     .onTapGesture {
                                                         withAnimation {
@@ -132,13 +164,7 @@ struct Editor: View {
                                                 .padding()
                                             }
                                             .onHover { hovering in
-                                                withAnimation {
-                                                    if hovering {
-                                                        self.highlighting = strings[string]
-                                                    } else {
-                                                        self.highlighting = ""
-                                                    }
-                                                }
+                                                withAnimation { self.row = hovering ? strings[string] : "" }
                                             }
                                             .padding(.horizontal)
                                         }
@@ -150,102 +176,82 @@ struct Editor: View {
                             .frame(height: 65)
                     }
                 }
-            }
-            VStack(spacing: 0) {
-                Spacer()
-                Divider()
-                ZStack {
+                VStack(spacing: 0) {
+                    Spacer()
+                    Divider()
+                    ZStack {
+                        Rectangle()
+                            .opacity(0)
+                            .background(VisualEffect())
+                            .frame(height: 55)
+                        ZStack {
+                            Rectangle()
+                                .foregroundColor(Color("Mode"))
+                                .cornerRadius(6)
+                                .opacity(1)
+                                .frame(height: 30)
+                            TextField("Add unique string", text: $entry, onCommit: {
+                                if entry != "" && !data.translations.filter({$0.language == data.target})[0].texts.keys.contains(entry) {
+                                    data.translations.indices.forEach { index in
+                                        data.translations[index].texts[entry] = Storage.Format.Text(
+                                            order: data.translations[index].texts.isEmpty ? 1 : data.translations[index].texts.values.map({$0.order}).max()! + 1,
+                                            translation: "",
+                                            pinned: false
+                                        )
+                                    }
+                                    Storage(status: $status, progress: $progress).write(
+                                        status: status,
+                                        selection: selection,
+                                        data: data
+                                    )
+                                    self.entry = ""
+                                }
+                            })
+                            .textFieldStyle(PlainTextFieldStyle())
+                            .foregroundColor(data.translations.filter({$0.language == data.target})[0].texts.keys.contains(entry) ? .red : data.styles.color)
+                            .padding(.horizontal)
+                        }
+                        .padding(.horizontal, 32)
+                        .padding(.vertical, 10)
+                    }
+                }
+                VStack(spacing: 0) {
                     Rectangle()
                         .opacity(0)
+                        .frame(height: 60)
                         .background(VisualEffect())
-                        .frame(height: 55)
-                    HStack {
-                        Button(action: {
-                            Coder(data: $data, status: $status, progress: $progress).decode() { imported in
-                                imported.forEach { string in
-                                    data.translations.indices.forEach { index in
-                                        if !data.translations[index].texts.keys.contains(string) {
-                                            data.translations[index].texts[string] = Storage.Format.Text(
-                                                order: data.translations[index].texts.isEmpty ? 1 : data.translations[index].texts.values.map({$0.order}).max()! + 1,
-                                                translation: "",
-                                                pinned: false
-                                            )
-                                        }
-                                    }
-                                }
-                                Storage(status: $status, progress: $progress).write(
-                                    status: status,
-                                    selection: selection,
-                                    data: data
-                                )
-                            }
-                        }) {
-                            Image(systemName: "folder.fill.badge.plus")
-                        }
-                        .disabled(selection == "")
-                        .help("Import strings from an Xcode project folder")
-                        TextField("Add unique string", text: $entry)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .disabled(selection == "" || data.target == "")
-                            .help("Add a unique string for translation")
-                        Button(action: {
-                            withAnimation {
-                                data.translations.indices.forEach { index in
-                                    data.translations[index].texts[entry] = Storage.Format.Text(
+                    Divider()
+                    Spacer()
+                }
+                .padding(.top, -60)
+            }
+        }
+        .toolbar {
+            ToolbarItemGroup(placement: .automatic) {
+                Button(action: {
+                    Coder(data: $data, status: $status, progress: $progress).decode() { imported in
+                        imported.forEach { string in
+                            data.translations.indices.forEach { index in
+                                if !data.translations[index].texts.keys.contains(string) {
+                                    data.translations[index].texts[string] = Storage.Format.Text(
                                         order: data.translations[index].texts.isEmpty ? 1 : data.translations[index].texts.values.map({$0.order}).max()! + 1,
                                         translation: "",
                                         pinned: false
                                     )
                                 }
-                                Storage(status: $status, progress: $progress).write(
-                                    status: status,
-                                    selection: selection,
-                                    data: data
-                                )
-                                self.entry = ""
                             }
-                        }) {
-                            Image(systemName: "arrow.right.circle.fill")
                         }
-                        .keyboardShortcut(.defaultAction)
-                        .disabled(entry == "" || data.translations.filter({$0.language == data.target})[0].texts.keys.contains(entry))
+                        Storage(status: $status, progress: $progress).write(
+                            status: status,
+                            selection: selection,
+                            data: data
+                        )
                     }
-                    .padding(.horizontal, 30)
-                    .padding(.vertical)
+                }) {
+                    Image(systemName: "folder.fill.badge.plus")
                 }
-            }
-        }
-        .navigationTitle(selection + ".localproj")
-        .toolbar {
-            ToolbarItemGroup(placement: .automatic) {
-                ZStack {
-                    VStack {
-                        Spacer()
-                        HStack {
-                            Rectangle()
-                                .foregroundColor(.accentColor)
-                                .frame(width: 320 * self.progress, height: 1.5)
-                            Spacer()
-                        }
-                        .frame(width: 320, height: 1.5)
-                    }
-                    .frame(width: 320, height: 27)
-                    .mask(Rectangle().frame(width: 320, height: 27).cornerRadius(5))
-                    Menu {
-                        ForEach(status.indices.reversed(), id: \.self) { index in
-                            Text("\(status[index])")
-                                .font(.system(size: 10))
-                            Divider()
-                        }
-                    } label: {
-                        Text(status.last!)
-                            .font(.system(size: 10))
-                    }
-                    .background(Color("StatusColor"))
-                    .cornerRadius(5)
-                    .frame(width: 320)
-                    .help("View project changelog, and revert to a previous version")
-                }
+                .disabled(selection == "")
+                .help("Import strings from an Xcode project folder")
                 Button(action: {
                     withAnimation {
                         Progress(status: $status, progress: $progress).load(string: "Translating strings to \(data.target)...")
@@ -261,13 +267,70 @@ struct Editor: View {
                 }
                 .disabled(selection == "") // DISABLE IF THERE ARE NO STRINGS OR BASE/TARGET LANGUAGE IS NOT VALID FOR TRANSLATION
                 .help("Auto-translate strings")
+                Spacer()
+                ZStack {
+                    VStack {
+                        Spacer()
+                        HStack {
+                            Rectangle()
+                                .foregroundColor(data.styles.color)
+                                .frame(width: 400 * self.progress, height: 1.5)
+                            Spacer()
+                        }
+                        .frame(width: 400, height: 1.5)
+                    }
+                    .frame(width: 400, height: 27)
+                    .mask(Rectangle().frame(width: 400, height: 27).cornerRadius(5))
+                    Menu {
+                        ForEach(status.indices.reversed(), id: \.self) { index in
+                            Text("\(status[index])")
+                                .font(.system(size: 10))
+                            Divider()
+                        }
+                    } label: {
+                        Text(status.last!)
+                            .font(.system(size: 10))
+                    }
+                    .frame(width: 400)
+                    .help("View project changelog, and revert to a previous version")
+                    HStack {
+                        Spacer()
+                        ZStack {
+                            if clear {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundColor(data.styles.color)
+                            } else if checking {
+                                Image(systemName: "xmark.circle")
+                                    .opacity(0.25)
+                            }
+                        }
+                        .onHover { hovering in
+                            self.clear = hovering ? true : false
+                        }
+                        .onTapGesture {
+                            self.status = ["\(Time().current()) - Cleared application changelog"]
+                        }
+                    }
+                    .padding(.horizontal, 22)
+                }
+                .onHover { hovering in
+                    withAnimation { self.checking = hovering ? true : false }
+                }
+                Spacer()
+                Button(action: {
+                    // Export localization project
+                }) {
+                    Image(systemName: "arrow.up.doc")
+                }
+                .disabled(selection == "" || data.target == "") // DISABLE IF NO STRINGS
+                .help("Export localization project")
                 Button(action: {
                     Coder(data: $data, status: $status, progress: $progress).encode()
                 }) {
                     Image(systemName: "square.and.arrow.up")
                 }
-                .disabled(selection == "")
-                .help("Export strings and translations for targeted languages, as .strings files")
+                .disabled(selection == "" || data.target == "") // DISABLE IF NO STRINGS
+                .help("Export strings and translations")
             }
         }
     }
