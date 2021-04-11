@@ -54,6 +54,7 @@ struct Editor: View {
                             ForEach(data.translations.indices, id: \.self) { index in
                                 if data.translations[index].language == data.target {
                                     let strings = Array(data.translations[index].texts.keys)
+                                        .sorted { data.translations[index].texts[$0]!.order < data.translations[index].texts[$1]!.order }
                                         .sorted { data.translations[index].texts[$0]!.pinned == true && data.translations[index].texts[$1]!.pinned == false }
                                     ForEach(strings.indices, id: \.self) { string in
                                         if strings[string].lowercased().hasPrefix(query.lowercased()) {
@@ -65,23 +66,32 @@ struct Editor: View {
                                                 HStack(alignment: .center, spacing: 15) {
                                                     if strings[string] == highlighting {
                                                         Image(systemName: "xmark.circle.fill")
-                                                            .opacity(0.2)
+                                                            .opacity(0.25)
                                                             .onTapGesture {
-                                                                withAnimation {
-                                                                    data.translations.indices.forEach { index in
-                                                                        data.translations[index].texts.removeValue(forKey: strings[string])
+                                                                data.translations.indices.forEach { t in
+                                                                    data.translations[t].texts.keys.forEach { s in
+                                                                        if data.translations[t].texts[s]!.order > data.translations[index].texts[strings[string]]!.order {
+                                                                            data.translations[t].texts[s]!.order = data.translations[t].texts[s]!.order - 1
+                                                                        }
                                                                     }
-                                                                    Storage(status: $status, progress: $progress).write(
-                                                                        status: status,
-                                                                        selection: selection,
-                                                                        data: data
-                                                                    )
                                                                 }
+                                                                data.translations.indices.forEach { index in
+                                                                    data.translations[index].texts.removeValue(forKey: strings[string])
+                                                                }
+                                                                Storage(status: $status, progress: $progress).write(
+                                                                    status: status,
+                                                                    selection: selection,
+                                                                    data: data
+                                                                )
                                                             }
                                                     }
-                                                    Text("1")
-                                                        .fontWeight(.light)
-                                                        .opacity(0.5)
+                                                    HStack {
+                                                        Text("\(data.translations[index].texts[strings[string]]!.order)")
+                                                            .fontWeight(.light)
+                                                            .opacity(0.25)
+                                                        Spacer()
+                                                    }
+                                                    .frame(width: CGFloat(5 + (10 * String(data.translations[index].texts.values.map({$0.order}).max()!).count)))
                                                     Text("\(strings[string])")
                                                         .font(.custom(data.styles.font, size: data.styles.size))
                                                         .fontWeight(data.styles.weight)
@@ -103,7 +113,7 @@ struct Editor: View {
                                                                 .foregroundColor(data.styles.color)
                                                         } else if strings[string] == highlighting {
                                                             Image(systemName: "pin.fill")
-                                                                .opacity(0.2)
+                                                                .opacity(0.25)
                                                         }
                                                     }
                                                     .onTapGesture {
@@ -137,7 +147,7 @@ struct Editor: View {
                             }
                         }
                         Spacer()
-                            .frame(height: 10)
+                            .frame(height: 65)
                     }
                 }
             }
@@ -150,6 +160,30 @@ struct Editor: View {
                         .background(VisualEffect())
                         .frame(height: 55)
                     HStack {
+                        Button(action: {
+                            Coder(data: $data, status: $status, progress: $progress).decode() { imported in
+                                imported.forEach { string in
+                                    data.translations.indices.forEach { index in
+                                        if !data.translations[index].texts.keys.contains(string) {
+                                            data.translations[index].texts[string] = Storage.Format.Text(
+                                                order: data.translations[index].texts.isEmpty ? 1 : data.translations[index].texts.values.map({$0.order}).max()! + 1,
+                                                translation: "",
+                                                pinned: false
+                                            )
+                                        }
+                                    }
+                                }
+                                Storage(status: $status, progress: $progress).write(
+                                    status: status,
+                                    selection: selection,
+                                    data: data
+                                )
+                            }
+                        }) {
+                            Image(systemName: "folder.fill.badge.plus")
+                        }
+                        .disabled(selection == "")
+                        .help("Import strings from an Xcode project folder")
                         TextField("Add unique string", text: $entry)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .disabled(selection == "" || data.target == "")
@@ -157,7 +191,11 @@ struct Editor: View {
                         Button(action: {
                             withAnimation {
                                 data.translations.indices.forEach { index in
-                                    data.translations[index].texts[entry] = Storage.Format.Text(translation: "", pinned: false)
+                                    data.translations[index].texts[entry] = Storage.Format.Text(
+                                        order: data.translations[index].texts.isEmpty ? 1 : data.translations[index].texts.values.map({$0.order}).max()! + 1,
+                                        translation: "",
+                                        pinned: false
+                                    )
                                 }
                                 Storage(status: $status, progress: $progress).write(
                                     status: status,
@@ -172,7 +210,8 @@ struct Editor: View {
                         .keyboardShortcut(.defaultAction)
                         .disabled(entry == "" || data.translations.filter({$0.language == data.target})[0].texts.keys.contains(entry))
                     }
-                    .padding()
+                    .padding(.horizontal, 30)
+                    .padding(.vertical)
                 }
             }
         }
@@ -222,26 +261,6 @@ struct Editor: View {
                 }
                 .disabled(selection == "") // DISABLE IF THERE ARE NO STRINGS OR BASE/TARGET LANGUAGE IS NOT VALID FOR TRANSLATION
                 .help("Auto-translate strings")
-                Button(action: {
-                    Coder(data: $data, status: $status, progress: $progress).decode() { imported in
-                        imported.forEach { string in
-                            data.translations.indices.forEach { index in
-                                if !data.translations[index].texts.keys.contains(string) {
-                                    data.translations[index].texts[string] = Storage.Format.Text(translation: "", pinned: false)
-                                }
-                            }
-                        }
-                        Storage(status: $status, progress: $progress).write(
-                            status: status,
-                            selection: selection,
-                            data: data
-                        )
-                    }
-                }) {
-                    Image(systemName: "folder.fill.badge.plus")
-                }
-                .disabled(selection == "")
-                .help("Import strings from an Xcode project folder")
                 Button(action: {
                     Coder(data: $data, status: $status, progress: $progress).encode()
                 }) {

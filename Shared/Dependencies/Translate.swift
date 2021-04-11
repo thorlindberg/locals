@@ -17,7 +17,11 @@ struct Translation {
                 data.translations[index].texts.keys.forEach { string in
                     if data.translations[index].texts[string]!.translation == "" {
                         query(base: base, target: target, string: string) { translation in
-                            data.translations[index].texts[string] = Storage.Format.Text(translation: translation, pinned: data.translations[index].texts[string]!.pinned)
+                            data.translations[index].texts[string] = Storage.Format.Text(
+                                order: data.translations[index].texts[string]!.order,
+                                translation: translation,
+                                pinned: data.translations[index].texts[string]!.pinned
+                            )
                         }
                     }
                 }

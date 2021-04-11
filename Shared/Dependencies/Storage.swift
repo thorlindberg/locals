@@ -41,6 +41,7 @@ struct Storage {
         }
         
         struct Text: Hashable {
+            var order: Int
             var translation: String
             var pinned: Bool
         }
@@ -488,11 +489,13 @@ struct Storage {
                         if self.data.translations[index].id == line[0] {
                             if "_" == line[3] {
                                 baseData.translations[index].texts[line[2].replacingOccurrences(of: "/:", with: ":").replacingOccurrences(of: "/;", with: ";")] = Format.Text(
+                                    order: baseData.translations[index].texts.isEmpty ? 1 : baseData.translations[index].texts.values.map({$0.order}).max()! + 1,
                                     translation: "",
                                     pinned: Bool(line[1])!
                                 )
                             } else {
                                 baseData.translations[index].texts[line[2].replacingOccurrences(of: "/:", with: ":").replacingOccurrences(of: "/;", with: ";")] = Format.Text(
+                                    order: baseData.translations[index].texts.isEmpty ? 1 : baseData.translations[index].texts.values.map({$0.order}).max()! + 1,
                                     translation: line[3].replacingOccurrences(of: "/:", with: ":").replacingOccurrences(of: "/;", with: ";"),
                                     pinned: Bool(line[1])!
                                 )
