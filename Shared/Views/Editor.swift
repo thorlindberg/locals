@@ -124,6 +124,32 @@ struct Editor: View {
                         .frame(height: 10)
                 }
             }
+            Spacer()
+            Divider()
+            HStack {
+                TextField("Add unique string", text: $entry)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .disabled(selection == "" || data.target == "")
+                    .help("Add a unique string for translation")
+                Button(action: {
+                    withAnimation {
+                        data.translations.indices.forEach { index in
+                            data.translations[index].texts[entry] = Storage.Format.Text(translation: "", pinned: false)
+                        }
+                        Storage(status: $status, progress: $progress).write(
+                            status: status,
+                            selection: selection,
+                            data: data
+                        )
+                        self.entry = ""
+                    }
+                }) {
+                    Image(systemName: "arrow.right.circle.fill")
+                }
+                .keyboardShortcut(.defaultAction)
+                .disabled(entry == "" || data.translations.filter({$0.language == data.target})[0].texts.keys.contains(entry))
+            }
+            .padding()
         }
         .navigationTitle(selection + ".localproj")
         .toolbar {
@@ -156,6 +182,41 @@ struct Editor: View {
                     .frame(width: 320)
                     .help("View project changelog, and revert to a previous version")
                 }
+                Button(action: {
+                    withAnimation {
+                        Progress(status: $status, progress: $progress).load(string: "Translating strings to \(data.target)...")
+                        Translation(status: $status, progress: $progress, data: $data).translate()
+                        Storage(status: $status, progress: $progress).write(
+                            status: status,
+                            selection: selection,
+                            data: data
+                        )
+                    }
+                }) {
+                    Image(systemName: "globe")
+                }
+                .disabled(selection == "") // DISABLE IF THERE ARE NO STRINGS OR BASE/TARGET LANGUAGE IS NOT VALID FOR TRANSLATION
+                .help("Auto-translate strings")
+                Button(action: {
+                    Coder(data: $data, status: $status, progress: $progress).decode() { imported in
+                        imported.forEach { string in
+                            data.translations.indices.forEach { index in
+                                if !data.translations[index].texts.keys.contains(string) {
+                                    data.translations[index].texts[string] = Storage.Format.Text(translation: "", pinned: false)
+                                }
+                            }
+                        }
+                        Storage(status: $status, progress: $progress).write(
+                            status: status,
+                            selection: selection,
+                            data: data
+                        )
+                    }
+                }) {
+                    Image(systemName: "folder.fill.badge.plus")
+                }
+                .disabled(selection == "")
+                .help("Import strings from an Xcode project folder")
                 Button(action: {
                     Coder(data: $data, status: $status, progress: $progress).encode()
                 }) {
