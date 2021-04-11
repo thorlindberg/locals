@@ -293,6 +293,17 @@ struct Sidebar: View {
                 Divider()
                 VStack {
                     HStack {
+                        Text("Unpinned")
+                        Spacer()
+                        Toggle(isOn: Binding(
+                            get: { data.filters.unpinned },
+                            set: { data.filters.unpinned = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
+                        )) {
+                            Text("")
+                        }
+                        .toggleStyle(CheckboxToggleStyle())
+                    }
+                    HStack {
                         Text("Single-line")
                         Spacer()
                         Toggle(isOn: Binding(

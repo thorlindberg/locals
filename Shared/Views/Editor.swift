@@ -1,5 +1,20 @@
 import SwiftUI
 
+struct VisualEffect: NSViewRepresentable {
+    
+  func makeNSView(context: Context) -> NSVisualEffectView {
+    let view = NSVisualEffectView()
+    view.blendingMode = .withinWindow
+    view.isEmphasized = true
+    view.material = .popover
+    return view
+  }
+    
+  func updateNSView(_ nsView: NSVisualEffectView, context: Context) {
+  }
+    
+}
+
 struct Header: View {
     @Binding var data: Storage.Format
     var body: some View {
@@ -28,128 +43,138 @@ struct Editor: View {
     @State var highlighting: String = ""
     
     var body: some View {
-        VStack(spacing: 0) {
-            Divider()
-            List {
-                Section(header: Header(data: $data)) {
-                    Spacer()
-                        .frame(height: 10)
-                    VStack(spacing: 0) {
-                        ForEach(data.translations.indices, id: \.self) { index in
-                            if data.translations[index].language == data.target {
-                                let strings = Array(data.translations[index].texts.keys)
-                                    .sorted { data.translations[index].texts[$0]!.pinned == true && data.translations[index].texts[$1]!.pinned == false }
-                                ForEach(strings.indices, id: \.self) { string in
-                                    if strings[string].lowercased().hasPrefix(query.lowercased()) {
-                                        ZStack {
-                                            Rectangle()
-                                                .frame(minHeight: 50)
-                                                .opacity((string % 2 == 0) ? 0.03 : 0)
-                                                .cornerRadius(6)
-                                            HStack(alignment: .center, spacing: 15) {
-                                                if strings[string] == highlighting {
-                                                    Image(systemName: "xmark.circle.fill")
-                                                        .opacity(0.2)
-                                                        .onTapGesture {
-                                                            withAnimation {
-                                                                data.translations.indices.forEach { index in
-                                                                    data.translations[index].texts.removeValue(forKey: strings[string])
-                                                                }
-                                                                Storage(status: $status, progress: $progress).write(
-                                                                    status: status,
-                                                                    selection: selection,
-                                                                    data: data
-                                                                )
-                                                            }
-                                                        }
-                                                }
-                                                Text("1")
-                                                    .fontWeight(.light)
-                                                    .opacity(0.5)
-                                                Text("\(strings[string])")
-                                                    .font(.custom(data.styles.font, size: data.styles.size))
-                                                    .fontWeight(data.styles.weight)
-                                                    .foregroundColor(data.styles.color)
-                                                Divider()
-                                                TextField("Translation", text: Binding(
-                                                    get: { data.translations[index].texts[strings[string]]!.translation },
-                                                    set: { data.translations[index].texts[strings[string]]?.translation = $0 }
-                                                ), onCommit: { withAnimation { Storage(status: $status, progress: $progress).write(
-                                                    status: status,
-                                                    selection: selection,
-                                                    data: data
-                                                )}})
-                                                .textFieldStyle(PlainTextFieldStyle())
-                                                Spacer()
-                                                ZStack {
-                                                    if data.translations[index].texts[strings[string]]!.pinned {
-                                                        Image(systemName: "pin.fill")
-                                                            .foregroundColor(data.styles.color)
-                                                    } else if strings[string] == highlighting {
-                                                        Image(systemName: "pin.fill")
+        ZStack {
+            VStack(spacing: 0) {
+                Divider()
+                List {
+                    Section(header: Header(data: $data)) {
+                        Spacer()
+                            .frame(height: 10)
+                        VStack(spacing: 0) {
+                            ForEach(data.translations.indices, id: \.self) { index in
+                                if data.translations[index].language == data.target {
+                                    let strings = Array(data.translations[index].texts.keys)
+                                        .sorted { data.translations[index].texts[$0]!.pinned == true && data.translations[index].texts[$1]!.pinned == false }
+                                    ForEach(strings.indices, id: \.self) { string in
+                                        if strings[string].lowercased().hasPrefix(query.lowercased()) {
+                                            ZStack {
+                                                Rectangle()
+                                                    .frame(minHeight: 50)
+                                                    .opacity((string % 2 == 0) ? 0.03 : 0)
+                                                    .cornerRadius(6)
+                                                HStack(alignment: .center, spacing: 15) {
+                                                    if strings[string] == highlighting {
+                                                        Image(systemName: "xmark.circle.fill")
                                                             .opacity(0.2)
+                                                            .onTapGesture {
+                                                                withAnimation {
+                                                                    data.translations.indices.forEach { index in
+                                                                        data.translations[index].texts.removeValue(forKey: strings[string])
+                                                                    }
+                                                                    Storage(status: $status, progress: $progress).write(
+                                                                        status: status,
+                                                                        selection: selection,
+                                                                        data: data
+                                                                    )
+                                                                }
+                                                            }
                                                     }
-                                                }
-                                                .onTapGesture {
-                                                    withAnimation {
-                                                        data.translations.indices.forEach { index in
-                                                            data.translations[index].texts[strings[string]]!.pinned = !data.translations[index].texts[strings[string]]!.pinned
+                                                    Text("1")
+                                                        .fontWeight(.light)
+                                                        .opacity(0.5)
+                                                    Text("\(strings[string])")
+                                                        .font(.custom(data.styles.font, size: data.styles.size))
+                                                        .fontWeight(data.styles.weight)
+                                                        .foregroundColor(data.styles.color)
+                                                    Divider()
+                                                    TextField("Translation", text: Binding(
+                                                        get: { data.translations[index].texts[strings[string]]!.translation },
+                                                        set: { data.translations[index].texts[strings[string]]?.translation = $0 }
+                                                    ), onCommit: { withAnimation { Storage(status: $status, progress: $progress).write(
+                                                        status: status,
+                                                        selection: selection,
+                                                        data: data
+                                                    )}})
+                                                    .textFieldStyle(PlainTextFieldStyle())
+                                                    Spacer()
+                                                    ZStack {
+                                                        if data.translations[index].texts[strings[string]]!.pinned {
+                                                            Image(systemName: "pin.fill")
+                                                                .foregroundColor(data.styles.color)
+                                                        } else if strings[string] == highlighting {
+                                                            Image(systemName: "pin.fill")
+                                                                .opacity(0.2)
                                                         }
-                                                        Storage(status: $status, progress: $progress).write(
-                                                            status: status,
-                                                            selection: selection,
-                                                            data: data
-                                                        )
+                                                    }
+                                                    .onTapGesture {
+                                                        withAnimation {
+                                                            data.translations.indices.forEach { index in
+                                                                data.translations[index].texts[strings[string]]!.pinned = !data.translations[index].texts[strings[string]]!.pinned
+                                                            }
+                                                            Storage(status: $status, progress: $progress).write(
+                                                                status: status,
+                                                                selection: selection,
+                                                                data: data
+                                                            )
+                                                        }
+                                                    }
+                                                }
+                                                .padding()
+                                            }
+                                            .onHover { hovering in
+                                                withAnimation {
+                                                    if hovering {
+                                                        self.highlighting = strings[string]
+                                                    } else {
+                                                        self.highlighting = ""
                                                     }
                                                 }
                                             }
-                                            .padding()
+                                            .padding(.horizontal)
                                         }
-                                        .onHover { hovering in
-                                            withAnimation {
-                                                if hovering {
-                                                    self.highlighting = strings[string]
-                                                } else {
-                                                    self.highlighting = ""
-                                                }
-                                            }
-                                        }
-                                        .padding(.horizontal)
                                     }
                                 }
                             }
                         }
+                        Spacer()
+                            .frame(height: 10)
                     }
-                    Spacer()
-                        .frame(height: 10)
                 }
             }
-            Spacer()
-            Divider()
-            HStack {
-                TextField("Add unique string", text: $entry)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .disabled(selection == "" || data.target == "")
-                    .help("Add a unique string for translation")
-                Button(action: {
-                    withAnimation {
-                        data.translations.indices.forEach { index in
-                            data.translations[index].texts[entry] = Storage.Format.Text(translation: "", pinned: false)
+            VStack(spacing: 0) {
+                Spacer()
+                Divider()
+                ZStack {
+                    Rectangle()
+                        .opacity(0)
+                        .background(VisualEffect())
+                        .frame(height: 55)
+                    HStack {
+                        TextField("Add unique string", text: $entry)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .disabled(selection == "" || data.target == "")
+                            .help("Add a unique string for translation")
+                        Button(action: {
+                            withAnimation {
+                                data.translations.indices.forEach { index in
+                                    data.translations[index].texts[entry] = Storage.Format.Text(translation: "", pinned: false)
+                                }
+                                Storage(status: $status, progress: $progress).write(
+                                    status: status,
+                                    selection: selection,
+                                    data: data
+                                )
+                                self.entry = ""
+                            }
+                        }) {
+                            Image(systemName: "arrow.right.circle.fill")
                         }
-                        Storage(status: $status, progress: $progress).write(
-                            status: status,
-                            selection: selection,
-                            data: data
-                        )
-                        self.entry = ""
+                        .keyboardShortcut(.defaultAction)
+                        .disabled(entry == "" || data.translations.filter({$0.language == data.target})[0].texts.keys.contains(entry))
                     }
-                }) {
-                    Image(systemName: "arrow.right.circle.fill")
+                    .padding()
                 }
-                .keyboardShortcut(.defaultAction)
-                .disabled(entry == "" || data.translations.filter({$0.language == data.target})[0].texts.keys.contains(entry))
             }
-            .padding()
         }
         .navigationTitle(selection + ".localproj")
         .toolbar {

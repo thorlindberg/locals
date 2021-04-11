@@ -16,6 +16,7 @@ struct Storage {
         var translations: [Translations]
         
         struct Filters: Hashable {
+            var unpinned: Bool
             var singleline: Bool
             var multiline: Bool
             var parenthesis: Bool
@@ -50,6 +51,7 @@ struct Storage {
         base: "English (United Kingdom)",
         target: "",
         filters: Format.Filters(
+            unpinned: true,
             singleline: true,
             multiline: true,
             parenthesis: true,
@@ -444,12 +446,13 @@ struct Storage {
                     
                 } else if "filters" == line[0] {
                     
-                    // "filters" : singleline : multiline : parenthesis : nummerical : symbols ;
-                    baseData.filters.singleline = Bool(line[1])!
-                    baseData.filters.multiline = Bool(line[2])!
-                    baseData.filters.parenthesis = Bool(line[3])!
-                    baseData.filters.nummerical = Bool(line[4])!
-                    baseData.filters.symbols = Bool(line[5])!
+                    // "filters" : unpinned : singleline : multiline : parenthesis : nummerical : symbols ;
+                    baseData.filters.unpinned = Bool(line[1])!
+                    baseData.filters.singleline = Bool(line[2])!
+                    baseData.filters.multiline = Bool(line[3])!
+                    baseData.filters.parenthesis = Bool(line[4])!
+                    baseData.filters.nummerical = Bool(line[5])!
+                    baseData.filters.symbols = Bool(line[6])!
                     
                 } else if "styles" == line[0] {
                     
@@ -533,8 +536,9 @@ struct Storage {
         }
         output += " ; "
         
-        // "filters" : singleline : multiline : parenthesis : nummerical : symbols ;
+        // "filters" : unpinned : singleline : multiline : parenthesis : nummerical : symbols ;
         output += "filters : "
+        output += String(data.filters.unpinned) + " : "
         output += String(data.filters.singleline) + " : "
         output += String(data.filters.multiline) + " : "
         output += String(data.filters.parenthesis) + " : "
