@@ -25,45 +25,55 @@ struct Editor: View {
     @Binding var entry: String
     @Binding var inspector: Bool
     
+    @State var highlighting: String = ""
+    
     var body: some View {
         VStack(spacing: 0) {
             Divider()
             List {
                 Section(header: Header(data: $data)) {
-                    VStack(spacing: 15) {
+                    Spacer()
+                        .frame(height: 10)
+                    VStack(spacing: 0) {
                         ForEach(data.translations.indices, id: \.self) { index in
                             if data.translations[index].language == data.target {
                                 let strings = Array(data.translations[index].texts.keys)
                                     .sorted { data.translations[index].texts[$0]!.pinned == true && data.translations[index].texts[$1]!.pinned == false }
-                                ForEach(strings, id: \.self) { string in
-                                    if string.lowercased().hasPrefix(query.lowercased()) {
+                                ForEach(strings.indices, id: \.self) { string in
+                                    if strings[string].lowercased().hasPrefix(query.lowercased()) {
                                         ZStack {
                                             Rectangle()
-                                                .opacity(0.07)
-                                                .cornerRadius(10)
+                                                .frame(minHeight: 50)
+                                                .opacity((string % 2 == 0) ? 0.03 : 0)
+                                                .cornerRadius(6)
                                             HStack(alignment: .center, spacing: 15) {
-                                                Image(systemName: "xmark.circle.fill")
-                                                    .opacity(0.2)
-                                                    .onTapGesture {
-                                                        withAnimation {
-                                                            data.translations.indices.forEach { index in
-                                                                data.translations[index].texts.removeValue(forKey: string)
+                                                if strings[string] == highlighting {
+                                                    Image(systemName: "xmark.circle.fill")
+                                                        .opacity(0.2)
+                                                        .onTapGesture {
+                                                            withAnimation {
+                                                                data.translations.indices.forEach { index in
+                                                                    data.translations[index].texts.removeValue(forKey: strings[string])
+                                                                }
+                                                                Storage(status: $status, progress: $progress).write(
+                                                                    status: status,
+                                                                    selection: selection,
+                                                                    data: data
+                                                                )
                                                             }
-                                                            Storage(status: $status, progress: $progress).write(
-                                                                status: status,
-                                                                selection: selection,
-                                                                data: data
-                                                            )
                                                         }
-                                                    }
-                                                Text("\(string)")
+                                                }
+                                                Text("1")
+                                                    .fontWeight(.light)
+                                                    .opacity(0.5)
+                                                Text("\(strings[string])")
                                                     .font(.custom(data.styles.font, size: data.styles.size))
                                                     .fontWeight(data.styles.weight)
                                                     .foregroundColor(data.styles.color)
                                                 Divider()
                                                 TextField("Translation", text: Binding(
-                                                    get: { data.translations[index].texts[string]!.translation },
-                                                    set: { data.translations[index].texts[string]?.translation = $0 }
+                                                    get: { data.translations[index].texts[strings[string]]!.translation },
+                                                    set: { data.translations[index].texts[strings[string]]?.translation = $0 }
                                                 ), onCommit: { withAnimation { Storage(status: $status, progress: $progress).write(
                                                     status: status,
                                                     selection: selection,
@@ -72,10 +82,10 @@ struct Editor: View {
                                                 .textFieldStyle(PlainTextFieldStyle())
                                                 Spacer()
                                                 ZStack {
-                                                    if data.translations[index].texts[string]!.pinned {
+                                                    if data.translations[index].texts[strings[string]]!.pinned {
                                                         Image(systemName: "pin.fill")
-                                                            .foregroundColor(.accentColor)
-                                                    } else {
+                                                            .foregroundColor(data.styles.color)
+                                                    } else if strings[string] == highlighting {
                                                         Image(systemName: "pin.fill")
                                                             .opacity(0.2)
                                                     }
@@ -83,7 +93,7 @@ struct Editor: View {
                                                 .onTapGesture {
                                                     withAnimation {
                                                         data.translations.indices.forEach { index in
-                                                            data.translations[index].texts[string]!.pinned = !data.translations[index].texts[string]!.pinned
+                                                            data.translations[index].texts[strings[string]]!.pinned = !data.translations[index].texts[strings[string]]!.pinned
                                                         }
                                                         Storage(status: $status, progress: $progress).write(
                                                             status: status,
@@ -95,31 +105,57 @@ struct Editor: View {
                                             }
                                             .padding()
                                         }
+                                        .onHover { hovering in
+                                            withAnimation {
+                                                if hovering {
+                                                    self.highlighting = strings[string]
+                                                } else {
+                                                    self.highlighting = ""
+                                                }
+                                            }
+                                        }
+                                        .padding(.horizontal)
                                     }
                                 }
                             }
                         }
                     }
+                    Spacer()
+                        .frame(height: 10)
                 }
             }
         }
         .navigationTitle(selection + ".localproj")
         .toolbar {
             ToolbarItemGroup(placement: .automatic) {
-                Menu {
-                    ForEach(status.indices.reversed(), id: \.self) { index in
-                        Text("\(status[index])")
-                            .font(.system(size: 10))
-                        Divider()
+                ZStack {
+                    VStack {
+                        Spacer()
+                        HStack {
+                            Rectangle()
+                                .foregroundColor(.accentColor)
+                                .frame(width: 320 * self.progress, height: 1.5)
+                            Spacer()
+                        }
+                        .frame(width: 320, height: 1.5)
                     }
-                } label: {
-                    Text(status.last!)
-                        .font(.system(size: 10))
+                    .frame(width: 320, height: 27)
+                    .mask(Rectangle().frame(width: 320, height: 27).cornerRadius(5))
+                    Menu {
+                        ForEach(status.indices.reversed(), id: \.self) { index in
+                            Text("\(status[index])")
+                                .font(.system(size: 10))
+                            Divider()
+                        }
+                    } label: {
+                        Text(status.last!)
+                            .font(.system(size: 10))
+                    }
+                    .background(Color("StatusColor"))
+                    .cornerRadius(5)
+                    .frame(width: 320)
+                    .help("View project changelog, and revert to a previous version")
                 }
-                .background(Color("StatusColor"))
-                .cornerRadius(5)
-                .frame(width: 320)
-                .help("View project changelog, and revert to a previous version")
                 Button(action: {
                     Coder(data: $data, status: $status, progress: $progress).encode()
                 }) {
