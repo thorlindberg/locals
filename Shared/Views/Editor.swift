@@ -52,6 +52,7 @@ struct Editor: View {
     @State var row: String = ""
     @State var checking: Bool = false
     @State var clear: Bool = false
+    @State var alert: Bool = false
     
     var body: some View {
         ZStack {
@@ -74,73 +75,82 @@ struct Editor: View {
                                                     .opacity((string % 2 == 0) ? 0.03 : 0)
                                                     .cornerRadius(6)
                                                 VStack(alignment: .leading) {
-                                                    HStack(alignment: .top) {
-                                                        Text("\(data.translations[index].texts[strings[string]]!.order)")
-                                                            .fontWeight(.light)
-                                                            .opacity(0.25)
-                                                        Spacer()
-                                                        ZStack {
-                                                            if data.translations[index].texts[strings[string]]!.pinned {
-                                                                if strings[string] == pin {
-                                                                    Image(systemName: "pin.fill")
-                                                                        .opacity(0.25)
-                                                                } else {
+                                                    VStack {
+                                                        HStack {
+                                                            Text("#\(data.translations[index].texts[strings[string]]!.order)")
+                                                                .fontWeight(.light)
+                                                                .opacity(0.25)
+                                                            Spacer()
+                                                            ZStack {
+                                                                if data.translations[index].texts[strings[string]]!.pinned {
+                                                                    if strings[string] == pin {
+                                                                        Image(systemName: "pin.fill")
+                                                                            .opacity(0.25)
+                                                                    } else {
+                                                                        Image(systemName: "pin.fill")
+                                                                            .foregroundColor(data.styles.color)
+                                                                    }
+                                                                } else if strings[string] == pin {
                                                                     Image(systemName: "pin.fill")
                                                                         .foregroundColor(data.styles.color)
+                                                                } else if strings[string] == row {
+                                                                    Image(systemName: "pin.fill")
+                                                                        .opacity(0.25)
                                                                 }
-                                                            } else if strings[string] == pin {
-                                                                Image(systemName: "pin.fill")
-                                                                    .foregroundColor(data.styles.color)
-                                                            } else if strings[string] == row {
-                                                                Image(systemName: "pin.fill")
-                                                                    .opacity(0.25)
                                                             }
-                                                        }
-                                                        .onHover { hovering in
-                                                            self.pin = hovering ? strings[string] : ""
-                                                        }
-                                                        .onTapGesture {
-                                                            withAnimation {
-                                                                data.translations.indices.forEach { index in
-                                                                    data.translations[index].texts[strings[string]]!.pinned = !data.translations[index].texts[strings[string]]!.pinned
-                                                                }
-                                                                Storage(status: $status, progress: $progress).write(
-                                                                    status: status,
-                                                                    selection: selection,
-                                                                    data: data
-                                                                )
+                                                            .onHover { hovering in
+                                                                self.pin = hovering ? strings[string] : ""
                                                             }
-                                                        }
-                                                        ZStack {
-                                                            if strings[string] == xmark {
-                                                                Image(systemName: "xmark.circle.fill")
-                                                                    .foregroundColor(data.styles.color)
-                                                            } else if strings[string] == row {
-                                                                Image(systemName: "xmark.circle.fill")
-                                                                    .opacity(0.25)
-                                                            }
-                                                        }
-                                                        .onHover { hovering in
-                                                            self.xmark = hovering ? strings[string] : ""
-                                                        }
-                                                        .onTapGesture {
-                                                            data.translations.indices.forEach { t in
-                                                                data.translations[t].texts.keys.forEach { s in
-                                                                    if data.translations[t].texts[s]!.order > data.translations[index].texts[strings[string]]!.order {
-                                                                        data.translations[t].texts[s]!.order = data.translations[t].texts[s]!.order - 1
+                                                            .onTapGesture {
+                                                                withAnimation {
+                                                                    data.translations.indices.forEach { index in
+                                                                        data.translations[index].texts[strings[string]]!.pinned = !data.translations[index].texts[strings[string]]!.pinned
                                                                     }
+                                                                    Storage(status: $status, progress: $progress).write(
+                                                                        status: status,
+                                                                        selection: selection,
+                                                                        data: data
+                                                                    )
                                                                 }
                                                             }
-                                                            data.translations.indices.forEach { index in
-                                                                data.translations[index].texts.removeValue(forKey: strings[string])
+                                                            ZStack {
+                                                                if strings[string] == xmark {
+                                                                    Image(systemName: "xmark.circle.fill")
+                                                                        .foregroundColor(data.styles.color)
+                                                                } else if strings[string] == row {
+                                                                    Image(systemName: "xmark.circle.fill")
+                                                                        .opacity(0.25)
+                                                                }
                                                             }
-                                                            Storage(status: $status, progress: $progress).write(
-                                                                status: status,
-                                                                selection: selection,
-                                                                data: data
-                                                            )
+                                                            .onHover { hovering in
+                                                                self.xmark = hovering ? strings[string] : ""
+                                                            }
+                                                            .onTapGesture {
+                                                                if data.alerts {
+                                                                    self.alert.toggle()
+                                                                } else {
+                                                                    data.translations.indices.forEach { t in
+                                                                        data.translations[t].texts.keys.forEach { s in
+                                                                            if data.translations[t].texts[s]!.order > data.translations[index].texts[strings[string]]!.order {
+                                                                                data.translations[t].texts[s]!.order = data.translations[t].texts[s]!.order - 1
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                    data.translations.indices.forEach { index in
+                                                                        data.translations[index].texts.removeValue(forKey: strings[string])
+                                                                    }
+                                                                    Storage(status: $status, progress: $progress).write(
+                                                                        status: status,
+                                                                        selection: selection,
+                                                                        data: data
+                                                                    )
+                                                                }
+                                                            }
                                                         }
+                                                        Spacer()
                                                     }
+                                                    .frame(height: 30)
+                                                    Spacer()
                                                     Text("\(strings[string])")
                                                         .font(.custom(data.styles.font, size: data.styles.size))
                                                         .fontWeight(data.styles.weight)
@@ -177,7 +187,8 @@ struct Editor: View {
                             .frame(height: 55)
                         ZStack {
                             Rectangle()
-                                .foregroundColor(Color("Mode"))
+                                .foregroundColor(data.translations.filter({$0.language == data.target})[0].texts.keys.contains(entry) ? .red : Color("Mode"))
+                                .opacity(data.translations.filter({$0.language == data.target})[0].texts.keys.contains(entry) ? 0.5 : 1)
                                 .cornerRadius(6)
                                 .frame(height: 30)
                             TextField("Add unique string", text: $entry, onCommit: {
@@ -198,7 +209,6 @@ struct Editor: View {
                                 }
                             })
                             .textFieldStyle(PlainTextFieldStyle())
-                            .foregroundColor(data.translations.filter({$0.language == data.target})[0].texts.keys.contains(entry) ? .red : data.styles.color)
                             .padding(.horizontal)
                         }
                         .padding(.horizontal, 32)
@@ -216,6 +226,21 @@ struct Editor: View {
                 .padding(.top, -60)
             }
         }
+        .alert(isPresented: $alert) {
+                    Alert(
+                        title: Text("Are you sure?"),
+                        message: Text("Deleting an entry removes it from your entire project. This action is irreversible."),
+                        primaryButton: .default (Text("Understood")) {
+                            data.alerts = false
+                            Storage(status: $status, progress: $progress).write(
+                                status: status,
+                                selection: selection,
+                                data: data
+                            )
+                        },
+                        secondaryButton: .cancel()
+                    )
+                }
         .toolbar {
             ToolbarItemGroup(placement: .automatic) {
                 Button(action: {

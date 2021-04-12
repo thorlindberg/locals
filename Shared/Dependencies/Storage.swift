@@ -11,6 +11,7 @@ struct Storage {
         
         var base: String
         var target: String
+        var alerts: Bool
         var filters: Filters
         var styles: Styles
         var translations: [Translations]
@@ -52,6 +53,7 @@ struct Storage {
     var data = Format(
         base: "English (United Kingdom)",
         target: "",
+        alerts: true,
         filters: Format.Filters(
             unpinned: true,
             singleline: true,
@@ -61,7 +63,7 @@ struct Storage {
             symbols: true
         ),
         styles: Format.Styles(
-            columns: 3,
+            columns: 1,
             font: "San Francisco",
             size: CGFloat(14),
             weight: Font.Weight.regular,
@@ -440,6 +442,11 @@ struct Storage {
                     // "base" : language ;
                     baseData.base = line[1]
                     
+                } else if "alerts" == line[0] {
+                    
+                    // "alerts" : Bool ;
+                    baseData.alerts = Bool(line[1])!
+                    
                 } else if "targets" == line[0] && line[1] != "_" {
                     
                     // "targets" : language , language , language ;
@@ -526,6 +533,9 @@ struct Storage {
         
         // "base" : language ;
         output += "base : " + data.base + " ; "
+        
+        // "alerts" : Bool ;
+        output += "alerts : " + String(data.alerts) + " ; "
         
         // "targets" : language , language , language ;
         output += "targets : "

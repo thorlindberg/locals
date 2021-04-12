@@ -42,7 +42,7 @@ struct Sidebar: View {
                             Image(systemName: "info.circle")
                         }
                     }
-                    .onTapGesture { self.toggle = "help" }
+                    .onTapGesture { self.toggle = "help" ; self.query = "" }
                     .onHover { hovering in
                         self.menu = hovering ? "help" : ""
                     }
@@ -58,7 +58,7 @@ struct Sidebar: View {
                             Image(systemName: "folder")
                         }
                     }
-                    .onTapGesture { self.toggle = "projects" }
+                    .onTapGesture { self.toggle = "projects" ; self.query = "" }
                     .onHover { hovering in
                         self.menu = hovering ? "projects" : ""
                     }
@@ -76,7 +76,7 @@ struct Sidebar: View {
                             Image(systemName: "textformat")
                         }
                     }
-                    .onTapGesture { self.toggle = "languages" }
+                    .onTapGesture { self.toggle = "languages" ; self.query = "" }
                     .onHover { hovering in
                         self.menu = hovering ? "languages" : ""
                     }
@@ -403,6 +403,21 @@ struct Sidebar: View {
                         Toggle(isOn: Binding(
                             get: { data.filters.symbols },
                             set: { data.filters.symbols = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
+                        )) {
+                            Text("")
+                        }
+                        .toggleStyle(CheckboxToggleStyle())
+                    }
+                }
+                .padding()
+                Divider()
+                VStack {
+                    HStack {
+                        Text("Alerts")
+                        Spacer()
+                        Toggle(isOn: Binding(
+                            get: { data.alerts },
+                            set: { data.alerts = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
                         )) {
                             Text("")
                         }
