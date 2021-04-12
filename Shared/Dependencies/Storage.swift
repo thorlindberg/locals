@@ -25,6 +25,7 @@ struct Storage {
         }
         
         struct Styles: Hashable {
+            var columns: Int
             var font: String
             var size: CGFloat
             var weight: Font.Weight
@@ -60,6 +61,7 @@ struct Storage {
             symbols: true
         ),
         styles: Format.Styles(
+            columns: 1,
             font: "San Francisco",
             size: CGFloat(14),
             weight: Font.Weight.regular,
@@ -457,27 +459,28 @@ struct Storage {
                     
                 } else if "styles" == line[0] {
                     
-                    // "styles" : font : size : weight : color ;
-                    baseData.styles.font = line[1]
-                    baseData.styles.size = CGFloat(Int(line[2])!)
-                    if line[3] == "Regular" { baseData.styles.weight = Font.Weight.regular }
-                    if line[3] == "Heavy" { baseData.styles.weight = Font.Weight.heavy }
-                    if line[3] == "Black" { baseData.styles.weight = Font.Weight.black }
-                    if line[3] == "Bold" { baseData.styles.weight = Font.Weight.bold }
-                    if line[3] == "Semi-bold" { baseData.styles.weight = Font.Weight.semibold }
-                    if line[3] == "Medium" { baseData.styles.weight = Font.Weight.medium }
-                    if line[3] == "Thin" { baseData.styles.weight = Font.Weight.thin }
-                    if line[3] == "Light" { baseData.styles.weight = Font.Weight.light }
-                    if line[3] == "Ultra light" { baseData.styles.weight = Font.Weight.ultraLight }
-                    if line[4] == "Accent" { baseData.styles.color = Color.accentColor }
-                    if line[4] == "Blue" { baseData.styles.color = Color.blue }
-                    if line[4] == "Gray" { baseData.styles.color = Color.gray }
-                    if line[4] == "Green" { baseData.styles.color = Color.green }
-                    if line[4] == "Orange" { baseData.styles.color = Color.orange }
-                    if line[4] == "Pink" { baseData.styles.color = Color.pink }
-                    if line[4] == "Purple" { baseData.styles.color = Color.purple }
-                    if line[4] == "Red" { baseData.styles.color = Color.red }
-                    if line[4] == "Yellow" { baseData.styles.color = Color.yellow }
+                    // "styles" : columns : font : size : weight : color ;
+                    baseData.styles.columns = Int(line[1])!
+                    baseData.styles.font = line[2]
+                    baseData.styles.size = CGFloat(Int(line[3])!)
+                    if line[4] == "Regular" { baseData.styles.weight = Font.Weight.regular }
+                    if line[4] == "Heavy" { baseData.styles.weight = Font.Weight.heavy }
+                    if line[4] == "Black" { baseData.styles.weight = Font.Weight.black }
+                    if line[4] == "Bold" { baseData.styles.weight = Font.Weight.bold }
+                    if line[4] == "Semi-bold" { baseData.styles.weight = Font.Weight.semibold }
+                    if line[4] == "Medium" { baseData.styles.weight = Font.Weight.medium }
+                    if line[4] == "Thin" { baseData.styles.weight = Font.Weight.thin }
+                    if line[4] == "Light" { baseData.styles.weight = Font.Weight.light }
+                    if line[4] == "Ultra light" { baseData.styles.weight = Font.Weight.ultraLight }
+                    if line[5] == "Accent" { baseData.styles.color = Color.accentColor }
+                    if line[5] == "Blue" { baseData.styles.color = Color.blue }
+                    if line[5] == "Gray" { baseData.styles.color = Color.gray }
+                    if line[5] == "Green" { baseData.styles.color = Color.green }
+                    if line[5] == "Orange" { baseData.styles.color = Color.orange }
+                    if line[5] == "Pink" { baseData.styles.color = Color.pink }
+                    if line[5] == "Purple" { baseData.styles.color = Color.purple }
+                    if line[5] == "Red" { baseData.styles.color = Color.red }
+                    if line[5] == "Yellow" { baseData.styles.color = Color.yellow }
                     
                 } else {
                     
@@ -551,6 +554,7 @@ struct Storage {
         
         // "styles" : font : size : weight : color ;
         output += "styles : "
+        output += String(data.styles.columns) + " : "
         output += data.styles.font + " : "
         output += String(Int(data.styles.size)) + " : "
         if data.styles.weight == Font.Weight.regular { output += "Regular" + " : " }

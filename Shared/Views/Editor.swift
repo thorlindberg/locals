@@ -61,7 +61,7 @@ struct Editor: View {
                         Section(header: Header(data: $data)) {
                             Spacer()
                                 .frame(height: 10)
-                            LazyVStack(spacing: 0) {
+                            LazyVGrid(columns: Array(repeating: .init(.adaptive(minimum: 600)), count: data.styles.columns), spacing: 0) {
                                 ForEach(data.translations.indices, id: \.self) { index in
                                     if data.translations[index].language == data.target {
                                         let strings = Array(data.translations[index].texts.keys)
@@ -114,20 +114,22 @@ struct Editor: View {
                                                         Spacer()
                                                     }
                                                     .frame(width: CGFloat(5 + (10 * String(data.translations[index].texts.values.map({$0.order}).max()!).count)))
-                                                    Text("\(strings[string])")
-                                                        .font(.custom(data.styles.font, size: data.styles.size))
-                                                        .fontWeight(data.styles.weight)
-                                                        .foregroundColor(data.styles.color)
-                                                    Divider()
-                                                    TextField("Translation", text: Binding(
-                                                        get: { data.translations[index].texts[strings[string]]!.translation },
-                                                        set: { data.translations[index].texts[strings[string]]?.translation = $0 }
-                                                    ), onCommit: { withAnimation { Storage(status: $status, progress: $progress).write(
-                                                        status: status,
-                                                        selection: selection,
-                                                        data: data
-                                                    )}})
-                                                    .textFieldStyle(PlainTextFieldStyle())
+                                                    VStack(alignment: .leading) {
+                                                        Text("\(strings[string])")
+                                                            .font(.custom(data.styles.font, size: data.styles.size))
+                                                            .fontWeight(data.styles.weight)
+                                                            .foregroundColor(data.styles.color)
+                                                        Divider()
+                                                        TextField("Translation", text: Binding(
+                                                            get: { data.translations[index].texts[strings[string]]!.translation },
+                                                            set: { data.translations[index].texts[strings[string]]?.translation = $0 }
+                                                        ), onCommit: { withAnimation { Storage(status: $status, progress: $progress).write(
+                                                            status: status,
+                                                            selection: selection,
+                                                            data: data
+                                                        )}})
+                                                        .textFieldStyle(PlainTextFieldStyle())
+                                                    }
                                                     Spacer()
                                                     ZStack {
                                                         if data.translations[index].texts[strings[string]]!.pinned {

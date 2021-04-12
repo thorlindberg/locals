@@ -419,11 +419,11 @@ struct Sidebar: View {
                     .frame(width: 65)
                     Spacer()
                     Picker("", selection: Binding(
-                        get: { data.styles.font },
-                        set: { data.styles.font = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
+                        get: { data.styles.columns },
+                        set: { data.styles.columns = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
                     )) {
-                        ForEach(1...4, id: \.self) { size in
-                            Text(String(size)).tag(CGFloat(size))
+                        ForEach(Array(stride(from: 1, to: 6, by: 2)), id: \.self) { count in
+                            Text(String(count)).tag(count)
                         }
                     }
                 }
