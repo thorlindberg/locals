@@ -68,7 +68,13 @@ struct Editor: View {
                                         let strings = Array(data.translations[index].texts.keys)
                                             .sorted { data.translations[index].texts[$0]!.order < data.translations[index].texts[$1]!.order }
                                             .sorted { data.translations[index].texts[$0]!.pinned == true && data.translations[index].texts[$1]!.pinned == false }
-                                            .filter { $0.lowercased().hasPrefix(query.lowercased()) }
+                                            .filter { $0.lowercased().hasPrefix(query.lowercased()) } // search strings
+                                            // single-line
+                                            // multi-line
+                                            .filter { data.filters.parenthesis ? true : !($0.hasPrefix("(") && $0.hasSuffix(")")) } // parenthesis
+                                            .filter { data.filters.nummerical ? true : !($0.allSatisfy({ $0.isNumber })) } // nummerical
+                                            .filter { data.filters.symbols ? true : !($0.allSatisfy({ ($0.isSymbol || $0.isPunctuation || $0.isCurrencySymbol || $0.isMathSymbol) })) } // symbols
+                                            .filter { data.filters.unpinned ? true : data.translations[index].texts[$0]!.pinned } // unpinned
                                         ForEach(strings.indices, id: \.self) { string in
                                             ZStack {
                                                 Rectangle()
