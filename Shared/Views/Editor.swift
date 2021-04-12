@@ -71,34 +71,38 @@ struct Editor: View {
                                         ForEach(strings.indices, id: \.self) { string in
                                             ZStack {
                                                 Rectangle()
-                                                    .frame(minHeight: 50)
                                                     .opacity((string % 2 == 0) ? 0.03 : 0)
                                                     .cornerRadius(6)
-                                                HStack(alignment: .center, spacing: 15) {
-                                                    HStack {
-                                                        if strings[string] == row {
-                                                            ZStack {
-                                                                if strings[string] == xmark {
-                                                                    Image(systemName: "xmark.circle.fill")
-                                                                        .foregroundColor(data.styles.color)
-                                                                } else {
-                                                                    Image(systemName: "xmark.circle.fill")
+                                                VStack(alignment: .leading) {
+                                                    HStack(alignment: .top) {
+                                                        Text("\(data.translations[index].texts[strings[string]]!.order)")
+                                                            .fontWeight(.light)
+                                                            .opacity(0.25)
+                                                        Spacer()
+                                                        ZStack {
+                                                            if data.translations[index].texts[strings[string]]!.pinned {
+                                                                if strings[string] == pin {
+                                                                    Image(systemName: "pin.fill")
                                                                         .opacity(0.25)
+                                                                } else {
+                                                                    Image(systemName: "pin.fill")
+                                                                        .foregroundColor(data.styles.color)
                                                                 }
+                                                            } else if strings[string] == pin {
+                                                                Image(systemName: "pin.fill")
+                                                                    .foregroundColor(data.styles.color)
+                                                            } else if strings[string] == row {
+                                                                Image(systemName: "pin.fill")
+                                                                    .opacity(0.25)
                                                             }
-                                                            .onHover { hovering in
-                                                                self.xmark = hovering ? strings[string] : ""
-                                                            }
-                                                            .onTapGesture {
-                                                                data.translations.indices.forEach { t in
-                                                                    data.translations[t].texts.keys.forEach { s in
-                                                                        if data.translations[t].texts[s]!.order > data.translations[index].texts[strings[string]]!.order {
-                                                                            data.translations[t].texts[s]!.order = data.translations[t].texts[s]!.order - 1
-                                                                        }
-                                                                    }
-                                                                }
+                                                        }
+                                                        .onHover { hovering in
+                                                            self.pin = hovering ? strings[string] : ""
+                                                        }
+                                                        .onTapGesture {
+                                                            withAnimation {
                                                                 data.translations.indices.forEach { index in
-                                                                    data.translations[index].texts.removeValue(forKey: strings[string])
+                                                                    data.translations[index].texts[strings[string]]!.pinned = !data.translations[index].texts[strings[string]]!.pinned
                                                                 }
                                                                 Storage(status: $status, progress: $progress).write(
                                                                     status: status,
@@ -106,55 +110,29 @@ struct Editor: View {
                                                                     data: data
                                                                 )
                                                             }
-                                                        } else {
-                                                            Text("\(data.translations[index].texts[strings[string]]!.order)")
-                                                                .fontWeight(.light)
-                                                                .opacity(0.25)
                                                         }
-                                                        Spacer()
-                                                    }
-                                                    .frame(width: CGFloat(5 + (10 * String(data.translations[index].texts.values.map({$0.order}).max()!).count)))
-                                                    VStack(alignment: .leading) {
-                                                        Text("\(strings[string])")
-                                                            .font(.custom(data.styles.font, size: data.styles.size))
-                                                            .fontWeight(data.styles.weight)
-                                                            .foregroundColor(data.styles.color)
-                                                        Divider()
-                                                        TextField("Translation", text: Binding(
-                                                            get: { data.translations[index].texts[strings[string]]!.translation },
-                                                            set: { data.translations[index].texts[strings[string]]?.translation = $0 }
-                                                        ), onCommit: { withAnimation { Storage(status: $status, progress: $progress).write(
-                                                            status: status,
-                                                            selection: selection,
-                                                            data: data
-                                                        )}})
-                                                        .textFieldStyle(PlainTextFieldStyle())
-                                                    }
-                                                    Spacer()
-                                                    ZStack {
-                                                        if data.translations[index].texts[strings[string]]!.pinned {
-                                                            if strings[string] == pin {
-                                                                Image(systemName: "pin.fill")
-                                                                    .opacity(0.25)
-                                                            } else {
-                                                                Image(systemName: "pin.fill")
+                                                        ZStack {
+                                                            if strings[string] == xmark {
+                                                                Image(systemName: "xmark.circle.fill")
                                                                     .foregroundColor(data.styles.color)
+                                                            } else if strings[string] == row {
+                                                                Image(systemName: "xmark.circle.fill")
+                                                                    .opacity(0.25)
                                                             }
-                                                        } else if strings[string] == pin {
-                                                            Image(systemName: "pin.fill")
-                                                                .foregroundColor(data.styles.color)
-                                                        } else if strings[string] == row {
-                                                            Image(systemName: "pin.fill")
-                                                                .opacity(0.25)
                                                         }
-                                                    }
-                                                    .onHover { hovering in
-                                                        self.pin = hovering ? strings[string] : ""
-                                                    }
-                                                    .onTapGesture {
-                                                        withAnimation {
+                                                        .onHover { hovering in
+                                                            self.xmark = hovering ? strings[string] : ""
+                                                        }
+                                                        .onTapGesture {
+                                                            data.translations.indices.forEach { t in
+                                                                data.translations[t].texts.keys.forEach { s in
+                                                                    if data.translations[t].texts[s]!.order > data.translations[index].texts[strings[string]]!.order {
+                                                                        data.translations[t].texts[s]!.order = data.translations[t].texts[s]!.order - 1
+                                                                    }
+                                                                }
+                                                            }
                                                             data.translations.indices.forEach { index in
-                                                                data.translations[index].texts[strings[string]]!.pinned = !data.translations[index].texts[strings[string]]!.pinned
+                                                                data.translations[index].texts.removeValue(forKey: strings[string])
                                                             }
                                                             Storage(status: $status, progress: $progress).write(
                                                                 status: status,
@@ -163,6 +141,20 @@ struct Editor: View {
                                                             )
                                                         }
                                                     }
+                                                    Text("\(strings[string])")
+                                                        .font(.custom(data.styles.font, size: data.styles.size))
+                                                        .fontWeight(data.styles.weight)
+                                                        .foregroundColor(data.styles.color)
+                                                    Divider()
+                                                    TextField("Add translation", text: Binding(
+                                                        get: { data.translations[index].texts[strings[string]]!.translation },
+                                                        set: { data.translations[index].texts[strings[string]]?.translation = $0 }
+                                                    ), onCommit: { withAnimation { Storage(status: $status, progress: $progress).write(
+                                                        status: status,
+                                                        selection: selection,
+                                                        data: data
+                                                    )}})
+                                                    .textFieldStyle(PlainTextFieldStyle())
                                                 }
                                                 .padding()
                                             }
@@ -189,7 +181,7 @@ struct Editor: View {
                                 .cornerRadius(6)
                                 .frame(height: 30)
                             TextField("Add unique string", text: $entry, onCommit: {
-                                if entry != "" && !data.translations.filter({$0.language == data.target})[0].texts.keys.contains(entry) {
+                                if entry.trimmingCharacters(in: .whitespaces) != "" && !data.translations.filter({$0.language == data.target})[0].texts.keys.contains(entry) {
                                     data.translations.indices.forEach { index in
                                         data.translations[index].texts[entry] = Storage.Format.Text(
                                             order: data.translations[index].texts.isEmpty ? 1 : data.translations[index].texts.values.map({$0.order}).max()! + 1,

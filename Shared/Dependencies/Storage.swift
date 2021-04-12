@@ -61,7 +61,7 @@ struct Storage {
             symbols: true
         ),
         styles: Format.Styles(
-            columns: 1,
+            columns: 3,
             font: "San Francisco",
             size: CGFloat(14),
             weight: Font.Weight.regular,

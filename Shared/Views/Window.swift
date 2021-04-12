@@ -8,7 +8,7 @@ struct Window: View {
     @State var progress: CGFloat = CGFloat.zero
     @State var data: Storage.Format = Storage.Format(
         base: "", target: "", filters: Storage.Format.Filters(unpinned: true, singleline: true, multiline: true, parenthesis: true, nummerical: true, symbols: true),
-        styles: Storage.Format.Styles(columns: 1, font: "San Francisco", size: CGFloat(14), weight: Font.Weight.regular, color: Color.accentColor), translations: []
+        styles: Storage.Format.Styles(columns: 3, font: "San Francisco", size: CGFloat(14), weight: Font.Weight.regular, color: Color.accentColor), translations: []
     )
     @State var query: String = ""
     @State var entry: String = ""
@@ -18,7 +18,7 @@ struct Window: View {
         NavigationView {
             Sidebar(toggle: $toggle, selection: $selection, status: $status, progress: $progress, data: $data,
                     query: $query, entry: $entry, inspector: $inspector)
-                .frame(minWidth: 220)
+                .frame(minWidth: 200)
             Editor(selection: $selection, status: $status, progress: $progress, data: $data, query: $query, entry: $entry, inspector: $inspector)
         }
         .frame(minWidth: 860, minHeight: 500)

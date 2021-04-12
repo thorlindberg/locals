@@ -213,7 +213,7 @@ struct Sidebar: View {
             if toggle == "languages" {
                 VStack(spacing: 15) {
                     HStack {
-                        TextField("􀊫 Search languages", text: $language)
+                        TextField("􀊫 Languages", text: $language)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                         Spacer()
                         Button(action: {
@@ -337,7 +337,7 @@ struct Sidebar: View {
                 }
             }
             if toggle == "filter" {
-                TextField("􀊫 Search strings", text: $query)
+                TextField("􀊫 Strings", text: $query)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding()
                 Divider()
@@ -411,25 +411,23 @@ struct Sidebar: View {
                 }
                 .padding()
                 Divider()
-                HStack {
+                VStack {
                     HStack {
-                        Text("Columns")
+                        HStack {
+                            Text("Columns")
+                            Spacer()
+                        }
+                        .frame(width: 65)
                         Spacer()
-                    }
-                    .frame(width: 65)
-                    Spacer()
-                    Picker("", selection: Binding(
-                        get: { data.styles.columns },
-                        set: { data.styles.columns = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
-                    )) {
-                        ForEach(Array(stride(from: 1, to: 6, by: 2)), id: \.self) { count in
-                            Text(String(count)).tag(count)
+                        Picker("", selection: Binding(
+                            get: { data.styles.columns },
+                            set: { data.styles.columns = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
+                        )) {
+                            ForEach(Array(stride(from: 1, to: 6, by: 2)), id: \.self) { count in
+                                Text(String(count)).tag(count)
+                            }
                         }
                     }
-                }
-                .padding()
-                Divider()
-                VStack {
                     HStack {
                         HStack {
                             Text("Font")
@@ -513,6 +511,7 @@ struct Sidebar: View {
                 Spacer()
             }
         }
+        /*
         .toolbar {
             ToolbarItemGroup(placement: .automatic) {
                 Button(action: {
@@ -522,6 +521,7 @@ struct Sidebar: View {
                 }
             }
         }
+        */
     }
     
 }
