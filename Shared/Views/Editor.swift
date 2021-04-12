@@ -56,18 +56,19 @@ struct Editor: View {
     var body: some View {
         ZStack {
             if selection != "" && data.target != "" {
-                List {
-                    Section(header: Header(data: $data)) {
-                        Spacer()
-                            .frame(height: 10)
-                        LazyVStack(spacing: 0) {
-                            ForEach(data.translations.indices, id: \.self) { index in
-                                if data.translations[index].language == data.target {
-                                    let strings = Array(data.translations[index].texts.keys)
-                                        .sorted { data.translations[index].texts[$0]!.order < data.translations[index].texts[$1]!.order }
-                                        .sorted { data.translations[index].texts[$0]!.pinned == true && data.translations[index].texts[$1]!.pinned == false }
-                                    ForEach(strings.indices, id: \.self) { string in
-                                        if strings[string].lowercased().hasPrefix(query.lowercased()) {
+                VStack(spacing: 0) {
+                    List {
+                        Section(header: Header(data: $data)) {
+                            Spacer()
+                                .frame(height: 10)
+                            LazyVStack(spacing: 0) {
+                                ForEach(data.translations.indices, id: \.self) { index in
+                                    if data.translations[index].language == data.target {
+                                        let strings = Array(data.translations[index].texts.keys)
+                                            .sorted { data.translations[index].texts[$0]!.order < data.translations[index].texts[$1]!.order }
+                                            .sorted { data.translations[index].texts[$0]!.pinned == true && data.translations[index].texts[$1]!.pinned == false }
+                                            .filter { $0.lowercased().hasPrefix(query.lowercased()) }
+                                        ForEach(strings.indices, id: \.self) { string in
                                             ZStack {
                                                 Rectangle()
                                                     .frame(minHeight: 50)
@@ -171,24 +172,19 @@ struct Editor: View {
                                     }
                                 }
                             }
+                            Spacer()
+                                .frame(height: 10)
                         }
-                        Spacer()
-                            .frame(height: 65)
                     }
-                }
-                VStack(spacing: 0) {
-                    Spacer()
                     Divider()
                     ZStack {
                         Rectangle()
                             .opacity(0)
-                            .background(VisualEffect())
                             .frame(height: 55)
                         ZStack {
                             Rectangle()
                                 .foregroundColor(Color("Mode"))
                                 .cornerRadius(6)
-                                .opacity(1)
                                 .frame(height: 30)
                             TextField("Add unique string", text: $entry, onCommit: {
                                 if entry != "" && !data.translations.filter({$0.language == data.target})[0].texts.keys.contains(entry) {

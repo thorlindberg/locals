@@ -315,6 +315,14 @@ struct Sidebar: View {
                                             Text("\(data.translations[index].language)")
                                         }
                                         .frame(height: 20)
+                                        .contextMenu {
+                                            Button(action: {
+                                                data.translations[index].target = false
+                                                Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data)
+                                            }) {
+                                                Text("Disable target")
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -403,13 +411,31 @@ struct Sidebar: View {
                 }
                 .padding()
                 Divider()
+                HStack {
+                    HStack {
+                        Text("Columns")
+                        Spacer()
+                    }
+                    .frame(width: 65)
+                    Spacer()
+                    Picker("", selection: Binding(
+                        get: { data.styles.font },
+                        set: { data.styles.font = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
+                    )) {
+                        ForEach(1...4, id: \.self) { size in
+                            Text(String(size)).tag(CGFloat(size))
+                        }
+                    }
+                }
+                .padding()
+                Divider()
                 VStack {
                     HStack {
                         HStack {
                             Text("Font")
                             Spacer()
                         }
-                        .frame(width: 55)
+                        .frame(width: 65)
                         Spacer()
                         Picker("", selection: Binding(
                             get: { data.styles.font },
@@ -427,7 +453,7 @@ struct Sidebar: View {
                             Text("Size")
                             Spacer()
                         }
-                        .frame(width: 55)
+                        .frame(width: 65)
                         Spacer()
                         Picker("", selection: Binding(
                             get: { data.styles.size },
@@ -443,7 +469,7 @@ struct Sidebar: View {
                             Text("Weight")
                             Spacer()
                         }
-                        .frame(width: 55)
+                        .frame(width: 65)
                         Spacer()
                         Picker("", selection: Binding(
                             get: { data.styles.weight },
@@ -465,7 +491,7 @@ struct Sidebar: View {
                             Text("Color")
                             Spacer()
                         }
-                        .frame(width: 55)
+                        .frame(width: 65)
                         Spacer()
                         Picker("", selection: Binding(
                             get: { data.styles.color },
