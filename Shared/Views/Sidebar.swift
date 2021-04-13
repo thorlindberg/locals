@@ -117,11 +117,7 @@ struct Sidebar: View {
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                     if !files.contains(filename) && filename != "" && !filename.hasPrefix(".") {
                         Button(action: {
-                            Storage(status: $status, progress: $progress).write(
-                                status: status,
-                                selection: filename,
-                                data: Storage(status: $status, progress: $progress).data
-                            )
+                            Storage(status: $status, progress: $progress).write(status: status, selection: filename, data: Storage(status: $status, progress: $progress).data)
                             self.filename = ""
                             self.files = Storage(status: $status, progress: $progress).identify(status: status)
                         }) {
@@ -521,7 +517,6 @@ struct Sidebar: View {
                             Text("Yellow").foregroundColor(.yellow).tag(Color.yellow)
                         }
                     }
-                    /*
                     Button(action: {
                         data.styles.columns = 1
                         data.styles.font = "Helvetica Neue"
@@ -532,11 +527,10 @@ struct Sidebar: View {
                     }) {
                         Text("Reset styles")
                     }
-                    .buttonStyle(PlainButtonStyle())
                     .disabled(
-                        data.styles.columns == 1 && data.styles.font == "Helvetica Neue" && data.styles.size == CGFloat(14) && data.styles.weight == Font.Weight.regular && data.styles.color == Color.accentColor
+                        data.styles.columns == 1 && data.styles.font == "Helvetica Neue" && data.styles.size == CGFloat(14)
+                        && data.styles.weight == Font.Weight.regular && data.styles.color == Color.accentColor
                     )
-                    */
                 }
                 .padding()
                 Spacer()

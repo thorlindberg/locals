@@ -84,55 +84,19 @@ struct Editor: View {
                                                     .opacity((string % 2 == 0) ? 0.03 : 0)
                                                     .cornerRadius(6)
                                                 VStack(alignment: .leading) {
-                                                    HStack {
-                                                        Text("#\(data.translations[index].texts[strings[string]]!.order)")
-                                                            .fontWeight(.light)
-                                                            .opacity(0.25)
-                                                        Spacer()
-                                                        if data.translations[index].texts[strings[string]]!.single {
-                                                            Text("S").fontWeight(.light).opacity(0.25)
-                                                        } else {
-                                                            Text("M").fontWeight(.light).opacity(0.25)
-                                                        }
-                                                    }
-                                                    .padding(.bottom, 20)
-                                                    Spacer()
-                                                    Text("\(strings[string])")
-                                                        .font(.custom(data.styles.font, size: data.styles.size))
-                                                        .fontWeight(data.styles.weight)
-                                                        .foregroundColor(data.styles.color)
-                                                    TextField("Add translation", text: Binding(
-                                                        get: { data.translations[index].texts[strings[string]]!.translation },
-                                                        set: { data.translations[index].texts[strings[string]]?.translation = $0 }
-                                                    ), onCommit: { withAnimation { Storage(status: $status, progress: $progress).write(
-                                                        status: status,
-                                                        selection: selection,
-                                                        data: data
-                                                    )}})
-                                                    .textFieldStyle(PlainTextFieldStyle())
-                                                }
-                                                .padding()
-                                            }
-                                            .contextMenu {
-                                                Button(action: {
-                                                    withAnimation {
+                                                    /*
+                                                    Button(action: {
                                                         data.translations.indices.forEach { index in
                                                             data.translations[index].texts[strings[string]]!.pinned = !data.translations[index].texts[strings[string]]!.pinned
                                                         }
-                                                        Storage(status: $status, progress: $progress).write(
-                                                            status: status,
-                                                            selection: selection,
-                                                            data: data
-                                                        )
+                                                        Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data)
+                                                    }) {
+                                                        Text("Pin card")
                                                     }
-                                                }) {
-                                                    Text("Pin card")
-                                                }
-                                                Button(action: {
-                                                    if data.alerts {
-                                                        self.alert.toggle()
-                                                    } else {
-                                                        withAnimation {
+                                                    Button(action: {
+                                                        if data.alerts {
+                                                            self.alert.toggle()
+                                                        } else {
                                                             data.translations.indices.forEach { t in
                                                                 data.translations[t].texts.keys.forEach { s in
                                                                     if data.translations[t].texts[s]!.order > data.translations[index].texts[strings[string]]!.order {
@@ -143,16 +107,27 @@ struct Editor: View {
                                                             data.translations.indices.forEach { index in
                                                                 data.translations[index].texts.removeValue(forKey: strings[string])
                                                             }
-                                                            Storage(status: $status, progress: $progress).write(
-                                                                status: status,
-                                                                selection: selection,
-                                                                data: data
-                                                            )
+                                                            Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data)
                                                         }
+                                                    }) {
+                                                        Text("Delete")
                                                     }
-                                                }) {
-                                                    Text("Delete")
+                                                    */
+                                                    Text("#\(data.translations[index].texts[strings[string]]!.order)")
+                                                    Spacer()
+                                                    Text(data.translations[index].texts[strings[string]]!.single ? "S" : "M")
+                                                    Spacer()
+                                                    Text("\(strings[string])")
+                                                        .font(.custom(data.styles.font, size: data.styles.size))
+                                                        .fontWeight(data.styles.weight)
+                                                        .foregroundColor(data.styles.color)
+                                                    TextField("Add translation", text: Binding(
+                                                        get: { data.translations[index].texts[strings[string]]!.translation },
+                                                        set: { data.translations[index].texts[strings[string]]?.translation = $0 }
+                                                    ), onCommit: { withAnimation { Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data)}})
+                                                    .textFieldStyle(PlainTextFieldStyle())
                                                 }
+                                                .padding()
                                             }
                                         }
                                     }
@@ -185,11 +160,7 @@ struct Editor: View {
                                             multi: false
                                         )
                                     }
-                                    Storage(status: $status, progress: $progress).write(
-                                        status: status,
-                                        selection: selection,
-                                        data: data
-                                    )
+                                    Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data)
                                     self.entry = ""
                                 }
                             })
@@ -218,11 +189,7 @@ struct Editor: View {
                 primaryButton: .default (Text("Okay")) {
                     self.alert = false
                     data.alerts = false
-                    Storage(status: $status, progress: $progress).write(
-                        status: status,
-                        selection: selection,
-                        data: data
-                    )
+                    Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data)
                 },
                 secondaryButton: .cancel (Text("Cancel")) {
                     self.alert = false
@@ -246,11 +213,7 @@ struct Editor: View {
                                 }
                             }
                         }
-                        Storage(status: $status, progress: $progress).write(
-                            status: status,
-                            selection: selection,
-                            data: data
-                        )
+                        Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data)
                     }
                 }) {
                     Image(systemName: "folder.fill.badge.plus")
@@ -261,11 +224,7 @@ struct Editor: View {
                     withAnimation {
                         Progress(status: $status, progress: $progress).load(string: "Translating strings to \(data.target)...")
                         Translation(status: $status, progress: $progress, data: $data).translate()
-                        Storage(status: $status, progress: $progress).write(
-                            status: status,
-                            selection: selection,
-                            data: data
-                        )
+                        Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data)
                     }
                 }) {
                     Image(systemName: "globe")
