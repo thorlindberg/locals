@@ -20,7 +20,9 @@ struct Translation {
                             data.translations[index].texts[string] = Storage.Format.Text(
                                 order: data.translations[index].texts[string]!.order,
                                 translation: translation,
-                                pinned: data.translations[index].texts[string]!.pinned
+                                pinned: data.translations[index].texts[string]!.pinned,
+                                single: data.translations[index].texts[string]!.single,
+                                multi: data.translations[index].texts[string]!.multi
                             )
                         }
                     }

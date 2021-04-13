@@ -46,6 +46,8 @@ struct Storage {
             var order: Int
             var translation: String
             var pinned: Bool
+            var single: Bool
+            var multi: Bool
         }
         
     }
@@ -501,13 +503,17 @@ struct Storage {
                                 baseData.translations[index].texts[line[2].replacingOccurrences(of: "/:", with: ":").replacingOccurrences(of: "/;", with: ";")] = Format.Text(
                                     order: baseData.translations[index].texts.isEmpty ? 1 : baseData.translations[index].texts.values.map({$0.order}).max()! + 1,
                                     translation: "",
-                                    pinned: Bool(line[1])!
+                                    pinned: Bool(line[1])!,
+                                    single: true,
+                                    multi: false
                                 )
                             } else {
                                 baseData.translations[index].texts[line[2].replacingOccurrences(of: "/:", with: ":").replacingOccurrences(of: "/;", with: ";")] = Format.Text(
                                     order: baseData.translations[index].texts.isEmpty ? 1 : baseData.translations[index].texts.values.map({$0.order}).max()! + 1,
                                     translation: line[3].replacingOccurrences(of: "/:", with: ":").replacingOccurrences(of: "/;", with: ";"),
-                                    pinned: Bool(line[1])!
+                                    pinned: Bool(line[1])!,
+                                    single: true,
+                                    multi: false
                                 )
                             }
                         }

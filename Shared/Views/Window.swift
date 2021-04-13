@@ -21,7 +21,7 @@ struct Window: View {
                 .frame(minWidth: 200)
             Editor(selection: $selection, status: $status, progress: $progress, data: $data, query: $query, entry: $entry, inspector: $inspector)
         }
-        .frame(minWidth: 860, minHeight: 560)
+        .frame(minWidth: 880, minHeight: 580)
     }
     
 }

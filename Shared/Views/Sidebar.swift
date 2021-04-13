@@ -510,7 +510,7 @@ struct Sidebar: View {
                             get: { data.styles.color },
                             set: { data.styles.color = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
                         )) {
-                            Text("Accent").foregroundColor(.accentColor).tag(Color.accentColor)
+                            Text("Accent").foregroundColor(.black).tag(Color.accentColor)
                             Text("Blue").foregroundColor(.blue).tag(Color.blue)
                             Text("Gray").foregroundColor(.gray).tag(Color.gray)
                             Text("Green").foregroundColor(.green).tag(Color.green)
@@ -521,11 +521,28 @@ struct Sidebar: View {
                             Text("Yellow").foregroundColor(.yellow).tag(Color.yellow)
                         }
                     }
+                    /*
+                    Button(action: {
+                        data.styles.columns = 1
+                        data.styles.font = "Helvetica Neue"
+                        data.styles.size = CGFloat(14)
+                        data.styles.weight = Font.Weight.regular
+                        data.styles.color = Color.accentColor
+                        Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data)
+                    }) {
+                        Text("Reset styles")
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .disabled(
+                        data.styles.columns == 1 && data.styles.font == "Helvetica Neue" && data.styles.size == CGFloat(14) && data.styles.weight == Font.Weight.regular && data.styles.color == Color.accentColor
+                    )
+                    */
                 }
                 .padding()
                 Spacer()
             }
         }
+        .accentColor(data.styles.color)
         /*
         .toolbar {
             ToolbarItemGroup(placement: .automatic) {
