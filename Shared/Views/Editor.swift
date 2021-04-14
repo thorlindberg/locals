@@ -55,74 +55,76 @@ struct Card: View {
     var strings: [Dictionary<String, Storage.Format.Text>.Keys.Element]
     
     var body: some View {
-        ZStack {
-            Rectangle()
-                .opacity((string % 2 == 0) ? 0.03 : 0)
-                .cornerRadius(6)
-            VStack(alignment: .leading) {
-                VStack {
-                    HStack {
-                        Text("#\(data.translations[index].texts[strings[string]]!.order)")
-                            .fontWeight(.light)
-                            .opacity(0.25)
-                        Spacer()
-                        Text(data.translations[index].texts[strings[string]]!.single ? "S" : "M")
-                            .fontWeight(.light)
-                            .opacity(0.25)
-                        ZStack {
-                            if data.translations[index].texts[strings[string]]!.pinned {
-                                Image(systemName: "pin.fill")
-                                    .foregroundColor(data.styles.color)
-                            } else {
-                                Image(systemName: "pin.fill")
-                                    .opacity(0.25)
-                            }
-                        }
-                        .onTapGesture {
-                            withAnimation {
-                                data.translations.indices.forEach { index in
-                                    data.translations[index].texts[strings[string]]!.pinned = !data.translations[index].texts[strings[string]]!.pinned
-                                }
-                                Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data)
-                            }
-                        }
-                        Image(systemName: "xmark.circle.fill")
-                            .opacity(0.25)
-                            .onTapGesture {
-                                if data.alerts {
-                                    self.alert.toggle()
+        if selection != "" && data.target != "" {
+            ZStack {
+                Rectangle()
+                    .opacity((string % 2 == 0) ? 0.03 : 0)
+                    .cornerRadius(6)
+                VStack(alignment: .leading) {
+                    VStack {
+                        HStack {
+                            Text("#\(data.translations[index].texts[strings[string]]!.order)")
+                                .fontWeight(.light)
+                                .opacity(0.25)
+                            Spacer()
+                            Text(data.translations[index].texts[strings[string]]!.single ? "S" : "M")
+                                .fontWeight(.light)
+                                .opacity(0.25)
+                            ZStack {
+                                if data.translations[index].texts[strings[string]]!.pinned {
+                                    Image(systemName: "pin.fill")
+                                        .foregroundColor(data.styles.color)
                                 } else {
-                                    withAnimation {
-                                        data.translations.indices.forEach { t in
-                                            data.translations[t].texts.keys.forEach { s in
-                                                if data.translations[t].texts[s]!.order > data.translations[index].texts[strings[string]]!.order {
-                                                    data.translations[t].texts[s]!.order = data.translations[t].texts[s]!.order - 1
+                                    Image(systemName: "pin.fill")
+                                        .opacity(0.25)
+                                }
+                            }
+                            .onTapGesture {
+                                withAnimation {
+                                    data.translations.indices.forEach { index in
+                                        data.translations[index].texts[strings[string]]!.pinned = !data.translations[index].texts[strings[string]]!.pinned
+                                    }
+                                    Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data)
+                                }
+                            }
+                            Image(systemName: "xmark.circle.fill")
+                                .opacity(0.25)
+                                .onTapGesture {
+                                    if data.alerts {
+                                        self.alert.toggle()
+                                    } else {
+                                        withAnimation {
+                                            data.translations.indices.forEach { t in
+                                                data.translations[t].texts.keys.forEach { s in
+                                                    if data.translations[t].texts[s]!.order > data.translations[index].texts[strings[string]]!.order {
+                                                        data.translations[t].texts[s]!.order = data.translations[t].texts[s]!.order - 1
+                                                    }
                                                 }
                                             }
+                                            data.translations.indices.forEach { index in
+                                                data.translations[index].texts.removeValue(forKey: strings[string])
+                                            }
+                                            Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data)
                                         }
-                                        data.translations.indices.forEach { index in
-                                            data.translations[index].texts.removeValue(forKey: strings[string])
-                                        }
-                                        Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data)
                                     }
                                 }
-                            }
+                        }
+                        Spacer()
                     }
+                    .frame(height: 40)
                     Spacer()
+                    Text("\(strings[string])")
+                        .font(.custom(data.styles.font, size: data.styles.size))
+                        .fontWeight(data.styles.weight)
+                        .foregroundColor(data.styles.color)
+                    TextField("Add translation", text: Binding(
+                        get: { data.translations[index].texts[strings[string]]!.translation },
+                        set: { data.translations[index].texts[strings[string]]?.translation = $0 }
+                    ), onCommit: { withAnimation { Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data)}})
+                    .textFieldStyle(PlainTextFieldStyle())
                 }
-                .frame(height: 40)
-                Spacer()
-                Text("\(strings[string])")
-                    .font(.custom(data.styles.font, size: data.styles.size))
-                    .fontWeight(data.styles.weight)
-                    .foregroundColor(data.styles.color)
-                TextField("Add translation", text: Binding(
-                    get: { data.translations[index].texts[strings[string]]!.translation },
-                    set: { data.translations[index].texts[strings[string]]?.translation = $0 }
-                ), onCommit: { withAnimation { Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data)}})
-                .textFieldStyle(PlainTextFieldStyle())
+                .padding()
             }
-            .padding()
         }
     }
     
@@ -157,8 +159,8 @@ struct Editor: View {
                                             .sorted { data.translations[index].texts[$0]!.order < data.translations[index].texts[$1]!.order }
                                             .sorted { data.translations[index].texts[$0]!.pinned == true && data.translations[index].texts[$1]!.pinned == false }
                                             .filter { $0.lowercased().hasPrefix(query.lowercased()) } // search strings
-                                            .filter { data.filters.singleline ? true : data.translations[index].texts[$0]!.single } // single-line
-                                            .filter { data.filters.multiline ? true : data.translations[index].texts[$0]!.multi } // multi-line
+                                            .filter { data.filters.singleline ? true : !data.translations[index].texts[$0]!.single } // single-line
+                                            .filter { data.filters.multiline ? true : !data.translations[index].texts[$0]!.multi } // multi-line
                                             .filter { data.filters.parenthesis ? true : !($0.hasPrefix("(") && $0.hasSuffix(")")) } // parenthesis
                                             .filter { data.filters.nummerical ? true : !($0.allSatisfy({ $0.isNumber })) } // nummerical
                                             .filter { data.filters.symbols ? true : !($0.allSatisfy({ ($0.isSymbol || $0.isPunctuation || $0.isCurrencySymbol || $0.isMathSymbol) })) } // symbols
