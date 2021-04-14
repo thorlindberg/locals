@@ -43,6 +43,84 @@ struct Header: View {
     }
 }
 
+struct Card: View {
+    
+    @Binding var selection: String
+    @Binding var status: [String]
+    @Binding var progress: CGFloat
+    @Binding var data: Storage.Format
+    @Binding var alert: Bool
+    var index: Range<Array<Storage.Format.Translations>.Index>.Element
+    var string: Range<Array<Dictionary<String, Storage.Format.Text>.Keys.Element>.Index>.Element
+    var strings: [Dictionary<String, Storage.Format.Text>.Keys.Element]
+    
+    var body: some View {
+        ZStack {
+            Rectangle()
+                .opacity((string % 2 == 0) ? 0.03 : 0)
+                .cornerRadius(6)
+            VStack(alignment: .leading) {
+                HStack {
+                    Text("#\(data.translations[index].texts[strings[string]]!.order)")
+                        .fontWeight(.light)
+                        .opacity(0.25)
+                    Spacer()
+                    Text(data.translations[index].texts[strings[string]]!.single ? "S" : "M")
+                        .fontWeight(.light)
+                        .opacity(0.25)
+                    ZStack {
+                        if data.translations[index].texts[strings[string]]!.pinned {
+                            Image(systemName: "pin.fill")
+                                .foregroundColor(data.styles.color)
+                        } else {
+                            Image(systemName: "pin.fill")
+                                .opacity(0.25)
+                        }
+                    }
+                    .onTapGesture {
+                        data.translations.indices.forEach { index in
+                            data.translations[index].texts[strings[string]]!.pinned = !data.translations[index].texts[strings[string]]!.pinned
+                        }
+                        Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data)
+                    }
+                    Image(systemName: "xmark.circle.fill")
+                        .opacity(0.25)
+                        .onTapGesture {
+                            if data.alerts {
+                                self.alert.toggle()
+                            } else {
+                                data.translations.indices.forEach { t in
+                                    data.translations[t].texts.keys.forEach { s in
+                                        if data.translations[t].texts[s]!.order > data.translations[index].texts[strings[string]]!.order {
+                                            data.translations[t].texts[s]!.order = data.translations[t].texts[s]!.order - 1
+                                        }
+                                    }
+                                }
+                                data.translations.indices.forEach { index in
+                                    data.translations[index].texts.removeValue(forKey: strings[string])
+                                }
+                                Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data)
+                            }
+                        }
+                }
+                .frame(height: 30)
+                Spacer()
+                Text("\(strings[string])")
+                    .font(.custom(data.styles.font, size: data.styles.size))
+                    .fontWeight(data.styles.weight)
+                    .foregroundColor(data.styles.color)
+                TextField("Add translation", text: Binding(
+                    get: { data.translations[index].texts[strings[string]]!.translation },
+                    set: { data.translations[index].texts[strings[string]]?.translation = $0 }
+                ), onCommit: { withAnimation { Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data)}})
+                .textFieldStyle(PlainTextFieldStyle())
+            }
+            .padding()
+        }
+    }
+    
+}
+
 struct Editor: View {
     
     @Binding var selection: String
@@ -79,54 +157,7 @@ struct Editor: View {
                                             .filter { data.filters.symbols ? true : !($0.allSatisfy({ ($0.isSymbol || $0.isPunctuation || $0.isCurrencySymbol || $0.isMathSymbol) })) } // symbols
                                             .filter { data.filters.unpinned ? true : data.translations[index].texts[$0]!.pinned } // unpinned
                                         ForEach(strings.indices, id: \.self) { string in
-                                            ZStack {
-                                                Rectangle()
-                                                    .opacity((string % 2 == 0) ? 0.03 : 0)
-                                                    .cornerRadius(6)
-                                                VStack(alignment: .leading) {
-                                                    Button(action: {
-                                                        data.translations.indices.forEach { index in
-                                                            data.translations[index].texts[strings[string]]!.pinned = !data.translations[index].texts[strings[string]]!.pinned
-                                                        }
-                                                        Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data)
-                                                    }) {
-                                                        Text("Pin card")
-                                                    }
-                                                    Button(action: {
-                                                        if data.alerts {
-                                                            self.alert.toggle()
-                                                        } else {
-                                                            data.translations.indices.forEach { t in
-                                                                data.translations[t].texts.keys.forEach { s in
-                                                                    if data.translations[t].texts[s]!.order > data.translations[index].texts[strings[string]]!.order {
-                                                                        data.translations[t].texts[s]!.order = data.translations[t].texts[s]!.order - 1
-                                                                    }
-                                                                }
-                                                            }
-                                                            data.translations.indices.forEach { index in
-                                                                data.translations[index].texts.removeValue(forKey: strings[string])
-                                                            }
-                                                            Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data)
-                                                        }
-                                                    }) {
-                                                        Text("Delete")
-                                                    }
-                                                    Text("#\(data.translations[index].texts[strings[string]]!.order)")
-                                                    Spacer()
-                                                    Text(data.translations[index].texts[strings[string]]!.single ? "S" : "M")
-                                                    Spacer()
-                                                    Text("\(strings[string])")
-                                                        .font(.custom(data.styles.font, size: data.styles.size))
-                                                        .fontWeight(data.styles.weight)
-                                                        .foregroundColor(data.styles.color)
-                                                    TextField("Add translation", text: Binding(
-                                                        get: { data.translations[index].texts[strings[string]]!.translation },
-                                                        set: { data.translations[index].texts[strings[string]]?.translation = $0 }
-                                                    ), onCommit: { withAnimation { Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data)}})
-                                                    .textFieldStyle(PlainTextFieldStyle())
-                                                }
-                                                .padding()
-                                            }
+                                            Card(selection: $selection, status: $status, progress: $progress, data: $data, alert: $alert, index: index, string: string, strings: strings)
                                         }
                                     }
                                 }
