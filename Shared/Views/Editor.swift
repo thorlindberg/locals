@@ -84,7 +84,6 @@ struct Editor: View {
                                                     .opacity((string % 2 == 0) ? 0.03 : 0)
                                                     .cornerRadius(6)
                                                 VStack(alignment: .leading) {
-                                                    /*
                                                     Button(action: {
                                                         data.translations.indices.forEach { index in
                                                             data.translations[index].texts[strings[string]]!.pinned = !data.translations[index].texts[strings[string]]!.pinned
@@ -112,7 +111,6 @@ struct Editor: View {
                                                     }) {
                                                         Text("Delete")
                                                     }
-                                                    */
                                                     Text("#\(data.translations[index].texts[strings[string]]!.order)")
                                                     Spacer()
                                                     Text(data.translations[index].texts[strings[string]]!.single ? "S" : "M")
