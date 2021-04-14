@@ -4,6 +4,7 @@ struct Storage {
     
     @Binding var status: [String]
     @Binding var progress: CGFloat
+    @Binding var saved: String
     
     let folder = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
     
@@ -611,10 +612,9 @@ struct Storage {
         
         do {
             try output.dropLast(3).write(to: self.folder.appendingPathComponent(selection + ".localproj"), atomically: true, encoding: String.Encoding.utf8)
-            // Progress(status: $status, progress: $progress).log(string: "Project \"\(selection)\" written to internal application storage")
+            self.saved = "Last saved at \(Time().current())"
         } catch {
             NSLog(error.localizedDescription)
-            // Progress(status: $status, progress: $progress).log(string: "Failed to write project \"\(selection)\"")
         }
         
     }

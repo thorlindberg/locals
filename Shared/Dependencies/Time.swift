@@ -4,6 +4,7 @@ struct Time {
     
     let hours = String(Calendar.current.component(.hour, from: Date()))
     let minutes = String(Calendar.current.component(.minute, from: Date()))
+    let seconds = String(Calendar.current.component(.second, from: Date()))
     
     func current() -> String {
         var hour = hours
@@ -14,6 +15,6 @@ struct Time {
         if minutes.count == 1 {
             minute = "0" + minutes
         }
-        return hour + "." + minute
+        return hour + "." + minute + "." + seconds
     }
 }

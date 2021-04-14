@@ -24,6 +24,7 @@ struct VisualEffect: NSViewRepresentable {
 
 struct Header: View {
     @Binding var data: Storage.Format
+    @Binding var saved: String
     var body: some View {
         if data.target != "" {
             HStack {
@@ -36,6 +37,10 @@ struct Header: View {
                 Text("\(data.target)")
                     .fontWeight(.regular)
                     .foregroundColor(data.styles.color)
+                Spacer()
+                Text(saved)
+                    .fontWeight(.regular)
+                    .opacity(0.5)
             }
         } else {
             Text("")
@@ -50,81 +55,80 @@ struct Card: View {
     @Binding var progress: CGFloat
     @Binding var data: Storage.Format
     @Binding var alert: Bool
+    @Binding var saved: String
     var index: Range<Array<Storage.Format.Translations>.Index>.Element
     var string: Range<Array<Dictionary<String, Storage.Format.Text>.Keys.Element>.Index>.Element
     var strings: [Dictionary<String, Storage.Format.Text>.Keys.Element]
     
     var body: some View {
-        if selection != "" && data.target != "" {
-            ZStack {
-                Rectangle()
-                    .opacity((string % 2 == 0) ? 0.03 : 0)
-                    .cornerRadius(6)
-                VStack(alignment: .leading) {
-                    VStack {
-                        HStack {
-                            Text("#\(data.translations[index].texts[strings[string]]!.order)")
-                                .fontWeight(.light)
-                                .opacity(0.25)
-                            Spacer()
-                            Text(data.translations[index].texts[strings[string]]!.single ? "S" : "M")
-                                .fontWeight(.light)
-                                .opacity(0.25)
-                            ZStack {
-                                if data.translations[index].texts[strings[string]]!.pinned {
-                                    Image(systemName: "pin.fill")
-                                        .foregroundColor(data.styles.color)
-                                } else {
-                                    Image(systemName: "pin.fill")
-                                        .opacity(0.25)
-                                }
+        ZStack {
+            Rectangle()
+                .opacity((string % 2 == 0) ? 0.03 : 0)
+                .cornerRadius(6)
+            VStack(alignment: .leading) {
+                VStack {
+                    HStack {
+                        Text("#\(data.translations[index].texts[strings[string]]!.order)")
+                            .fontWeight(.light)
+                            .opacity(0.25)
+                        Spacer()
+                        Text(data.translations[index].texts[strings[string]]!.single ? "S" : "M")
+                            .fontWeight(.light)
+                            .opacity(0.25)
+                        ZStack {
+                            if data.translations[index].texts[strings[string]]!.pinned {
+                                Image(systemName: "pin.fill")
+                                    .foregroundColor(data.styles.color)
+                            } else {
+                                Image(systemName: "pin.fill")
+                                    .opacity(0.25)
                             }
+                        }
+                        .onTapGesture {
+                            withAnimation {
+                                data.translations.indices.forEach { index in
+                                    data.translations[index].texts[strings[string]]!.pinned = !data.translations[index].texts[strings[string]]!.pinned
+                                }
+                                Storage(status: $status, progress: $progress, saved: $saved).write(status: status, selection: selection, data: data)
+                            }
+                        }
+                        Image(systemName: "xmark.circle.fill")
+                            .opacity(0.25)
                             .onTapGesture {
-                                withAnimation {
-                                    data.translations.indices.forEach { index in
-                                        data.translations[index].texts[strings[string]]!.pinned = !data.translations[index].texts[strings[string]]!.pinned
-                                    }
-                                    Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data)
-                                }
-                            }
-                            Image(systemName: "xmark.circle.fill")
-                                .opacity(0.25)
-                                .onTapGesture {
-                                    if data.alerts {
-                                        self.alert.toggle()
-                                    } else {
-                                        withAnimation {
-                                            data.translations.indices.forEach { t in
-                                                data.translations[t].texts.keys.forEach { s in
-                                                    if data.translations[t].texts[s]!.order > data.translations[index].texts[strings[string]]!.order {
-                                                        data.translations[t].texts[s]!.order = data.translations[t].texts[s]!.order - 1
-                                                    }
+                                if data.alerts {
+                                    self.alert.toggle()
+                                } else {
+                                    withAnimation {
+                                        data.translations.indices.forEach { t in
+                                            data.translations[t].texts.keys.forEach { s in
+                                                if data.translations[t].texts[s]!.order > data.translations[index].texts[strings[string]]!.order {
+                                                    data.translations[t].texts[s]!.order = data.translations[t].texts[s]!.order - 1
                                                 }
                                             }
-                                            data.translations.indices.forEach { index in
-                                                data.translations[index].texts.removeValue(forKey: strings[string])
-                                            }
-                                            Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data)
                                         }
+                                        data.translations.indices.forEach { index in
+                                            data.translations[index].texts.removeValue(forKey: strings[string])
+                                        }
+                                        Storage(status: $status, progress: $progress, saved: $saved).write(status: status, selection: selection, data: data)
                                     }
                                 }
-                        }
-                        Spacer()
+                            }
                     }
-                    .frame(height: 40)
                     Spacer()
-                    Text("\(strings[string])")
-                        .font(.custom(data.styles.font, size: data.styles.size))
-                        .fontWeight(data.styles.weight)
-                        .foregroundColor(data.styles.color)
-                    TextField("Add translation", text: Binding(
-                        get: { data.translations[index].texts[strings[string]]!.translation },
-                        set: { data.translations[index].texts[strings[string]]?.translation = $0 }
-                    ), onCommit: { withAnimation { Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data)}})
-                    .textFieldStyle(PlainTextFieldStyle())
                 }
-                .padding()
+                .frame(height: 40)
+                Spacer()
+                Text("\(strings[string])")
+                    .font(.custom(data.styles.font, size: data.styles.size))
+                    .fontWeight(data.styles.weight)
+                    .foregroundColor(data.styles.color)
+                TextField("Add translation", text: Binding(
+                    get: { data.translations[index].texts[strings[string]]!.translation },
+                    set: { data.translations[index].texts[strings[string]]?.translation = $0 }
+                ), onCommit: { withAnimation { Storage(status: $status, progress: $progress, saved: $saved).write(status: status, selection: selection, data: data)}})
+                .textFieldStyle(PlainTextFieldStyle())
             }
+            .padding()
         }
     }
     
@@ -139,6 +143,7 @@ struct Editor: View {
     @Binding var query: String
     @Binding var entry: String
     @Binding var inspector: Bool
+    @Binding var saved: String
     
     @State var checking: Bool = false
     @State var clear: Bool = false
@@ -149,7 +154,7 @@ struct Editor: View {
             if selection != "" && data.target != "" {
                 VStack(spacing: 0) {
                     List {
-                        Section(header: Header(data: $data)) {
+                        Section(header: Header(data: $data, saved: $saved)) {
                             Spacer()
                                 .frame(height: 10)
                             LazyVGrid(columns: Array(repeating: .init(.adaptive(minimum: 600)), count: data.styles.columns), spacing: 0) {
@@ -166,7 +171,7 @@ struct Editor: View {
                                             .filter { data.filters.symbols ? true : !($0.allSatisfy({ ($0.isSymbol || $0.isPunctuation || $0.isCurrencySymbol || $0.isMathSymbol) })) } // symbols
                                             .filter { data.filters.unpinned ? true : data.translations[index].texts[$0]!.pinned } // unpinned
                                         ForEach(strings.indices, id: \.self) { string in
-                                            Card(selection: $selection, status: $status, progress: $progress, data: $data, alert: $alert, index: index, string: string, strings: strings)
+                                            Card(selection: $selection, status: $status, progress: $progress, data: $data, alert: $alert, saved: $saved, index: index, string: string, strings: strings)
                                         }
                                     }
                                 }
@@ -198,7 +203,7 @@ struct Editor: View {
                                             multi: false
                                         )
                                     }
-                                    Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data)
+                                    Storage(status: $status, progress: $progress, saved: $saved).write(status: status, selection: selection, data: data)
                                     self.entry = ""
                                 }
                             })
@@ -227,7 +232,7 @@ struct Editor: View {
                 primaryButton: .default (Text("Okay")) {
                     self.alert = false
                     data.alerts = false
-                    Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data)
+                    Storage(status: $status, progress: $progress, saved: $saved).write(status: status, selection: selection, data: data)
                 },
                 secondaryButton: .cancel (Text("Cancel")) {
                     self.alert = false
@@ -251,7 +256,7 @@ struct Editor: View {
                                 }
                             }
                         }
-                        Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data)
+                        Storage(status: $status, progress: $progress, saved: $saved).write(status: status, selection: selection, data: data)
                     }
                 }) {
                     Image(systemName: "folder.fill.badge.plus")
@@ -262,7 +267,7 @@ struct Editor: View {
                     withAnimation {
                         Progress(status: $status, progress: $progress).load(string: "Translating strings to \(data.target)...")
                         Translation(status: $status, progress: $progress, data: $data).translate()
-                        Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data)
+                        Storage(status: $status, progress: $progress, saved: $saved).write(status: status, selection: selection, data: data)
                     }
                 }) {
                     Image(systemName: "globe")
@@ -276,13 +281,13 @@ struct Editor: View {
                         HStack {
                             Rectangle()
                                 .foregroundColor(data.styles.color)
-                                .frame(width: 400 * self.progress, height: 1.5)
+                                .frame(width: 500 * self.progress, height: 1.5)
                             Spacer()
                         }
-                        .frame(width: 400, height: 1.5)
+                        .frame(width: 500, height: 1.5)
                     }
-                    .frame(width: 400, height: 27)
-                    .mask(Rectangle().frame(width: 400, height: 27).cornerRadius(5))
+                    .frame(width: 500, height: 27)
+                    .mask(Rectangle().frame(width: 500, height: 27).cornerRadius(5))
                     Menu {
                         ForEach(status.indices.reversed(), id: \.self) { index in
                             Text("\(status[index])")
@@ -293,7 +298,7 @@ struct Editor: View {
                         Text(status.last!)
                             .font(.system(size: 10))
                     }
-                    .frame(width: 400)
+                    .frame(width: 500)
                     .help("View project changelog, and revert to a previous version")
                     HStack {
                         Spacer()

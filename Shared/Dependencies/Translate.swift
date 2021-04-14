@@ -1,6 +1,6 @@
 import SwiftUI
 
-// Translates strings by querying Libre Translate API
+// Translates strings by querying LibreTranslate API
 
 struct Translation {
     

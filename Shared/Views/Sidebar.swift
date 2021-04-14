@@ -10,6 +10,7 @@ struct Sidebar: View {
     @Binding var query: String
     @Binding var entry: String
     @Binding var inspector: Bool
+    @Binding var saved: String
     
     @State var rename: String = ""
     @State var renaming: Bool = false
@@ -117,9 +118,9 @@ struct Sidebar: View {
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                     if !files.contains(filename) && filename != "" && !filename.hasPrefix(".") {
                         Button(action: {
-                            Storage(status: $status, progress: $progress).write(status: status, selection: filename, data: Storage(status: $status, progress: $progress).data)
+                            Storage(status: $status, progress: $progress, saved: $saved).write(status: status, selection: filename, data: Storage(status: $status, progress: $progress, saved: $saved).data)
                             self.filename = ""
-                            self.files = Storage(status: $status, progress: $progress).identify(status: status)
+                            self.files = Storage(status: $status, progress: $progress, saved: $saved).identify(status: status)
                         }) {
                             Image(systemName: "plus")
                         }
@@ -133,11 +134,11 @@ struct Sidebar: View {
                         ForEach(files, id: \.self) { file in
                             NavigationLink(destination:
                                 Editor(selection: $selection, status: $status, progress: $progress, data: $data,
-                                       query: $query, entry: $entry, inspector: $inspector),
+                                       query: $query, entry: $entry, inspector: $inspector, saved: $saved),
                                 tag: file,
                                 selection: Binding(
                                     get: { selection },
-                                    set: { if $0 != nil { self.selection = $0! } ; self.toggle = "languages" ; self.data = Storage(status: $status, progress: $progress).read(status: status, selection: file) }
+                                    set: { if $0 != nil { self.selection = $0! } ; self.toggle = "languages" ; self.data = Storage(status: $status, progress: $progress, saved: $saved).read(status: status, selection: file) }
                                 )
                             ) {
                                 HStack {
@@ -157,14 +158,14 @@ struct Sidebar: View {
                                 }
                                 Button(action: {
                                     withAnimation {
-                                        Storage(status: $status, progress: $progress).remove(
+                                        Storage(status: $status, progress: $progress, saved: $saved).remove(
                                             status: status,
                                             selection: file
                                         )
                                         if file == selection {
                                             self.selection = ""
                                         }
-                                        self.files = Storage(status: $status, progress: $progress).identify(status: status)
+                                        self.files = Storage(status: $status, progress: $progress, saved: $saved).identify(status: status)
                                     }
                                 }) {
                                     Text("Delete")
@@ -183,10 +184,10 @@ struct Sidebar: View {
                                         Spacer()
                                         Button(action: {
                                             withAnimation {
-                                                Storage(status: $status, progress: $progress).rename(status: status, selection: file, rename: rename)
+                                                Storage(status: $status, progress: $progress, saved: $saved).rename(status: status, selection: file, rename: rename)
                                                 self.selection = self.rename
                                                 self.rename = ""
-                                                self.files = Storage(status: $status, progress: $progress).identify(status: status)
+                                                self.files = Storage(status: $status, progress: $progress, saved: $saved).identify(status: status)
                                                 self.renaming.toggle()
                                             }
                                         }) {
@@ -203,7 +204,7 @@ struct Sidebar: View {
                 }
                 .listStyle(SidebarListStyle())
                 .onAppear {
-                    self.files = Storage(status: $status, progress: $progress).identify(status: status)
+                    self.files = Storage(status: $status, progress: $progress, saved: $saved).identify(status: status)
                 }
             }
             if toggle == "languages" {
@@ -235,7 +236,7 @@ struct Sidebar: View {
                             Spacer()
                             Picker("", selection: Binding(
                                 get: { data.base },
-                                set: { data.base = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
+                                set: { data.base = $0 ; Storage(status: $status, progress: $progress, saved: $saved).write(status: status, selection: selection, data: data) }
                             )) {
                                 ForEach(data.translations, id: \.self) { translations in
                                     Text("\(translations.language)").tag(translations.language)
@@ -264,7 +265,7 @@ struct Sidebar: View {
                                             data.translations[index].target = true
                                         }
                                     }
-                                    Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data)
+                                    Storage(status: $status, progress: $progress, saved: $saved).write(status: status, selection: selection, data: data)
                                 }
                             )) {
                                 Text("")
@@ -290,7 +291,7 @@ struct Sidebar: View {
                                         Spacer()
                                         Toggle(isOn: Binding(
                                             get: { data.translations[index].target },
-                                            set: { data.translations[index].target = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
+                                            set: { data.translations[index].target = $0 ; Storage(status: $status, progress: $progress, saved: $saved).write(status: status, selection: selection, data: data) }
                                         )) {
                                             Text("")
                                         }
@@ -301,7 +302,7 @@ struct Sidebar: View {
                                     if data.translations[index].target {
                                         NavigationLink(destination:
                                             Editor(selection: $selection, status: $status, progress: $progress, data: $data,
-                                                   query: $query, entry: $entry, inspector: $inspector),
+                                                   query: $query, entry: $entry, inspector: $inspector, saved: $saved),
                                             tag: data.translations[index].language,
                                             selection: Binding(
                                                 get: { data.target },
@@ -314,7 +315,7 @@ struct Sidebar: View {
                                         .contextMenu {
                                             Button(action: {
                                                 data.translations[index].target = false
-                                                Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data)
+                                                Storage(status: $status, progress: $progress, saved: $saved).write(status: status, selection: selection, data: data)
                                             }) {
                                                 Text("Disable target")
                                             }
@@ -337,203 +338,205 @@ struct Sidebar: View {
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding()
                 Divider()
-                VStack {
-                    HStack {
-                        Text("Single-line")
-                        Spacer()
-                        Toggle(isOn: Binding(
-                            get: { data.filters.singleline },
-                            set: { data.filters.singleline = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
-                        )) {
-                            Text("")
-                        }
-                        .toggleStyle(CheckboxToggleStyle())
-                    }
-                    HStack {
-                        Text("Multi-line")
-                        Spacer()
-                        Toggle(isOn: Binding(
-                            get: { data.filters.multiline },
-                            set: { data.filters.multiline = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
-                        )) {
-                            Text("")
-                        }
-                        .toggleStyle(CheckboxToggleStyle())
-                    }
-                    HStack {
-                        Text("Parenthesis")
-                        Spacer()
-                        Toggle(isOn: Binding(
-                            get: { data.filters.parenthesis },
-                            set: { data.filters.parenthesis = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
-                        )) {
-                            Text("")
-                        }
-                        .toggleStyle(CheckboxToggleStyle())
-                    }
-                    HStack {
-                        Text("Nummerical")
-                        Spacer()
-                        Toggle(isOn: Binding(
-                            get: { data.filters.nummerical },
-                            set: { data.filters.nummerical = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
-                        )) {
-                            Text("")
-                        }
-                        .toggleStyle(CheckboxToggleStyle())
-                    }
-                    HStack {
-                        Text("Symbols")
-                        Spacer()
-                        Toggle(isOn: Binding(
-                            get: { data.filters.symbols },
-                            set: { data.filters.symbols = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
-                        )) {
-                            Text("")
-                        }
-                        .toggleStyle(CheckboxToggleStyle())
-                    }
-                    HStack {
-                        Text("Unpinned")
-                        Spacer()
-                        Toggle(isOn: Binding(
-                            get: { data.filters.unpinned },
-                            set: { data.filters.unpinned = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
-                        )) {
-                            Text("")
-                        }
-                        .toggleStyle(CheckboxToggleStyle())
-                    }
-                }
-                .padding()
-                Divider()
-                VStack {
-                    HStack {
-                        Text("Alerts")
-                        Spacer()
-                        Toggle(isOn: Binding(
-                            get: { data.alerts },
-                            set: { data.alerts = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
-                        )) {
-                            Text("")
-                        }
-                        .toggleStyle(CheckboxToggleStyle())
-                    }
-                }
-                .padding()
-                Divider()
-                VStack {
-                    HStack {
+                ScrollView {
+                    VStack {
                         HStack {
-                            Text("Columns")
+                            Text("Single-line")
                             Spacer()
+                            Toggle(isOn: Binding(
+                                get: { data.filters.singleline },
+                                set: { data.filters.singleline = $0 ; Storage(status: $status, progress: $progress, saved: $saved).write(status: status, selection: selection, data: data) }
+                            )) {
+                                Text("")
+                            }
+                            .toggleStyle(CheckboxToggleStyle())
                         }
-                        .frame(width: 65)
-                        Spacer()
-                        Picker("", selection: Binding(
-                            get: { data.styles.columns },
-                            set: { data.styles.columns = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
-                        )) {
-                            ForEach(Array(stride(from: 1, to: 6, by: 2)), id: \.self) { count in
-                                Text(String(count)).tag(count)
+                        HStack {
+                            Text("Multi-line")
+                            Spacer()
+                            Toggle(isOn: Binding(
+                                get: { data.filters.multiline },
+                                set: { data.filters.multiline = $0 ; Storage(status: $status, progress: $progress, saved: $saved).write(status: status, selection: selection, data: data) }
+                            )) {
+                                Text("")
+                            }
+                            .toggleStyle(CheckboxToggleStyle())
+                        }
+                        HStack {
+                            Text("Parenthesis")
+                            Spacer()
+                            Toggle(isOn: Binding(
+                                get: { data.filters.parenthesis },
+                                set: { data.filters.parenthesis = $0 ; Storage(status: $status, progress: $progress, saved: $saved).write(status: status, selection: selection, data: data) }
+                            )) {
+                                Text("")
+                            }
+                            .toggleStyle(CheckboxToggleStyle())
+                        }
+                        HStack {
+                            Text("Nummerical")
+                            Spacer()
+                            Toggle(isOn: Binding(
+                                get: { data.filters.nummerical },
+                                set: { data.filters.nummerical = $0 ; Storage(status: $status, progress: $progress, saved: $saved).write(status: status, selection: selection, data: data) }
+                            )) {
+                                Text("")
+                            }
+                            .toggleStyle(CheckboxToggleStyle())
+                        }
+                        HStack {
+                            Text("Symbols")
+                            Spacer()
+                            Toggle(isOn: Binding(
+                                get: { data.filters.symbols },
+                                set: { data.filters.symbols = $0 ; Storage(status: $status, progress: $progress, saved: $saved).write(status: status, selection: selection, data: data) }
+                            )) {
+                                Text("")
+                            }
+                            .toggleStyle(CheckboxToggleStyle())
+                        }
+                        HStack {
+                            Text("Unpinned")
+                            Spacer()
+                            Toggle(isOn: Binding(
+                                get: { data.filters.unpinned },
+                                set: { data.filters.unpinned = $0 ; Storage(status: $status, progress: $progress, saved: $saved).write(status: status, selection: selection, data: data) }
+                            )) {
+                                Text("")
+                            }
+                            .toggleStyle(CheckboxToggleStyle())
+                        }
+                    }
+                    .padding()
+                    Divider()
+                    VStack {
+                        HStack {
+                            Text("Alerts")
+                            Spacer()
+                            Toggle(isOn: Binding(
+                                get: { data.alerts },
+                                set: { data.alerts = $0 ; Storage(status: $status, progress: $progress, saved: $saved).write(status: status, selection: selection, data: data) }
+                            )) {
+                                Text("")
+                            }
+                            .toggleStyle(CheckboxToggleStyle())
+                        }
+                    }
+                    .padding()
+                    Divider()
+                    VStack {
+                        HStack {
+                            HStack {
+                                Text("Columns")
+                                Spacer()
+                            }
+                            .frame(width: 65)
+                            Spacer()
+                            Picker("", selection: Binding(
+                                get: { data.styles.columns },
+                                set: { data.styles.columns = $0 ; Storage(status: $status, progress: $progress, saved: $saved).write(status: status, selection: selection, data: data) }
+                            )) {
+                                ForEach(Array(stride(from: 1, to: 6, by: 2)), id: \.self) { count in
+                                    Text(String(count)).tag(count)
+                                }
                             }
                         }
-                    }
-                    HStack {
                         HStack {
-                            Text("Font")
+                            HStack {
+                                Text("Font")
+                                Spacer()
+                            }
+                            .frame(width: 65)
                             Spacer()
-                        }
-                        .frame(width: 65)
-                        Spacer()
-                        Picker("", selection: Binding(
-                            get: { data.styles.font },
-                            set: { data.styles.font = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
-                        )) {
-                            ForEach(fonts, id: \.self) { font in
-                                Text(font)
-                                    .font(.custom(font, size: 14))
-                                    .tag(font)
+                            Picker("", selection: Binding(
+                                get: { data.styles.font },
+                                set: { data.styles.font = $0 ; Storage(status: $status, progress: $progress, saved: $saved).write(status: status, selection: selection, data: data) }
+                            )) {
+                                ForEach(fonts, id: \.self) { font in
+                                    Text(font)
+                                        .font(.custom(font, size: 14))
+                                        .tag(font)
+                                }
                             }
                         }
-                    }
-                    HStack {
                         HStack {
-                            Text("Size")
+                            HStack {
+                                Text("Size")
+                                Spacer()
+                            }
+                            .frame(width: 65)
                             Spacer()
-                        }
-                        .frame(width: 65)
-                        Spacer()
-                        Picker("", selection: Binding(
-                            get: { data.styles.size },
-                            set: { data.styles.size = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
-                        )) {
-                            ForEach(Array(stride(from: 6, to: 102, by: 2)), id: \.self) { size in
-                                Text(String(size)).tag(CGFloat(size))
+                            Picker("", selection: Binding(
+                                get: { data.styles.size },
+                                set: { data.styles.size = $0 ; Storage(status: $status, progress: $progress, saved: $saved).write(status: status, selection: selection, data: data) }
+                            )) {
+                                ForEach(Array(stride(from: 6, to: 102, by: 2)), id: \.self) { size in
+                                    Text(String(size)).tag(CGFloat(size))
+                                }
                             }
                         }
-                    }
-                    HStack {
                         HStack {
-                            Text("Weight")
+                            HStack {
+                                Text("Weight")
+                                Spacer()
+                            }
+                            .frame(width: 65)
                             Spacer()
+                            Picker("", selection: Binding(
+                                get: { data.styles.weight },
+                                set: { data.styles.weight = $0 ; Storage(status: $status, progress: $progress, saved: $saved).write(status: status, selection: selection, data: data) }
+                            )) {
+                                Text("Regular").tag(Font.Weight.regular)
+                                Text("Heavy").tag(Font.Weight.heavy)
+                                Text("Black").tag(Font.Weight.black)
+                                Text("Bold").tag(Font.Weight.bold)
+                                Text("Semi-bold").tag(Font.Weight.semibold)
+                                Text("Medium").tag(Font.Weight.medium)
+                                Text("Thin").tag(Font.Weight.thin)
+                                Text("Light").tag(Font.Weight.light)
+                                Text("Ultra light").tag(Font.Weight.ultraLight)
+                            }
                         }
-                        .frame(width: 65)
-                        Spacer()
-                        Picker("", selection: Binding(
-                            get: { data.styles.weight },
-                            set: { data.styles.weight = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
-                        )) {
-                            Text("Regular").tag(Font.Weight.regular)
-                            Text("Heavy").tag(Font.Weight.heavy)
-                            Text("Black").tag(Font.Weight.black)
-                            Text("Bold").tag(Font.Weight.bold)
-                            Text("Semi-bold").tag(Font.Weight.semibold)
-                            Text("Medium").tag(Font.Weight.medium)
-                            Text("Thin").tag(Font.Weight.thin)
-                            Text("Light").tag(Font.Weight.light)
-                            Text("Ultra light").tag(Font.Weight.ultraLight)
-                        }
-                    }
-                    HStack {
                         HStack {
-                            Text("Color")
+                            HStack {
+                                Text("Color")
+                                Spacer()
+                            }
+                            .frame(width: 65)
                             Spacer()
+                            Picker("", selection: Binding(
+                                get: { data.styles.color },
+                                set: { data.styles.color = $0 ; Storage(status: $status, progress: $progress, saved: $saved).write(status: status, selection: selection, data: data) }
+                            )) {
+                                Text("Accent").foregroundColor(.black).tag(Color.accentColor)
+                                Text("Blue").foregroundColor(.blue).tag(Color.blue)
+                                Text("Gray").foregroundColor(.gray).tag(Color.gray)
+                                Text("Green").foregroundColor(.green).tag(Color.green)
+                                Text("Orange").foregroundColor(.orange).tag(Color.orange)
+                                Text("Pink").foregroundColor(.pink).tag(Color.pink)
+                                Text("Purple").foregroundColor(.purple).tag(Color.purple)
+                                Text("Red").foregroundColor(.red).tag(Color.red)
+                                Text("Yellow").foregroundColor(.yellow).tag(Color.yellow)
+                            }
                         }
-                        .frame(width: 65)
-                        Spacer()
-                        Picker("", selection: Binding(
-                            get: { data.styles.color },
-                            set: { data.styles.color = $0 ; Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data) }
-                        )) {
-                            Text("Accent").foregroundColor(.black).tag(Color.accentColor)
-                            Text("Blue").foregroundColor(.blue).tag(Color.blue)
-                            Text("Gray").foregroundColor(.gray).tag(Color.gray)
-                            Text("Green").foregroundColor(.green).tag(Color.green)
-                            Text("Orange").foregroundColor(.orange).tag(Color.orange)
-                            Text("Pink").foregroundColor(.pink).tag(Color.pink)
-                            Text("Purple").foregroundColor(.purple).tag(Color.purple)
-                            Text("Red").foregroundColor(.red).tag(Color.red)
-                            Text("Yellow").foregroundColor(.yellow).tag(Color.yellow)
+                        Button(action: {
+                            data.styles.columns = 1
+                            data.styles.font = "Helvetica Neue"
+                            data.styles.size = CGFloat(14)
+                            data.styles.weight = Font.Weight.regular
+                            data.styles.color = Color.accentColor
+                            Storage(status: $status, progress: $progress, saved: $saved).write(status: status, selection: selection, data: data)
+                        }) {
+                            Text("Reset styles")
                         }
+                        .disabled(
+                            data.styles.columns == 1 && data.styles.font == "Helvetica Neue" && data.styles.size == CGFloat(14)
+                            && data.styles.weight == Font.Weight.regular && data.styles.color == Color.accentColor
+                        )
                     }
-                    Button(action: {
-                        data.styles.columns = 1
-                        data.styles.font = "Helvetica Neue"
-                        data.styles.size = CGFloat(14)
-                        data.styles.weight = Font.Weight.regular
-                        data.styles.color = Color.accentColor
-                        Storage(status: $status, progress: $progress).write(status: status, selection: selection, data: data)
-                    }) {
-                        Text("Reset styles")
-                    }
-                    .disabled(
-                        data.styles.columns == 1 && data.styles.font == "Helvetica Neue" && data.styles.size == CGFloat(14)
-                        && data.styles.weight == Font.Weight.regular && data.styles.color == Color.accentColor
-                    )
+                    .padding()
+                    Spacer()
                 }
-                .padding()
-                Spacer()
             }
         }
         .accentColor(data.styles.color)

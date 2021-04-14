@@ -13,15 +13,16 @@ struct Window: View {
     @State var query: String = ""
     @State var entry: String = ""
     @State var inspector: Bool = true
+    @State var saved: String = ""
     
     var body: some View {
         NavigationView {
             Sidebar(toggle: $toggle, selection: $selection, status: $status, progress: $progress, data: $data,
-                    query: $query, entry: $entry, inspector: $inspector)
+                    query: $query, entry: $entry, inspector: $inspector, saved: $saved)
                 .frame(minWidth: 200)
-            Editor(selection: $selection, status: $status, progress: $progress, data: $data, query: $query, entry: $entry, inspector: $inspector)
+            Editor(selection: $selection, status: $status, progress: $progress, data: $data, query: $query, entry: $entry, inspector: $inspector, saved: $saved)
         }
-        .frame(minWidth: 880, minHeight: 580)
+        .frame(minWidth: 980, minHeight: 300)
     }
     
 }
