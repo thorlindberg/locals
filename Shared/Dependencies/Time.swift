@@ -15,6 +15,6 @@ struct Time {
         if minutes.count == 1 {
             minute = "0" + minutes
         }
-        return hour + "." + minute + "." + seconds
+        return hour + "." + minute + " (" + seconds + ")"
     }
 }

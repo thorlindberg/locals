@@ -255,6 +255,7 @@ struct Editor: View {
                 }
                 .disabled(selection == "")
                 .help("Import strings from an Xcode project folder")
+                /*
                 Button(action: {
                     withAnimation {
                         Progress(data: $data).load(string: "Translating strings to \(data.target)...")
@@ -266,6 +267,7 @@ struct Editor: View {
                 }
                 .disabled(selection == "") // DISABLE IF THERE ARE NO STRINGS OR BASE/TARGET LANGUAGE IS NOT VALID FOR TRANSLATION
                 .help("Auto-translate strings")
+                */
                 Spacer()
                 ZStack {
                     VStack {
@@ -316,6 +318,7 @@ struct Editor: View {
                     withAnimation { self.checking = hovering ? true : false }
                 }
                 Spacer()
+                /*
                 Button(action: {
                     // Export localization project
                 }) {
@@ -323,6 +326,7 @@ struct Editor: View {
                 }
                 .disabled(selection == "" || data.target == "") // DISABLE IF NO STRINGS
                 .help("Export localization project")
+                */
                 Button(action: {
                     Coder(data: $data).encode()
                 }) {

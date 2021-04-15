@@ -355,18 +355,16 @@ struct Settings: View {
     
     var body: some View {
         ScrollView {
-            VStack {
-                HStack {
-                    Text("Alerts")
-                    Spacer()
-                    Toggle(isOn: Binding(
-                        get: { data.alerts },
-                        set: { data.alerts = $0 ; Storage(data: $data).write(selection: selection) }
-                    )) {
-                        Text("")
-                    }
-                    .toggleStyle(CheckboxToggleStyle())
+            HStack {
+                Text("Alerts")
+                Spacer()
+                Toggle(isOn: Binding(
+                    get: { data.alerts },
+                    set: { data.alerts = $0 ; Storage(data: $data).write(selection: selection) }
+                )) {
+                    Text("")
                 }
+                .toggleStyle(CheckboxToggleStyle())
             }
             .padding()
             Divider()
