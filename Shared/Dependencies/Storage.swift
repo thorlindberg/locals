@@ -443,24 +443,26 @@ struct Storage {
                 
                 let line = line.components(separatedBy: " : ")
                 
-                if "base" == line[0] {
+                switch line[0] {
+                
+                case "base":
                     
                     // "base" : language ;
                     baseData.base = line[1]
-                    
-                } else if "alerts" == line[0] {
+                
+                case "alerts":
                     
                     // "alerts" : Bool ;
                     baseData.alerts = Bool(line[1])!
-                    
-                } else if "targets" == line[0] && line[1] != "_" {
+                
+                case "targets":
                     
                     // "targets" : language , language , language ;
                     line[1].components(separatedBy: " , ").forEach { target in
                         targets.append(target)
                     }
-                    
-                } else if "filters" == line[0] {
+                
+                case "filters":
                     
                     // "filters" : unpinned : singleline : multiline : parenthesis : nummerical : symbols ;
                     baseData.filters.unpinned = Bool(line[1])!
@@ -469,8 +471,8 @@ struct Storage {
                     baseData.filters.parenthesis = Bool(line[4])!
                     baseData.filters.nummerical = Bool(line[5])!
                     baseData.filters.symbols = Bool(line[6])!
-                    
-                } else if "styles" == line[0] {
+                
+                case "styles":
                     
                     // "styles" : columns : font : size : weight : color ;
                     baseData.styles.columns = Int(line[1])!
@@ -494,13 +496,13 @@ struct Storage {
                     if line[5] == "Purple" { baseData.styles.color = Color.purple }
                     if line[5] == "Red" { baseData.styles.color = Color.red }
                     if line[5] == "Yellow" { baseData.styles.color = Color.yellow }
-                    
-                } else if "extension" == line[0] {
+                
+                case "extension":
                     
                     // "extension" : extension : bool ;
                     baseData.extensions[line[1]] = Bool(line[2])
-                    
-                } else {
+                
+                default:
                     
                     // id : pinned : string : translation ;
                     self.database.translations.indices.forEach { index in
@@ -527,7 +529,7 @@ struct Storage {
                             }
                         }
                     }
-                    
+                
                 }
                 
             }
