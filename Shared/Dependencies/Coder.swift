@@ -5,8 +5,6 @@ import SwiftUI
 struct Coder {
     
     @Binding var data: Storage.Format
-    @Binding var status: [String]
-    @Binding var progress: CGFloat
     
     let formats = ["swift"] // ADD CORRECT EXTENSIONS FOR VALIDATION
     
@@ -34,7 +32,7 @@ struct Coder {
                                     files.append(fileURL)
                                 }
                             } catch {
-                                Progress(status: $status, progress: $progress).load(string: "Failed to import Xcode project")
+                                Progress(data: $data).load(string: "Failed to import Xcode project")
                             }
                         }
                     }
@@ -67,14 +65,14 @@ struct Coder {
                                     }
                                 }
                             } catch {
-                                Progress(status: $status, progress: $progress).load(string: "Failed to import Xcode project")
+                                Progress(data: $data).load(string: "Failed to import Xcode project")
                             }
                         }
                     }
-                    Progress(status: $status, progress: $progress).load(string: "Imported Xcode project strings")
+                    Progress(data: $data).load(string: "Imported Xcode project strings")
                     completion(imported)
                 } catch {
-                    Progress(status: $status, progress: $progress).load(string: "Failed to import Xcode project")
+                    Progress(data: $data).load(string: "Failed to import Xcode project")
                 }
             }
         }
@@ -113,14 +111,14 @@ struct Coder {
                         do {
                             try output.write(to: directory.appendingPathComponent(filename + ".strings"), atomically: true, encoding: String.Encoding.utf8)
                         } catch {
-                            Progress(status: $status, progress: $progress).load(string: "Failed to export .strings file")
+                            Progress(data: $data).load(string: "Failed to export .strings file")
                         }
                         
                     }
                     
                 }
                 
-                Progress(status: $status, progress: $progress).load(string: "Exported .strings files")
+                Progress(data: $data).load(string: "Exported .strings files")
                 
             }
         }

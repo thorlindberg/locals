@@ -4,8 +4,6 @@ import SwiftUI
 
 struct Translation {
     
-    @Binding var status: [String]
-    @Binding var progress: CGFloat
     @Binding var data: Storage.Format
     
     func translate() {
@@ -50,7 +48,7 @@ struct Translation {
             request.addValue("application/json", forHTTPHeaderField: "Content-Type")
             
             URLSession.shared.dataTask(with: request) { data, response, error in
-                if error != nil { Progress(status: $status, progress: $progress).load(string: "Failed to translate string") ; return }
+                if error != nil { Progress(data: $data).load(string: "Failed to translate string") ; return }
                 
                 DispatchQueue.main.async {
                     do {
@@ -59,23 +57,23 @@ struct Translation {
                             let result = responseJSON["translatedText"] as? String {
                             if result.last == "." && string.last != "." {
                                 completion(String(result.dropLast()))
-                                Progress(status: $status, progress: $progress).load(string: "Translated \"\(string)\" to \"\(String(result.dropLast()))\"")
+                                Progress(data: $data).load(string: "Translated \"\(string)\" to \"\(String(result.dropLast()))\"")
                             } else {
                                 completion(result)
-                                Progress(status: $status, progress: $progress).load(string: "Translated \"\(string)\" to \"\(result)\"")
+                                Progress(data: $data).load(string: "Translated \"\(string)\" to \"\(result)\"")
                             }
                         } else {
-                            Progress(status: $status, progress: $progress).load(string: "Failed to translate \"\(string)\"")
+                            Progress(data: $data).load(string: "Failed to translate \"\(string)\"")
                         }
                     } catch {
-                        Progress(status: $status, progress: $progress).load(string: "Failed to translate \"\(string)\"")
+                        Progress(data: $data).load(string: "Failed to translate \"\(string)\"")
                     }
                 }
             }
             .resume()
             
         } catch {
-            Progress(status: $status, progress: $progress).load(string: "Failed to translate \"\(string)\"")
+            Progress(data: $data).load(string: "Failed to translate \"\(string)\"")
         }
         
     }

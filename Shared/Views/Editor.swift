@@ -50,8 +50,6 @@ struct Header: View {
 struct Card: View {
     
     @Binding var selection: String
-    @Binding var status: [String]
-    @Binding var progress: CGFloat
     @Binding var data: Storage.Format
     @Binding var alert: Bool
     var index: Range<Array<Storage.Format.Translations>.Index>.Element
@@ -87,7 +85,7 @@ struct Card: View {
                                 data.translations.indices.forEach { index in
                                     data.translations[index].texts[strings[string]]!.pinned = !data.translations[index].texts[strings[string]]!.pinned
                                 }
-                                Storage(data: $data, status: $status, progress: $progress).write(status: status, selection: selection)
+                                Storage(data: $data).write(selection: selection)
                             }
                         }
                         Image(systemName: "xmark.circle.fill")
@@ -107,7 +105,7 @@ struct Card: View {
                                         data.translations.indices.forEach { index in
                                             data.translations[index].texts.removeValue(forKey: strings[string])
                                         }
-                                        Storage(data: $data, status: $status, progress: $progress).write(status: status, selection: selection)
+                                        Storage(data: $data).write(selection: selection)
                                     }
                                 }
                             }
@@ -123,7 +121,7 @@ struct Card: View {
                 TextField("Add translation", text: Binding(
                     get: { data.translations[index].texts[strings[string]]!.translation },
                     set: { data.translations[index].texts[strings[string]]?.translation = $0 }
-                ), onCommit: { withAnimation { Storage(data: $data, status: $status, progress: $progress).write(status: status, selection: selection)}})
+                ), onCommit: { withAnimation { Storage(data: $data).write(selection: selection)}})
                 .textFieldStyle(PlainTextFieldStyle())
             }
             .padding()
@@ -135,8 +133,6 @@ struct Card: View {
 struct Editor: View {
     
     @Binding var selection: String
-    @Binding var status: [String]
-    @Binding var progress: CGFloat
     @Binding var data: Storage.Format
     
     @State var checking: Bool = false
@@ -165,7 +161,7 @@ struct Editor: View {
                                             .filter { data.filters.symbols ? true : !($0.allSatisfy({ ($0.isSymbol || $0.isPunctuation || $0.isCurrencySymbol || $0.isMathSymbol) })) } // symbols
                                             .filter { data.filters.unpinned ? true : data.translations[index].texts[$0]!.pinned } // unpinned
                                         ForEach(strings.indices, id: \.self) { string in
-                                            Card(selection: $selection, status: $status, progress: $progress, data: $data, alert: $alert, index: index, string: string, strings: strings)
+                                            Card(selection: $selection, data: $data, alert: $alert, index: index, string: string, strings: strings)
                                         }
                                     }
                                 }
@@ -197,7 +193,7 @@ struct Editor: View {
                                             multi: false
                                         )
                                     }
-                                    Storage(data: $data, status: $status, progress: $progress).write(status: status, selection: selection)
+                                    Storage(data: $data).write(selection: selection)
                                     data.fields.entry = ""
                                 }
                             })
@@ -226,7 +222,7 @@ struct Editor: View {
                 primaryButton: .default (Text("Okay")) {
                     self.alert = false
                     data.alerts = false
-                    Storage(data: $data, status: $status, progress: $progress).write(status: status, selection: selection)
+                    Storage(data: $data).write(selection: selection)
                 },
                 secondaryButton: .cancel (Text("Cancel")) {
                     self.alert = false
@@ -236,7 +232,7 @@ struct Editor: View {
         .toolbar {
             ToolbarItemGroup(placement: .automatic) {
                 Button(action: {
-                    Coder(data: $data, status: $status, progress: $progress).decode() { imported in
+                    Coder(data: $data).decode() { imported in
                         imported.forEach { string in
                             data.translations.indices.forEach { index in
                                 if !data.translations[index].texts.keys.contains(string) {
@@ -250,7 +246,7 @@ struct Editor: View {
                                 }
                             }
                         }
-                        Storage(data: $data, status: $status, progress: $progress).write(status: status, selection: selection)
+                        Storage(data: $data).write(selection: selection)
                     }
                 }) {
                     Image(systemName: "folder.fill.badge.plus")
@@ -259,9 +255,9 @@ struct Editor: View {
                 .help("Import strings from an Xcode project folder")
                 Button(action: {
                     withAnimation {
-                        Progress(status: $status, progress: $progress).load(string: "Translating strings to \(data.target)...")
-                        Translation(status: $status, progress: $progress, data: $data).translate()
-                        Storage(data: $data, status: $status, progress: $progress).write(status: status, selection: selection)
+                        Progress(data: $data).load(string: "Translating strings to \(data.target)...")
+                        Translation(data: $data).translate()
+                        Storage(data: $data).write(selection: selection)
                     }
                 }) {
                     Image(systemName: "globe")
@@ -275,7 +271,7 @@ struct Editor: View {
                         HStack {
                             Rectangle()
                                 .foregroundColor(data.styles.color)
-                                .frame(width: 500 * self.progress, height: 1.5)
+                                .frame(width: 500 * data.progress, height: 1.5)
                             Spacer()
                         }
                         .frame(width: 500, height: 1.5)
@@ -283,13 +279,13 @@ struct Editor: View {
                     .frame(width: 500, height: 27)
                     .mask(Rectangle().frame(width: 500, height: 27).cornerRadius(5))
                     Menu {
-                        ForEach(status.indices.reversed(), id: \.self) { index in
-                            Text("\(status[index])")
+                        ForEach(data.status.indices.reversed(), id: \.self) { index in
+                            Text("\(data.status[index])")
                                 .font(.system(size: 10))
                             Divider()
                         }
                     } label: {
-                        Text(status.last!)
+                        Text(data.status.last!)
                             .font(.system(size: 10))
                     }
                     .frame(width: 500)
@@ -309,7 +305,7 @@ struct Editor: View {
                             self.clear = hovering ? true : false
                         }
                         .onTapGesture {
-                            self.status = ["\(Time().current()) - Cleared application changelog"]
+                            data.status = ["\(Time().current()) - Cleared application changelog"]
                         }
                     }
                     .padding(.horizontal, 22)
@@ -326,7 +322,7 @@ struct Editor: View {
                 .disabled(selection == "" || data.target == "") // DISABLE IF NO STRINGS
                 .help("Export localization project")
                 Button(action: {
-                    Coder(data: $data, status: $status, progress: $progress).encode()
+                    Coder(data: $data).encode()
                 }) {
                     Image(systemName: "square.and.arrow.up")
                 }

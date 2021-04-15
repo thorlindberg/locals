@@ -4,18 +4,23 @@ struct Window: View {
     
     @State var toggle: String = "projects"
     @State var selection: String = ""
-    @State var status: [String] = ["\(Time().current()) - Welcome to Locals"]
-    @State var progress: CGFloat = CGFloat.zero
     @State var data: Storage.Format = Storage.Format(
-        base: "", target: "", alerts: true, saved: "", fields: Storage.Format.Fields(query: "", entry: "", rename: "", language: ""), filters: Storage.Format.Filters(unpinned: true, singleline: true, multiline: true, parenthesis: true, nummerical: true, symbols: true),
+        base: "",
+        target: "",
+        alerts: true,
+        saved: "",
+        status: ["\(Time().current()) - Welcome to Locals"],
+        progress: CGFloat.zero,
+        fields: Storage.Format.Fields(query: "", entry: "", rename: "", language: ""),
+        filters: Storage.Format.Filters(unpinned: true, singleline: true, multiline: true, parenthesis: true, nummerical: true, symbols: true),
         styles: Storage.Format.Styles(columns: 1, font: "San Francisco", size: CGFloat(14), weight: Font.Weight.regular, color: Color.accentColor), translations: []
     )
     
     var body: some View {
         NavigationView {
-            Sidebar(toggle: $toggle, selection: $selection, status: $status, progress: $progress, data: $data)
+            Sidebar(toggle: $toggle, selection: $selection, data: $data)
                 .frame(minWidth: 200)
-            Editor(selection: $selection, status: $status, progress: $progress, data: $data)
+            Editor(selection: $selection, data: $data)
         }
         .frame(minWidth: 980, minHeight: 300)
     }

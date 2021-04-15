@@ -3,8 +3,6 @@ import SwiftUI
 struct Storage {
     
     @Binding var data: Format
-    @Binding var status: [String]
-    @Binding var progress: CGFloat
     
     let folder = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
     
@@ -14,6 +12,8 @@ struct Storage {
         var target: String
         var alerts: Bool
         var saved: String
+        var status: [String]
+        var progress: CGFloat
         var fields: Fields
         var filters: Filters
         var styles: Styles
@@ -67,26 +67,11 @@ struct Storage {
         target: "",
         alerts: true,
         saved: "",
-        fields: Format.Fields(
-            query: "",
-            entry: "",
-            rename: "",
-            language: ""
-        ),
-        filters: Format.Filters(
-            unpinned: true,
-            singleline: true,
-            multiline: true,
-            parenthesis: true,
-            nummerical: true,
-            symbols: true
-        ),
-        styles: Format.Styles(
-            columns: 1,
-            font: "San Francisco",
-            size: CGFloat(14),
-            weight: Font.Weight.regular,
-            color: Color.accentColor),
+        status: ["\(Time().current()) - Welcome to Locals"],
+        progress: CGFloat.zero,
+        fields: Format.Fields(query: "", entry: "", rename: "", language: ""),
+        filters: Format.Filters(unpinned: true, singleline: true, multiline: true, parenthesis: true, nummerical: true, symbols: true),
+        styles: Format.Styles(columns: 1, font: "San Francisco", size: CGFloat(14), weight: Font.Weight.regular, color: Color.accentColor),
         translations: [
             Format.Translations(
                 id: "1",
@@ -403,7 +388,7 @@ struct Storage {
         ]
     )
     
-    func identify(status: [String]) -> Array<String> {
+    func identify() -> Array<String> {
      
         var identified: [String] = []
         
@@ -416,30 +401,30 @@ struct Storage {
                 }
             }
         } catch {
-            Progress(status: $status, progress: $progress).log(string: "Failed to identify projects")
+            Progress(data: $data).log(string: "Failed to identify projects")
             return identified
         }
         
-        Progress(status: $status, progress: $progress).log(string: "Identified projects")
+        Progress(data: $data).log(string: "Identified projects")
         return identified
     
     }
     
-    func rename(status: [String], selection: String, rename: String) {
+    func rename(selection: String, rename: String) {
         
         let current = self.folder.appendingPathComponent(selection + ".localproj").path
         let new = self.folder.appendingPathComponent(rename + ".localproj").path
         
         do {
             try FileManager.default.moveItem(atPath: current, toPath: new)
-            Progress(status: $status, progress: $progress).load(string: "Project \"\(selection)\" renamed to \"\(rename)\"")
+            Progress(data: $data).load(string: "Project \"\(selection)\" renamed to \"\(rename)\"")
         } catch {
-            Progress(status: $status, progress: $progress).load(string: "Unable to rename the project")
+            Progress(data: $data).load(string: "Unable to rename the project")
         }
         
     }
     
-    func read(status: [String], selection: String) -> Format {
+    func read(selection: String) -> Format {
         
         var baseData = self.database
         
@@ -540,17 +525,17 @@ struct Storage {
                 
             }
             
-            Progress(status: $status, progress: $progress).log(string: "Read project \"\(selection)\"")
+            Progress(data: $data).log(string: "Read project \"\(selection)\"")
             return baseData
             
         } catch {
-            Progress(status: $status, progress: $progress).log(string: "Unable to read project")
+            Progress(data: $data).log(string: "Unable to read project")
             return baseData
         }
         
     }
     
-    func write(status: [String], selection: String) {
+    func write(selection: String) {
         
         var output = ""
         
@@ -635,16 +620,16 @@ struct Storage {
         
     }
     
-    func remove(status: [String], selection: String) {
+    func remove(selection: String) {
         
         do {
             let fileManager = FileManager.default
             let filePath = (self.folder.absoluteString + selection + ".localproj").replacingOccurrences(of: "file://", with: "")
             try fileManager.removeItem(atPath: filePath)
-            Progress(status: $status, progress: $progress).load(string: "Project \"\(selection)\" deleted")
+            Progress(data: $data).load(string: "Project \"\(selection)\" deleted")
         }
         catch {
-            Progress(status: $status, progress: $progress).load(string: "Project could not be deleted")
+            Progress(data: $data).load(string: "Project could not be deleted")
         }
         
     }

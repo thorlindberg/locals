@@ -14,9 +14,7 @@ struct Help: View {
 struct Projects: View {
     @Binding var toggle: String
     @Binding var selection: String
-    @Binding var status: [String]
     @Binding var data: Storage.Format
-    @Binding var progress: CGFloat
     @State var rename: String = ""
     @State var renaming: Bool = false
     @State var files: [String] = []
@@ -27,9 +25,9 @@ struct Projects: View {
                 .textFieldStyle(RoundedBorderTextFieldStyle())
             if !files.contains(filename) && filename != "" && !filename.hasPrefix(".") {
                 Button(action: {
-                    Storage(data: $data, status: $status, progress: $progress).write(status: status, selection: filename)
+                    Storage(data: $data).write(selection: filename)
                     self.filename = ""
-                    self.files = Storage(data: $data, status: $status, progress: $progress).identify(status: status)
+                    self.files = Storage(data: $data).identify()
                 }) {
                     Image(systemName: "plus")
                 }
@@ -42,11 +40,11 @@ struct Projects: View {
             Section(header: Text("")) {
                 ForEach(files, id: \.self) { file in
                     NavigationLink(destination:
-                        Editor(selection: $selection, status: $status, progress: $progress, data: $data),
+                        Editor(selection: $selection, data: $data),
                         tag: file,
                         selection: Binding(
                             get: { selection },
-                            set: { if $0 != nil { self.selection = $0! } ; self.toggle = "languages" ; self.data = Storage(data: $data, status: $status, progress: $progress).read(status: status, selection: file) }
+                            set: { if $0 != nil { self.selection = $0! } ; self.toggle = "languages" ; self.data = Storage(data: $data).read(selection: file) }
                         )
                     ) {
                         HStack {
@@ -66,14 +64,11 @@ struct Projects: View {
                         }
                         Button(action: {
                             withAnimation {
-                                Storage(data: $data, status: $status, progress: $progress).remove(
-                                    status: status,
-                                    selection: file
-                                )
+                                Storage(data: $data).remove(selection: file)
                                 if file == selection {
                                     self.selection = ""
                                 }
-                                self.files = Storage(data: $data, status: $status, progress: $progress).identify(status: status)
+                                self.files = Storage(data: $data).identify()
                             }
                         }) {
                             Text("Delete")
@@ -92,10 +87,10 @@ struct Projects: View {
                                 Spacer()
                                 Button(action: {
                                     withAnimation {
-                                        Storage(data: $data, status: $status, progress: $progress).rename(status: status, selection: file, rename: rename)
+                                        Storage(data: $data).rename(selection: file, rename: rename)
                                         self.selection = self.rename
                                         self.rename = ""
-                                        self.files = Storage(data: $data, status: $status, progress: $progress).identify(status: status)
+                                        self.files = Storage(data: $data).identify()
                                         self.renaming.toggle()
                                     }
                                 }) {
@@ -112,7 +107,7 @@ struct Projects: View {
         }
         .listStyle(SidebarListStyle())
         .onAppear {
-            self.files = Storage(data: $data, status: $status, progress: $progress).identify(status: status)
+            self.files = Storage(data: $data).identify()
         }
     }
 }
@@ -120,9 +115,7 @@ struct Projects: View {
 struct Languages: View {
     @Binding var toggle: String
     @Binding var selection: String
-    @Binding var status: [String]
     @Binding var data: Storage.Format
-    @Binding var progress: CGFloat
     @State var editing: Bool = false
     var body: some View {
         VStack(spacing: 15) {
@@ -153,7 +146,7 @@ struct Languages: View {
                     Spacer()
                     Picker("", selection: Binding(
                         get: { data.base },
-                        set: { data.base = $0 ; Storage(data: $data, status: $status, progress: $progress).write(status: status, selection: selection) }
+                        set: { data.base = $0 ; Storage(data: $data).write(selection: selection) }
                     )) {
                         ForEach(data.translations, id: \.self) { translations in
                             Text("\(translations.language)").tag(translations.language)
@@ -182,7 +175,7 @@ struct Languages: View {
                                     data.translations[index].target = true
                                 }
                             }
-                            Storage(data: $data, status: $status, progress: $progress).write(status: status, selection: selection)
+                            Storage(data: $data).write(selection: selection)
                         }
                     )) {
                         Text("")
@@ -208,7 +201,7 @@ struct Languages: View {
                                 Spacer()
                                 Toggle(isOn: Binding(
                                     get: { data.translations[index].target },
-                                    set: { data.translations[index].target = $0 ; Storage(data: $data, status: $status, progress: $progress).write(status: status, selection: selection) }
+                                    set: { data.translations[index].target = $0 ; Storage(data: $data).write(selection: selection) }
                                 )) {
                                     Text("")
                                 }
@@ -218,7 +211,7 @@ struct Languages: View {
                         } else {
                             if data.translations[index].target {
                                 NavigationLink(destination:
-                                    Editor(selection: $selection, status: $status, progress: $progress, data: $data),
+                                    Editor(selection: $selection, data: $data),
                                     tag: data.translations[index].language,
                                     selection: Binding(
                                         get: { data.target },
@@ -231,7 +224,7 @@ struct Languages: View {
                                 .contextMenu {
                                     Button(action: {
                                         data.translations[index].target = false
-                                        Storage(data: $data, status: $status, progress: $progress).write(status: status, selection: selection)
+                                        Storage(data: $data).write(selection: selection)
                                     }) {
                                         Text("Disable target")
                                     }
@@ -254,9 +247,7 @@ struct Languages: View {
 struct Filter: View {
     @Binding var toggle: String
     @Binding var selection: String
-    @Binding var status: [String]
     @Binding var data: Storage.Format
-    @Binding var progress: CGFloat
     let fonts: [String] = [
         "American Typewriter", "Andale Mono", "Arial", "Avenir", "Baskerville", "Big Caslon", "Bodoni 72",
         "Bradley Hand", "Calibri", "Cambria", "Chalkboard", "Chalkduster", "Charter", "Cochin", "Copperplate",
@@ -276,7 +267,7 @@ struct Filter: View {
                     Spacer()
                     Toggle(isOn: Binding(
                         get: { data.filters.singleline },
-                        set: { data.filters.singleline = $0 ; Storage(data: $data, status: $status, progress: $progress).write(status: status, selection: selection) }
+                        set: { data.filters.singleline = $0 ; Storage(data: $data).write(selection: selection) }
                     )) {
                         Text("")
                     }
@@ -287,7 +278,7 @@ struct Filter: View {
                     Spacer()
                     Toggle(isOn: Binding(
                         get: { data.filters.multiline },
-                        set: { data.filters.multiline = $0 ; Storage(data: $data, status: $status, progress: $progress).write(status: status, selection: selection) }
+                        set: { data.filters.multiline = $0 ; Storage(data: $data).write(selection: selection) }
                     )) {
                         Text("")
                     }
@@ -298,7 +289,7 @@ struct Filter: View {
                     Spacer()
                     Toggle(isOn: Binding(
                         get: { data.filters.parenthesis },
-                        set: { data.filters.parenthesis = $0 ; Storage(data: $data, status: $status, progress: $progress).write(status: status, selection: selection) }
+                        set: { data.filters.parenthesis = $0 ; Storage(data: $data).write(selection: selection) }
                     )) {
                         Text("")
                     }
@@ -309,7 +300,7 @@ struct Filter: View {
                     Spacer()
                     Toggle(isOn: Binding(
                         get: { data.filters.nummerical },
-                        set: { data.filters.nummerical = $0 ; Storage(data: $data, status: $status, progress: $progress).write(status: status, selection: selection) }
+                        set: { data.filters.nummerical = $0 ; Storage(data: $data).write(selection: selection) }
                     )) {
                         Text("")
                     }
@@ -320,7 +311,7 @@ struct Filter: View {
                     Spacer()
                     Toggle(isOn: Binding(
                         get: { data.filters.symbols },
-                        set: { data.filters.symbols = $0 ; Storage(data: $data, status: $status, progress: $progress).write(status: status, selection: selection) }
+                        set: { data.filters.symbols = $0 ; Storage(data: $data).write(selection: selection) }
                     )) {
                         Text("")
                     }
@@ -331,7 +322,7 @@ struct Filter: View {
                     Spacer()
                     Toggle(isOn: Binding(
                         get: { data.filters.unpinned },
-                        set: { data.filters.unpinned = $0 ; Storage(data: $data, status: $status, progress: $progress).write(status: status, selection: selection) }
+                        set: { data.filters.unpinned = $0 ; Storage(data: $data).write(selection: selection) }
                     )) {
                         Text("")
                     }
@@ -346,7 +337,7 @@ struct Filter: View {
                     Spacer()
                     Toggle(isOn: Binding(
                         get: { data.alerts },
-                        set: { data.alerts = $0 ; Storage(data: $data, status: $status, progress: $progress).write(status: status, selection: selection) }
+                        set: { data.alerts = $0 ; Storage(data: $data).write(selection: selection) }
                     )) {
                         Text("")
                     }
@@ -365,7 +356,7 @@ struct Filter: View {
                     Spacer()
                     Picker("", selection: Binding(
                         get: { data.styles.columns },
-                        set: { data.styles.columns = $0 ; Storage(data: $data, status: $status, progress: $progress).write(status: status, selection: selection) }
+                        set: { data.styles.columns = $0 ; Storage(data: $data).write(selection: selection) }
                     )) {
                         ForEach(Array(stride(from: 1, to: 6, by: 2)), id: \.self) { count in
                             Text(String(count)).tag(count)
@@ -381,7 +372,7 @@ struct Filter: View {
                     Spacer()
                     Picker("", selection: Binding(
                         get: { data.styles.font },
-                        set: { data.styles.font = $0 ; Storage(data: $data, status: $status, progress: $progress).write(status: status, selection: selection) }
+                        set: { data.styles.font = $0 ; Storage(data: $data).write(selection: selection) }
                     )) {
                         ForEach(fonts, id: \.self) { font in
                             Text(font)
@@ -399,7 +390,7 @@ struct Filter: View {
                     Spacer()
                     Picker("", selection: Binding(
                         get: { data.styles.size },
-                        set: { data.styles.size = $0 ; Storage(data: $data, status: $status, progress: $progress).write(status: status, selection: selection) }
+                        set: { data.styles.size = $0 ; Storage(data: $data).write(selection: selection) }
                     )) {
                         ForEach(Array(stride(from: 6, to: 102, by: 2)), id: \.self) { size in
                             Text(String(size)).tag(CGFloat(size))
@@ -415,7 +406,7 @@ struct Filter: View {
                     Spacer()
                     Picker("", selection: Binding(
                         get: { data.styles.weight },
-                        set: { data.styles.weight = $0 ; Storage(data: $data, status: $status, progress: $progress).write(status: status, selection: selection) }
+                        set: { data.styles.weight = $0 ; Storage(data: $data).write(selection: selection) }
                     )) {
                         Text("Regular").tag(Font.Weight.regular)
                         Text("Heavy").tag(Font.Weight.heavy)
@@ -437,7 +428,7 @@ struct Filter: View {
                     Spacer()
                     Picker("", selection: Binding(
                         get: { data.styles.color },
-                        set: { data.styles.color = $0 ; Storage(data: $data, status: $status, progress: $progress).write(status: status, selection: selection) }
+                        set: { data.styles.color = $0 ; Storage(data: $data).write(selection: selection) }
                     )) {
                         Text("Accent").foregroundColor(.black).tag(Color.accentColor)
                         Text("Blue").foregroundColor(.blue).tag(Color.blue)
@@ -456,7 +447,7 @@ struct Filter: View {
                     data.styles.size = CGFloat(14)
                     data.styles.weight = Font.Weight.regular
                     data.styles.color = Color.accentColor
-                    Storage(data: $data, status: $status, progress: $progress).write(status: status, selection: selection)
+                    Storage(data: $data).write(selection: selection)
                 }) {
                     Text("Reset styles")
                 }
@@ -475,8 +466,6 @@ struct Sidebar: View {
     
     @Binding var toggle: String
     @Binding var selection: String
-    @Binding var status: [String]
-    @Binding var progress: CGFloat
     @Binding var data: Storage.Format
     
     @State var menu: String = ""
@@ -560,13 +549,13 @@ struct Sidebar: View {
                 Help()
             }
             if toggle == "projects" {
-                Projects(toggle: $toggle, selection: $selection, status: $status, data: $data, progress: $progress)
+                Projects(toggle: $toggle, selection: $selection, data: $data)
             }
             if toggle == "languages" {
-                Languages(toggle: $toggle, selection: $selection, status: $status, data: $data, progress: $progress)
+                Languages(toggle: $toggle, selection: $selection, data: $data)
             }
             if toggle == "filter" {
-                Filter(toggle: $toggle, selection: $selection, status: $status, data: $data, progress: $progress)
+                Filter(toggle: $toggle, selection: $selection, data: $data)
             }
         }
         .accentColor(data.styles.color)
