@@ -57,6 +57,7 @@ struct Card: View {
     var strings: [Dictionary<String, Storage.Format.Text>.Keys.Element]
     
     var body: some View {
+        let reduced = data.translations[index].texts[strings[string]]!.pinned && data.styles.vibrancy == 0
         let vibrant = data.translations[index].texts[strings[string]]!.pinned && data.styles.vibrancy == 1
         ZStack {
             if vibrant {
@@ -81,7 +82,8 @@ struct Card: View {
                             .opacity(vibrant ? 0.5 : 0.25)
                         ZStack {
                             Image(systemName: "pin.fill")
-                                .opacity(vibrant ? 0.8 : 0.25)
+                                .foregroundColor(reduced ? data.styles.color : nil)
+                                .opacity(vibrant ? 0.8 : reduced ? 1 : 0.25)
                         }
                         .onTapGesture {
                             withAnimation {
