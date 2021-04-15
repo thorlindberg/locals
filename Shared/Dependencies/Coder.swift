@@ -8,9 +8,10 @@ struct Coder {
     
     let formats = ["swift"] // ADD CORRECT EXTENSIONS FOR VALIDATION
     
-    func decode(completion: @escaping ([String]) -> Void) {
+    func decode(completion: @escaping ([String:[String]]) -> Void) {
         
-        var imported: [String] = []
+        var singleline: [String] = []
+        var multiline: [String] = []
         
         let dialog = NSOpenPanel()
         dialog.prompt = "Choose"
@@ -41,6 +42,7 @@ struct Coder {
                             do {
                                 let savedData = try Data(contentsOf: file)
                                 let savedString = String(data: savedData, encoding: .utf8)
+                                // singleline
                                 savedString!.components(separatedBy: "\n").forEach { line in
                                     var count = 0
                                     var index1 = 0
@@ -55,12 +57,37 @@ struct Coder {
                                             if count == 2 {
                                                 index2 = index
                                                 string = String(Array(line)[index1...index2]).replacingOccurrences(of: "\"", with: "")
-                                                if !imported.contains(string) && string != "" { // NUMMERICAL-ONLY FILTER: Int(string) ?? nil == nil
-                                                    imported.append(string)
+                                                if !singleline.contains(string) && string != "" {
+                                                    singleline.append(string)
                                                 }
                                                 count = 0
                                                 string = ""
                                             }
+                                        }
+                                    }
+                                }
+                                // multiline
+                                let yo = """
+                                hey!
+                                """
+                                var count = 0
+                                var index1 = 0
+                                var index2 = 0
+                                var string: String
+                                for (index, char) in savedString!.enumerated() {
+                                    if char == "\"" && Array(savedString!)[index-1] == "\"" && Array(savedString!)[index-2] == "\"" {
+                                        count += 1
+                                        if count == 1 {
+                                            index1 = index
+                                        }
+                                        if count == 2 {
+                                            index2 = index
+                                            string = String(Array(savedString!)[index1+1...index2-3])
+                                            if !multiline.contains(string) && string != "" { // NUMMERICAL-ONLY FILTER: Int(string) ?? nil == nil
+                                                multiline.append(string)
+                                            }
+                                            count = 0
+                                            string = ""
                                         }
                                     }
                                 }
@@ -69,10 +96,8 @@ struct Coder {
                             }
                         }
                     }
-                    Progress(data: $data).load(string: "Imported Xcode project strings")
-                    completion(imported)
-                } catch {
-                    Progress(data: $data).load(string: "Failed to import Xcode project")
+                    Progress(data: $data).load(string: "Imported Xcode project")
+                    completion(["S" : singleline, "M" : multiline])
                 }
             }
         }

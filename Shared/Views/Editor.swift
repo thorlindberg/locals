@@ -145,8 +145,6 @@ struct Editor: View {
                 VStack(spacing: 0) {
                     List {
                         Section(header: Header(data: $data)) {
-                            Spacer()
-                                .frame(height: 10)
                             LazyVGrid(columns: Array(repeating: .init(.adaptive(minimum: 600)), count: data.styles.columns), spacing: 0) {
                                 ForEach(data.translations.indices, id: \.self) { index in
                                     if data.translations[index].language == data.target {
@@ -166,9 +164,6 @@ struct Editor: View {
                                     }
                                 }
                             }
-                            .padding(.horizontal)
-                            Spacer()
-                                .frame(height: 10)
                         }
                     }
                     Divider()
@@ -200,7 +195,7 @@ struct Editor: View {
                             .textFieldStyle(PlainTextFieldStyle())
                             .padding(.horizontal)
                         }
-                        .padding(.horizontal, 32)
+                        .padding(.horizontal)
                         .padding(.vertical, 10)
                     }
                 }
@@ -232,16 +227,23 @@ struct Editor: View {
         .toolbar {
             ToolbarItemGroup(placement: .automatic) {
                 Button(action: {
-                    Coder(data: $data).decode() { imported in
-                        imported.forEach { string in
+                    Coder(data: $data).decode() { lines in
+                        lines["S"]!.forEach { string in
                             data.translations.indices.forEach { index in
                                 if !data.translations[index].texts.keys.contains(string) {
                                     data.translations[index].texts[string] = Storage.Format.Text(
                                         order: data.translations[index].texts.isEmpty ? 1 : data.translations[index].texts.values.map({$0.order}).max()! + 1,
-                                        translation: "",
-                                        pinned: false,
-                                        single: true,
-                                        multi: false
+                                        translation: "", pinned: false, single: true, multi: false
+                                    )
+                                }
+                            }
+                        }
+                        lines["M"]!.forEach { string in
+                            data.translations.indices.forEach { index in
+                                if !data.translations[index].texts.keys.contains(string) {
+                                    data.translations[index].texts[string] = Storage.Format.Text(
+                                        order: data.translations[index].texts.isEmpty ? 1 : data.translations[index].texts.values.map({$0.order}).max()! + 1,
+                                        translation: "", pinned: false, single: false, multi: true
                                     )
                                 }
                             }

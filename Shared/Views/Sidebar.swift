@@ -441,20 +441,23 @@ struct Filter: View {
                         Text("Yellow").foregroundColor(.yellow).tag(Color.yellow)
                     }
                 }
-                Button(action: {
-                    data.styles.columns = 1
-                    data.styles.font = "Helvetica Neue"
-                    data.styles.size = CGFloat(14)
-                    data.styles.weight = Font.Weight.regular
-                    data.styles.color = Color.accentColor
-                    Storage(data: $data).write(selection: selection)
-                }) {
-                    Text("Reset styles")
+                HStack {
+                    Spacer()
+                    Button(action: {
+                        data.styles.columns = 1
+                        data.styles.font = "Helvetica Neue"
+                        data.styles.size = CGFloat(14)
+                        data.styles.weight = Font.Weight.regular
+                        data.styles.color = Color.accentColor
+                        Storage(data: $data).write(selection: selection)
+                    }) {
+                        Text("Reset styles")
+                    }
+                    .disabled(
+                        data.styles.columns == 1 && data.styles.font == "Helvetica Neue" && data.styles.size == CGFloat(14)
+                        && data.styles.weight == Font.Weight.regular && data.styles.color == Color.accentColor
+                    )
                 }
-                .disabled(
-                    data.styles.columns == 1 && data.styles.font == "Helvetica Neue" && data.styles.size == CGFloat(14)
-                    && data.styles.weight == Font.Weight.regular && data.styles.color == Color.accentColor
-                )
             }
             .padding()
             Spacer()
