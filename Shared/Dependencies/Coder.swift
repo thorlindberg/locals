@@ -36,58 +36,60 @@ struct Coder {
                         }
                     }
                     files.forEach { file in
-                        if data.extensions[file.absoluteString.components(separatedBy: ".").last!.lowercased()]! {
-                            do {
-                                let savedData = try Data(contentsOf: file)
-                                let savedString = String(data: savedData, encoding: .utf8)
-                                // singleline
-                                savedString!.components(separatedBy: "\n").forEach { line in
+                        if data.extensions.keys.contains(file.absoluteString.components(separatedBy: ".").last!.lowercased()) {
+                            if data.extensions[file.absoluteString.components(separatedBy: ".").last!.lowercased()]! {
+                                do {
+                                    let savedData = try Data(contentsOf: file)
+                                    let savedString = String(data: savedData, encoding: .utf8)
+                                    // singleline
+                                    savedString!.components(separatedBy: "\n").forEach { line in
+                                        var count = 0
+                                        var index1 = 0
+                                        var index2 = 0
+                                        var string: String
+                                        for (index, char) in line.enumerated() {
+                                            if char == "\"" {
+                                                count += 1
+                                                if count == 1 {
+                                                    index1 = index
+                                                }
+                                                if count == 2 {
+                                                    index2 = index
+                                                    string = String(Array(line)[index1...index2]).replacingOccurrences(of: "\"", with: "")
+                                                    if !singleline.contains(string) && string != "" {
+                                                        singleline.append(string)
+                                                    }
+                                                    count = 0
+                                                    string = ""
+                                                }
+                                            }
+                                        }
+                                    }
+                                    // multiline
                                     var count = 0
                                     var index1 = 0
                                     var index2 = 0
                                     var string: String
-                                    for (index, char) in line.enumerated() {
-                                        if char == "\"" {
+                                    for (index, char) in savedString!.enumerated() {
+                                        if char == "\"" && Array(savedString!)[index-1] == "\"" && Array(savedString!)[index-2] == "\"" {
                                             count += 1
                                             if count == 1 {
                                                 index1 = index
                                             }
                                             if count == 2 {
                                                 index2 = index
-                                                string = String(Array(line)[index1...index2]).replacingOccurrences(of: "\"", with: "")
-                                                if !singleline.contains(string) && string != "" {
-                                                    singleline.append(string)
+                                                string = String(Array(savedString!)[index1+1...index2-3])
+                                                if !multiline.contains(string) && string != "" { // NUMMERICAL-ONLY FILTER: Int(string) ?? nil == nil
+                                                    multiline.append(string)
                                                 }
                                                 count = 0
                                                 string = ""
                                             }
                                         }
                                     }
+                                } catch {
+                                    Progress(data: $data).load(string: "Failed to import Xcode project")
                                 }
-                                // multiline
-                                var count = 0
-                                var index1 = 0
-                                var index2 = 0
-                                var string: String
-                                for (index, char) in savedString!.enumerated() {
-                                    if char == "\"" && Array(savedString!)[index-1] == "\"" && Array(savedString!)[index-2] == "\"" {
-                                        count += 1
-                                        if count == 1 {
-                                            index1 = index
-                                        }
-                                        if count == 2 {
-                                            index2 = index
-                                            string = String(Array(savedString!)[index1+1...index2-3])
-                                            if !multiline.contains(string) && string != "" { // NUMMERICAL-ONLY FILTER: Int(string) ?? nil == nil
-                                                multiline.append(string)
-                                            }
-                                            count = 0
-                                            string = ""
-                                        }
-                                    }
-                                }
-                            } catch {
-                                Progress(data: $data).load(string: "Failed to import Xcode project")
                             }
                         }
                     }

@@ -42,6 +42,7 @@ struct Storage {
             var size: CGFloat
             var weight: Font.Weight
             var color: Color
+            var vibrancy: Int
         }
         
         struct Translations: Hashable {
@@ -72,7 +73,7 @@ struct Storage {
         progress: CGFloat.zero,
         fields: Format.Fields(query: "", entry: "", rename: "", language: ""),
         filters: Format.Filters(unpinned: true, singleline: true, multiline: true, parenthesis: true, nummerical: true, symbols: true),
-        styles: Format.Styles(columns: 3, font: "San Francisco", size: CGFloat(14), weight: Font.Weight.regular, color: Color.accentColor),
+        styles: Format.Styles(columns: 3, font: "San Francisco", size: CGFloat(14), weight: Font.Weight.regular, color: Color.accentColor, vibrancy: 1),
         extensions: ["swift" : true],
         translations: [
             Format.Translations(
@@ -474,7 +475,7 @@ struct Storage {
                 
                 case "styles":
                     
-                    // "styles" : columns : font : size : weight : color ;
+                    // "styles" : columns : font : size : weight : color : vibrancy ;
                     baseData.styles.columns = Int(line[1])!
                     baseData.styles.font = line[2]
                     baseData.styles.size = CGFloat(Int(line[3])!)
@@ -496,6 +497,7 @@ struct Storage {
                     if line[5] == "Purple" { baseData.styles.color = Color.purple }
                     if line[5] == "Red" { baseData.styles.color = Color.red }
                     if line[5] == "Yellow" { baseData.styles.color = Color.yellow }
+                    baseData.styles.vibrancy = Int(line[6])!
                 
                 case "extension":
                     
@@ -579,7 +581,7 @@ struct Storage {
         output += String(data.filters.symbols)
         output += " ; "
         
-        // "styles" : font : size : weight : color ;
+        // "styles" : font : size : weight : color : vibrancy ;
         output += "styles : "
         output += String(data.styles.columns) + " : "
         output += data.styles.font + " : "
@@ -593,15 +595,16 @@ struct Storage {
         if data.styles.weight == Font.Weight.thin { output += "Thin" + " : " }
         if data.styles.weight == Font.Weight.light { output += "Light" + " : " }
         if data.styles.weight == Font.Weight.ultraLight { output += "Ultra light" + " : " }
-        if data.styles.color == Color.accentColor { output += "Accent" }
-        if data.styles.color == Color.blue { output += "Blue" }
-        if data.styles.color == Color.gray { output += "Gray" }
-        if data.styles.color == Color.green { output += "Green" }
-        if data.styles.color == Color.orange { output += "Orange" }
-        if data.styles.color == Color.pink { output += "Pink" }
-        if data.styles.color == Color.purple { output += "Purple" }
-        if data.styles.color == Color.red { output += "Red" }
-        if data.styles.color == Color.yellow { output += "Yellow" }
+        if data.styles.color == Color.accentColor { output += "Accent" + " : " }
+        if data.styles.color == Color.blue { output += "Blue" + " : " }
+        if data.styles.color == Color.gray { output += "Gray" + " : " }
+        if data.styles.color == Color.green { output += "Green" + " : " }
+        if data.styles.color == Color.orange { output += "Orange" + " : " }
+        if data.styles.color == Color.pink { output += "Pink" + " : " }
+        if data.styles.color == Color.purple { output += "Purple" + " : " }
+        if data.styles.color == Color.red { output += "Red" + " : " }
+        if data.styles.color == Color.yellow { output += "Yellow" + " : " }
+        output += String(data.styles.vibrancy)
         output += " ; "
         
         // "extension" : extension : bool ;

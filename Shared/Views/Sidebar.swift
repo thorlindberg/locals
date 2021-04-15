@@ -481,13 +481,29 @@ struct Settings: View {
                     }
                 }
                 HStack {
+                    HStack {
+                        Text("Vibrancy")
+                        Spacer()
+                    }
+                    .frame(width: 65)
+                    Spacer()
+                    Picker("", selection: Binding(
+                        get: { data.styles.vibrancy },
+                        set: { data.styles.vibrancy = $0 ; Storage(data: $data).write(selection: selection) }
+                    )) {
+                        Text("Reduced").tag(0)
+                        Text("Default").tag(1)
+                    }
+                }
+                HStack {
                     Spacer()
                     Button(action: {
-                        data.styles.columns = 1
+                        data.styles.columns = 3
                         data.styles.font = "Helvetica Neue"
                         data.styles.size = CGFloat(14)
                         data.styles.weight = Font.Weight.regular
                         data.styles.color = Color.accentColor
+                        data.styles.vibrancy = 1
                         Storage(data: $data).write(selection: selection)
                     }) {
                         Text("Reset styles")
@@ -511,8 +527,6 @@ struct Sidebar: View {
     @Binding var selection: String
     @Binding var data: Storage.Format
     
-    @State var menu: String = ""
-    
     var body: some View {
         VStack(spacing: 0) {
             Divider()
@@ -520,33 +534,15 @@ struct Sidebar: View {
                 if toggle == "help" {
                     Image(systemName: "info.circle.fill").foregroundColor(.accentColor)
                 } else {
-                    ZStack {
-                        if menu == "help" {
-                            Image(systemName: "info.circle").foregroundColor(.accentColor)
-                        } else {
-                            Image(systemName: "info.circle")
-                        }
-                    }
-                    .onTapGesture { self.toggle = "help" ; data.fields.query = "" }
-                    .onHover { hovering in
-                        self.menu = hovering ? "help" : ""
-                    }
+                    Image(systemName: "info.circle")
+                        .onTapGesture { self.toggle = "help" ; data.fields.query = "" }
                 }
                 Spacer()
                 if toggle == "projects" {
                     Image(systemName: "folder.fill").foregroundColor(.accentColor)
                 } else {
-                    ZStack {
-                        if menu == "projects" {
-                            Image(systemName: "folder").foregroundColor(.accentColor)
-                        } else {
-                            Image(systemName: "folder")
-                        }
-                    }
-                    .onTapGesture { self.toggle = "projects" ; data.fields.query = "" }
-                    .onHover { hovering in
-                        self.menu = hovering ? "projects" : ""
-                    }
+                    Image(systemName: "folder")
+                        .onTapGesture { self.toggle = "projects" ; data.fields.query = "" }
                 }
                 Spacer()
                 if selection == "" {
@@ -554,17 +550,8 @@ struct Sidebar: View {
                 } else if toggle == "languages" {
                     Image(systemName: "textformat").foregroundColor(.accentColor)
                 } else {
-                    ZStack {
-                        if menu == "languages" {
-                            Image(systemName: "textformat").foregroundColor(.accentColor)
-                        } else {
-                            Image(systemName: "textformat")
-                        }
-                    }
-                    .onTapGesture { self.toggle = "languages" ; data.fields.query = "" }
-                    .onHover { hovering in
-                        self.menu = hovering ? "languages" : ""
-                    }
+                    Image(systemName: "textformat")
+                        .onTapGesture { self.toggle = "languages" ; data.fields.query = "" }
                 }
                 Spacer()
                 if selection == "" {
@@ -572,17 +559,8 @@ struct Sidebar: View {
                 } else if toggle == "find" {
                     Image(systemName: "magnifyingglass").foregroundColor(.accentColor)
                 } else {
-                    ZStack {
-                        if menu == "find" {
-                            Image(systemName: "magnifyingglass").foregroundColor(.accentColor)
-                        } else {
-                            Image(systemName: "magnifyingglass")
-                        }
-                    }
-                    .onTapGesture { self.toggle = "find" }
-                    .onHover { hovering in
-                        self.menu = hovering ? "find" : ""
-                    }
+                    Image(systemName: "magnifyingglass")
+                        .onTapGesture { self.toggle = "find" }
                 }
                 Spacer()
                 if selection == "" {
@@ -590,17 +568,8 @@ struct Sidebar: View {
                 } else if toggle == "settings" {
                     Image(systemName: "slider.horizontal.3").foregroundColor(.accentColor)
                 } else {
-                    ZStack {
-                        if menu == "settings" {
-                            Image(systemName: "slider.horizontal.3").foregroundColor(.accentColor)
-                        } else {
-                            Image(systemName: "slider.horizontal.3")
-                        }
-                    }
-                    .onTapGesture { self.toggle = "settings" }
-                    .onHover { hovering in
-                        self.menu = hovering ? "settings" : ""
-                    }
+                    Image(systemName: "slider.horizontal.3")
+                        .onTapGesture { self.toggle = "settings" }
                 }
             }
             .frame(width: 172, height: 26)

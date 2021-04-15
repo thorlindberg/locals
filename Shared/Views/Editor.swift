@@ -57,28 +57,31 @@ struct Card: View {
     var strings: [Dictionary<String, Storage.Format.Text>.Keys.Element]
     
     var body: some View {
+        let vibrant = data.translations[index].texts[strings[string]]!.pinned && data.styles.vibrancy == 1
         ZStack {
-            Rectangle()
-                .opacity((string % 2 == 0) ? 0.03 : 0)
-                .cornerRadius(6)
+            if vibrant {
+                Rectangle()
+                    .foregroundColor(data.styles.color)
+                    .opacity(0.8)
+                    .cornerRadius(6)
+            } else {
+                Rectangle()
+                    .opacity((string % 2 == 0) ? 0.03 : 0)
+                    .cornerRadius(6)
+            }
             VStack(alignment: .leading) {
                 VStack {
                     HStack {
                         Text("#\(data.translations[index].texts[strings[string]]!.order)")
                             .fontWeight(.light)
-                            .opacity(0.25)
+                            .opacity(vibrant ? 0.5 : 0.25)
                         Spacer()
                         Text(data.translations[index].texts[strings[string]]!.single ? "S" : "M")
                             .fontWeight(.light)
-                            .opacity(0.25)
+                            .opacity(vibrant ? 0.5 : 0.25)
                         ZStack {
-                            if data.translations[index].texts[strings[string]]!.pinned {
-                                Image(systemName: "pin.fill")
-                                    .foregroundColor(data.styles.color)
-                            } else {
-                                Image(systemName: "pin.fill")
-                                    .opacity(0.25)
-                            }
+                            Image(systemName: "pin.fill")
+                                .opacity(vibrant ? 0.8 : 0.25)
                         }
                         .onTapGesture {
                             withAnimation {
@@ -89,7 +92,7 @@ struct Card: View {
                             }
                         }
                         Image(systemName: "xmark.circle.fill")
-                            .opacity(0.25)
+                            .opacity(vibrant ? 0.5 : 0.25)
                             .onTapGesture {
                                 if data.alerts {
                                     self.alert.toggle()
@@ -117,7 +120,7 @@ struct Card: View {
                 Text("\(strings[string])")
                     .font(.custom(data.styles.font, size: data.styles.size))
                     .fontWeight(data.styles.weight)
-                    .foregroundColor(data.styles.color)
+                    .foregroundColor(vibrant ? nil : data.styles.color)
                 TextField("Add translation", text: Binding(
                     get: { data.translations[index].texts[strings[string]]!.translation },
                     set: { data.translations[index].texts[strings[string]]?.translation = $0 }
@@ -145,7 +148,7 @@ struct Editor: View {
                 VStack(spacing: 0) {
                     List {
                         Section(header: Header(data: $data)) {
-                            LazyVGrid(columns: Array(repeating: .init(.adaptive(minimum: 600)), count: data.styles.columns), spacing: 0) {
+                            LazyVGrid(columns: Array(repeating: .init(.adaptive(minimum: 600)), count: data.styles.columns), spacing: 10) {
                                 ForEach(data.translations.indices, id: \.self) { index in
                                     if data.translations[index].language == data.target {
                                         let strings = Array(data.translations[index].texts.keys)
@@ -201,7 +204,7 @@ struct Editor: View {
                 }
                 VStack(spacing: 0) {
                     Rectangle()
-                        .opacity(0)
+                        .foregroundColor(Color("Mode"))
                         .frame(height: 60)
                         .background(VisualEffect())
                     Divider()
