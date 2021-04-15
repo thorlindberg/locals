@@ -13,7 +13,8 @@ struct Window: View {
         progress: CGFloat.zero,
         fields: Storage.Format.Fields(query: "", entry: "", rename: "", language: ""),
         filters: Storage.Format.Filters(unpinned: true, singleline: true, multiline: true, parenthesis: true, nummerical: true, symbols: true),
-        styles: Storage.Format.Styles(columns: 1, font: "San Francisco", size: CGFloat(14), weight: Font.Weight.regular, color: Color.accentColor), translations: []
+        styles: Storage.Format.Styles(columns: 3, font: "San Francisco", size: CGFloat(14), weight: Font.Weight.regular, color: Color.accentColor),
+        extensions: ["swift" : true], translations: []
     )
     
     var body: some View {

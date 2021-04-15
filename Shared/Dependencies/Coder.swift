@@ -6,8 +6,6 @@ struct Coder {
     
     @Binding var data: Storage.Format
     
-    let formats = ["swift"] // ADD CORRECT EXTENSIONS FOR VALIDATION
-    
     func decode(completion: @escaping ([String:[String]]) -> Void) {
         
         var singleline: [String] = []
@@ -38,7 +36,7 @@ struct Coder {
                         }
                     }
                     files.forEach { file in
-                        if formats.contains(file.absoluteString.components(separatedBy: ".").last!) {
+                        if data.extensions[file.absoluteString.components(separatedBy: ".").last!.lowercased()]! {
                             do {
                                 let savedData = try Data(contentsOf: file)
                                 let savedString = String(data: savedData, encoding: .utf8)
@@ -67,9 +65,6 @@ struct Coder {
                                     }
                                 }
                                 // multiline
-                                let yo = """
-                                hey!
-                                """
                                 var count = 0
                                 var index1 = 0
                                 var index2 = 0

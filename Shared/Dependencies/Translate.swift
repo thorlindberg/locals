@@ -54,7 +54,7 @@ struct Translation {
                     do {
                         let responseJSON = try JSONSerialization.jsonObject(with: data!)
                         if let responseJSON = responseJSON as? [String: Any],
-                            let result = responseJSON["translatedText"] as? String {
+                           let result = responseJSON["translatedText"] as? String {
                             if result.last == "." && string.last != "." {
                                 completion(String(result.dropLast()))
                                 Progress(data: $data).load(string: "Translated \"\(string)\" to \"\(String(result.dropLast()))\"")

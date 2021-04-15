@@ -17,6 +17,7 @@ struct Storage {
         var fields: Fields
         var filters: Filters
         var styles: Styles
+        var extensions: [String:Bool]
         var translations: [Translations]
         
         struct Fields: Hashable {
@@ -71,7 +72,8 @@ struct Storage {
         progress: CGFloat.zero,
         fields: Format.Fields(query: "", entry: "", rename: "", language: ""),
         filters: Format.Filters(unpinned: true, singleline: true, multiline: true, parenthesis: true, nummerical: true, symbols: true),
-        styles: Format.Styles(columns: 1, font: "San Francisco", size: CGFloat(14), weight: Font.Weight.regular, color: Color.accentColor),
+        styles: Format.Styles(columns: 3, font: "San Francisco", size: CGFloat(14), weight: Font.Weight.regular, color: Color.accentColor),
+        extensions: ["swift" : true],
         translations: [
             Format.Translations(
                 id: "1",
@@ -389,7 +391,7 @@ struct Storage {
     )
     
     func identify() -> Array<String> {
-     
+        
         var identified: [String] = []
         
         do {
@@ -407,7 +409,7 @@ struct Storage {
         
         Progress(data: $data).log(string: "Identified projects")
         return identified
-    
+        
     }
     
     func rename(selection: String, rename: String) {
@@ -492,6 +494,11 @@ struct Storage {
                     if line[5] == "Purple" { baseData.styles.color = Color.purple }
                     if line[5] == "Red" { baseData.styles.color = Color.red }
                     if line[5] == "Yellow" { baseData.styles.color = Color.yellow }
+                    
+                } else if "extension" == line[0] {
+                    
+                    // "extension" : extension : bool ;
+                    baseData.extensions[line[1]] = Bool(line[2])
                     
                 } else {
                     
@@ -595,6 +602,14 @@ struct Storage {
         if data.styles.color == Color.yellow { output += "Yellow" }
         output += " ; "
         
+        // "extension" : extension : bool ;
+        Array(data.extensions.keys).forEach { format in
+            output += "extension : "
+            output += format + " : "
+            output += String(data.extensions[format]!)
+            output += " ; "
+        }
+        
         // id : pinned : string : translation ;
         data.translations.indices.forEach { index in
             if data.translations[index].texts != [:] {
@@ -631,6 +646,12 @@ struct Storage {
         catch {
             Progress(data: $data).load(string: "Project could not be deleted")
         }
+        
+    }
+    
+    func copy(selection: String) {
+        
+        // copy project somewhere
         
     }
     

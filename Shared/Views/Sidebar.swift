@@ -12,13 +12,16 @@ struct Help: View {
 }
 
 struct Projects: View {
+    
     @Binding var toggle: String
     @Binding var selection: String
     @Binding var data: Storage.Format
+    
     @State var rename: String = ""
     @State var renaming: Bool = false
     @State var files: [String] = []
     @State var filename: String = ""
+    
     var body: some View {
         HStack {
             TextField("Unique project name", text: $filename)
@@ -40,12 +43,12 @@ struct Projects: View {
             Section(header: Text("")) {
                 ForEach(files, id: \.self) { file in
                     NavigationLink(destination:
-                        Editor(selection: $selection, data: $data),
-                        tag: file,
-                        selection: Binding(
-                            get: { selection },
-                            set: { if $0 != nil { self.selection = $0! } ; self.toggle = "languages" ; self.data = Storage(data: $data).read(selection: file) }
-                        )
+                                    Editor(selection: $selection, data: $data),
+                                   tag: file,
+                                   selection: Binding(
+                                    get: { selection },
+                                    set: { if $0 != nil { self.selection = $0! } ; self.toggle = "languages" ; self.data = Storage(data: $data).read(selection: file) }
+                                   )
                     ) {
                         HStack {
                             Image("File")
@@ -110,13 +113,17 @@ struct Projects: View {
             self.files = Storage(data: $data).identify()
         }
     }
+    
 }
 
 struct Languages: View {
+    
     @Binding var toggle: String
     @Binding var selection: String
     @Binding var data: Storage.Format
+    
     @State var editing: Bool = false
+    
     var body: some View {
         VStack(spacing: 15) {
             HStack {
@@ -211,12 +218,12 @@ struct Languages: View {
                         } else {
                             if data.translations[index].target {
                                 NavigationLink(destination:
-                                    Editor(selection: $selection, data: $data),
-                                    tag: data.translations[index].language,
-                                    selection: Binding(
-                                        get: { data.target },
-                                        set: { if $0 != nil { data.target = $0! } }
-                                    )
+                                                Editor(selection: $selection, data: $data),
+                                               tag: data.translations[index].language,
+                                               selection: Binding(
+                                                get: { data.target },
+                                                set: { if $0 != nil { data.target = $0! } }
+                                               )
                                 ) {
                                     Text("\(data.translations[index].language)")
                                 }
@@ -242,19 +249,15 @@ struct Languages: View {
             }
         }
     }
+    
 }
 
-struct Filter: View {
+struct Find: View {
+    
     @Binding var toggle: String
     @Binding var selection: String
     @Binding var data: Storage.Format
-    let fonts: [String] = [
-        "American Typewriter", "Andale Mono", "Arial", "Avenir", "Baskerville", "Big Caslon", "Bodoni 72",
-        "Bradley Hand", "Calibri", "Cambria", "Chalkboard", "Chalkduster", "Charter", "Cochin", "Copperplate",
-        "Courier", "Didot", "Futura", "Geneva", "Georgia", "Gill Sans", "Helvetica", "Helvetica Neue", "Impact",
-        "Lucida Grande", "Luminari", "Marker Felt", "Menlo", "Monaco", "Noteworthy", "Optima", "Palatino", "Papyrus",
-        "Phosphate", "Rockwell", "San Francisco", "Skia", "Tahoma", "Times", "Times New Roman", "Verdana"
-    ]
+    
     var body: some View {
         TextField("􀊫 Strings", text: $data.fields.query)
             .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -330,7 +333,28 @@ struct Filter: View {
                 }
             }
             .padding()
-            Divider()
+            Spacer()
+        }
+    }
+    
+}
+
+struct Settings: View {
+    
+    @Binding var toggle: String
+    @Binding var selection: String
+    @Binding var data: Storage.Format
+    
+    let fonts: [String] = [
+        "American Typewriter", "Andale Mono", "Arial", "Avenir", "Baskerville", "Big Caslon", "Bodoni 72",
+        "Bradley Hand", "Calibri", "Cambria", "Chalkboard", "Chalkduster", "Charter", "Cochin", "Copperplate",
+        "Courier", "Didot", "Futura", "Geneva", "Georgia", "Gill Sans", "Helvetica", "Helvetica Neue", "Impact",
+        "Lucida Grande", "Luminari", "Marker Felt", "Menlo", "Monaco", "Noteworthy", "Optima", "Palatino", "Papyrus",
+        "Phosphate", "Rockwell", "San Francisco", "Skia", "Tahoma", "Times", "Times New Roman", "Verdana"
+    ]
+    
+    var body: some View {
+        ScrollView {
             VStack {
                 HStack {
                     Text("Alerts")
@@ -342,6 +366,23 @@ struct Filter: View {
                         Text("")
                     }
                     .toggleStyle(CheckboxToggleStyle())
+                }
+            }
+            .padding()
+            Divider()
+            VStack {
+                ForEach(Array(data.extensions.keys), id: \.self) { format in
+                    HStack {
+                        Text(format.capitalized)
+                        Spacer()
+                        Toggle(isOn: Binding(
+                            get: { data.extensions[format]! },
+                            set: { data.extensions[format] = $0 ; Storage(data: $data).write(selection: selection) }
+                        )) {
+                            Text("")
+                        }
+                        .toggleStyle(CheckboxToggleStyle())
+                    }
                 }
             }
             .padding()
@@ -455,14 +496,15 @@ struct Filter: View {
                     }
                     .disabled(
                         data.styles.columns == 1 && data.styles.font == "Helvetica Neue" && data.styles.size == CGFloat(14)
-                        && data.styles.weight == Font.Weight.regular && data.styles.color == Color.accentColor
+                            && data.styles.weight == Font.Weight.regular && data.styles.color == Color.accentColor
                     )
                 }
             }
             .padding()
-            Spacer()
         }
+        Spacer()
     }
+    
 }
 
 struct Sidebar: View {
@@ -529,23 +571,41 @@ struct Sidebar: View {
                 Spacer()
                 if selection == "" {
                     Image(systemName: "magnifyingglass").opacity(0.25)
-                } else if toggle == "filter" {
+                } else if toggle == "find" {
                     Image(systemName: "magnifyingglass").foregroundColor(.accentColor)
                 } else {
                     ZStack {
-                        if menu == "filter" {
+                        if menu == "find" {
                             Image(systemName: "magnifyingglass").foregroundColor(.accentColor)
                         } else {
                             Image(systemName: "magnifyingglass")
                         }
                     }
-                    .onTapGesture { self.toggle = "filter" }
+                    .onTapGesture { self.toggle = "find" }
                     .onHover { hovering in
-                        self.menu = hovering ? "filter" : ""
+                        self.menu = hovering ? "find" : ""
+                    }
+                }
+                Spacer()
+                if selection == "" {
+                    Image(systemName: "slider.horizontal.3").opacity(0.25)
+                } else if toggle == "settings" {
+                    Image(systemName: "slider.horizontal.3").foregroundColor(.accentColor)
+                } else {
+                    ZStack {
+                        if menu == "settings" {
+                            Image(systemName: "slider.horizontal.3").foregroundColor(.accentColor)
+                        } else {
+                            Image(systemName: "slider.horizontal.3")
+                        }
+                    }
+                    .onTapGesture { self.toggle = "settings" }
+                    .onHover { hovering in
+                        self.menu = hovering ? "settings" : ""
                     }
                 }
             }
-            .frame(height: 26)
+            .frame(width: 172, height: 26)
             .padding(.horizontal)
             Divider()
             if toggle == "help" {
@@ -557,8 +617,11 @@ struct Sidebar: View {
             if toggle == "languages" {
                 Languages(toggle: $toggle, selection: $selection, data: $data)
             }
-            if toggle == "filter" {
-                Filter(toggle: $toggle, selection: $selection, data: $data)
+            if toggle == "find" {
+                Find(toggle: $toggle, selection: $selection, data: $data)
+            }
+            if toggle == "settings" {
+                Settings(toggle: $toggle, selection: $selection, data: $data)
             }
         }
         .accentColor(data.styles.color)

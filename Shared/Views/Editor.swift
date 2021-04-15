@@ -9,16 +9,16 @@ extension NSTextField {
 
 struct VisualEffect: NSViewRepresentable {
     
-  func makeNSView(context: Context) -> NSVisualEffectView {
-    let view = NSVisualEffectView()
-    view.blendingMode = .withinWindow
-    view.isEmphasized = true
-    view.material = .popover
-    return view
-  }
+    func makeNSView(context: Context) -> NSVisualEffectView {
+        let view = NSVisualEffectView()
+        view.blendingMode = .withinWindow
+        view.isEmphasized = true
+        view.material = .popover
+        return view
+    }
     
-  func updateNSView(_ nsView: NSVisualEffectView, context: Context) {
-  }
+    func updateNSView(_ nsView: NSVisualEffectView, context: Context) {
+    }
     
 }
 
