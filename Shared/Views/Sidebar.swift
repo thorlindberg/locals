@@ -17,8 +17,6 @@ struct Projects: View {
     @Binding var status: [String]
     @Binding var data: Storage.Format
     @Binding var progress: CGFloat
-    @Binding var query: String
-    @Binding var entry: String
     @State var rename: String = ""
     @State var renaming: Bool = false
     @State var files: [String] = []
@@ -44,8 +42,7 @@ struct Projects: View {
             Section(header: Text("")) {
                 ForEach(files, id: \.self) { file in
                     NavigationLink(destination:
-                        Editor(selection: $selection, status: $status, progress: $progress, data: $data,
-                               query: $query, entry: $entry),
+                        Editor(selection: $selection, status: $status, progress: $progress, data: $data),
                         tag: file,
                         selection: Binding(
                             get: { selection },
@@ -126,14 +123,11 @@ struct Languages: View {
     @Binding var status: [String]
     @Binding var data: Storage.Format
     @Binding var progress: CGFloat
-    @Binding var query: String
-    @Binding var entry: String
-    @State var language: String = ""
     @State var editing: Bool = false
     var body: some View {
         VStack(spacing: 15) {
             HStack {
-                TextField("􀊫 Languages", text: $language)
+                TextField("􀊫 Languages", text: $data.fields.language)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                 Spacer()
                 Button(action: {
@@ -202,7 +196,7 @@ struct Languages: View {
         List {
             Section(header: Text("")) {
                 ForEach(data.translations.indices, id: \.self) { index in
-                    if data.translations[index].language.lowercased().hasPrefix(language.lowercased()) {
+                    if data.translations[index].language.lowercased().hasPrefix(data.fields.language.lowercased()) {
                         if editing {
                             HStack {
                                 if data.translations[index].target {
@@ -224,8 +218,7 @@ struct Languages: View {
                         } else {
                             if data.translations[index].target {
                                 NavigationLink(destination:
-                                    Editor(selection: $selection, status: $status, progress: $progress, data: $data,
-                                           query: $query, entry: $entry),
+                                    Editor(selection: $selection, status: $status, progress: $progress, data: $data),
                                     tag: data.translations[index].language,
                                     selection: Binding(
                                         get: { data.target },
@@ -264,8 +257,6 @@ struct Filter: View {
     @Binding var status: [String]
     @Binding var data: Storage.Format
     @Binding var progress: CGFloat
-    @Binding var query: String
-    @Binding var entry: String
     let fonts: [String] = [
         "American Typewriter", "Andale Mono", "Arial", "Avenir", "Baskerville", "Big Caslon", "Bodoni 72",
         "Bradley Hand", "Calibri", "Cambria", "Chalkboard", "Chalkduster", "Charter", "Cochin", "Copperplate",
@@ -274,7 +265,7 @@ struct Filter: View {
         "Phosphate", "Rockwell", "San Francisco", "Skia", "Tahoma", "Times", "Times New Roman", "Verdana"
     ]
     var body: some View {
-        TextField("􀊫 Strings", text: $query)
+        TextField("􀊫 Strings", text: $data.fields.query)
             .textFieldStyle(RoundedBorderTextFieldStyle())
             .padding()
         Divider()
@@ -487,8 +478,6 @@ struct Sidebar: View {
     @Binding var status: [String]
     @Binding var progress: CGFloat
     @Binding var data: Storage.Format
-    @Binding var query: String
-    @Binding var entry: String
     
     @State var menu: String = ""
     
@@ -506,7 +495,7 @@ struct Sidebar: View {
                             Image(systemName: "info.circle")
                         }
                     }
-                    .onTapGesture { self.toggle = "help" ; self.query = "" }
+                    .onTapGesture { self.toggle = "help" ; data.fields.query = "" }
                     .onHover { hovering in
                         self.menu = hovering ? "help" : ""
                     }
@@ -522,7 +511,7 @@ struct Sidebar: View {
                             Image(systemName: "folder")
                         }
                     }
-                    .onTapGesture { self.toggle = "projects" ; self.query = "" }
+                    .onTapGesture { self.toggle = "projects" ; data.fields.query = "" }
                     .onHover { hovering in
                         self.menu = hovering ? "projects" : ""
                     }
@@ -540,7 +529,7 @@ struct Sidebar: View {
                             Image(systemName: "textformat")
                         }
                     }
-                    .onTapGesture { self.toggle = "languages" ; self.query = "" }
+                    .onTapGesture { self.toggle = "languages" ; data.fields.query = "" }
                     .onHover { hovering in
                         self.menu = hovering ? "languages" : ""
                     }
@@ -571,13 +560,13 @@ struct Sidebar: View {
                 Help()
             }
             if toggle == "projects" {
-                Projects(toggle: $toggle, selection: $selection, status: $status, data: $data, progress: $progress, query: $query, entry: $entry)
+                Projects(toggle: $toggle, selection: $selection, status: $status, data: $data, progress: $progress)
             }
             if toggle == "languages" {
-                Languages(toggle: $toggle, selection: $selection, status: $status, data: $data, progress: $progress, query: $query, entry: $entry)
+                Languages(toggle: $toggle, selection: $selection, status: $status, data: $data, progress: $progress)
             }
             if toggle == "filter" {
-                Filter(toggle: $toggle, selection: $selection, status: $status, data: $data, progress: $progress, query: $query, entry: $entry)
+                Filter(toggle: $toggle, selection: $selection, status: $status, data: $data, progress: $progress)
             }
         }
         .accentColor(data.styles.color)

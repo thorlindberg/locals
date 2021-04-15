@@ -138,8 +138,6 @@ struct Editor: View {
     @Binding var status: [String]
     @Binding var progress: CGFloat
     @Binding var data: Storage.Format
-    @Binding var query: String
-    @Binding var entry: String
     
     @State var checking: Bool = false
     @State var clear: Bool = false
@@ -159,7 +157,7 @@ struct Editor: View {
                                         let strings = Array(data.translations[index].texts.keys)
                                             .sorted { data.translations[index].texts[$0]!.order < data.translations[index].texts[$1]!.order }
                                             .sorted { data.translations[index].texts[$0]!.pinned == true && data.translations[index].texts[$1]!.pinned == false }
-                                            .filter { $0.lowercased().hasPrefix(query.lowercased()) } // search strings
+                                            .filter { $0.lowercased().hasPrefix(data.fields.query.lowercased()) } // search strings
                                             .filter { data.filters.singleline ? true : !data.translations[index].texts[$0]!.single } // single-line
                                             .filter { data.filters.multiline ? true : !data.translations[index].texts[$0]!.multi } // multi-line
                                             .filter { data.filters.parenthesis ? true : !($0.hasPrefix("(") && $0.hasSuffix(")")) } // parenthesis
@@ -184,14 +182,14 @@ struct Editor: View {
                             .frame(height: 55)
                         ZStack {
                             Rectangle()
-                                .foregroundColor(data.translations.filter({$0.language == data.target})[0].texts.keys.contains(entry) ? .red : Color("Mode"))
-                                .opacity(data.translations.filter({$0.language == data.target})[0].texts.keys.contains(entry) ? 0.5 : 1)
+                                .foregroundColor(data.translations.filter({$0.language == data.target})[0].texts.keys.contains(data.fields.entry) ? .red : Color("Mode"))
+                                .opacity(data.translations.filter({$0.language == data.target})[0].texts.keys.contains(data.fields.entry) ? 0.5 : 1)
                                 .cornerRadius(6)
                                 .frame(height: 30)
-                            TextField("Add unique string", text: $entry, onCommit: {
-                                if entry.trimmingCharacters(in: .whitespaces) != "" && !data.translations.filter({$0.language == data.target})[0].texts.keys.contains(entry) {
+                            TextField("Add unique string", text: $data.fields.entry, onCommit: {
+                                if data.fields.entry.trimmingCharacters(in: .whitespaces) != "" && !data.translations.filter({$0.language == data.target})[0].texts.keys.contains(data.fields.entry) {
                                     data.translations.indices.forEach { index in
-                                        data.translations[index].texts[entry] = Storage.Format.Text(
+                                        data.translations[index].texts[data.fields.entry] = Storage.Format.Text(
                                             order: data.translations[index].texts.isEmpty ? 1 : data.translations[index].texts.values.map({$0.order}).max()! + 1,
                                             translation: "",
                                             pinned: false,
@@ -200,7 +198,7 @@ struct Editor: View {
                                         )
                                     }
                                     Storage(data: $data, status: $status, progress: $progress).write(status: status, selection: selection)
-                                    self.entry = ""
+                                    data.fields.entry = ""
                                 }
                             })
                             .textFieldStyle(PlainTextFieldStyle())

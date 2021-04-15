@@ -14,9 +14,17 @@ struct Storage {
         var target: String
         var alerts: Bool
         var saved: String
+        var fields: Fields
         var filters: Filters
         var styles: Styles
         var translations: [Translations]
+        
+        struct Fields: Hashable {
+            var query: String
+            var entry: String
+            var rename: String
+            var language: String
+        }
         
         struct Filters: Hashable {
             var unpinned: Bool
@@ -59,6 +67,12 @@ struct Storage {
         target: "",
         alerts: true,
         saved: "",
+        fields: Format.Fields(
+            query: "",
+            entry: "",
+            rename: "",
+            language: ""
+        ),
         filters: Format.Filters(
             unpinned: true,
             singleline: true,
