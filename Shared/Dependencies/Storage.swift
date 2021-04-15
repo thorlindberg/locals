@@ -2,9 +2,9 @@ import SwiftUI
 
 struct Storage {
     
+    @Binding var data: Format
     @Binding var status: [String]
     @Binding var progress: CGFloat
-    @Binding var saved: String
     
     let folder = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
     
@@ -13,6 +13,7 @@ struct Storage {
         var base: String
         var target: String
         var alerts: Bool
+        var saved: String
         var filters: Filters
         var styles: Styles
         var translations: [Translations]
@@ -53,10 +54,11 @@ struct Storage {
         
     }
     
-    var data = Format(
+    var database = Format(
         base: "English (United Kingdom)",
         target: "",
         alerts: true,
+        saved: "",
         filters: Format.Filters(
             unpinned: true,
             singleline: true,
@@ -425,7 +427,7 @@ struct Storage {
     
     func read(status: [String], selection: String) -> Format {
         
-        var baseData = self.data
+        var baseData = self.database
         
         do {
             
@@ -495,11 +497,11 @@ struct Storage {
                 } else {
                     
                     // id : pinned : string : translation ;
-                    self.data.translations.indices.forEach { index in
-                        if targets.contains(self.data.translations[index].language) {
+                    self.database.translations.indices.forEach { index in
+                        if targets.contains(self.database.translations[index].language) {
                             baseData.translations[index].target = true
                         }
-                        if self.data.translations[index].id == line[0] {
+                        if self.database.translations[index].id == line[0] {
                             if "_" == line[3] {
                                 baseData.translations[index].texts[line[2].replacingOccurrences(of: "/:", with: ":").replacingOccurrences(of: "/;", with: ";")] = Format.Text(
                                     order: baseData.translations[index].texts.isEmpty ? 1 : baseData.translations[index].texts.values.map({$0.order}).max()! + 1,
@@ -534,7 +536,7 @@ struct Storage {
         
     }
     
-    func write(status: [String], selection: String, data: Format) {
+    func write(status: [String], selection: String) {
         
         var output = ""
         
@@ -612,7 +614,7 @@ struct Storage {
         
         do {
             try output.dropLast(3).write(to: self.folder.appendingPathComponent(selection + ".localproj"), atomically: true, encoding: String.Encoding.utf8)
-            self.saved = "Last saved at \(Time().current())"
+            self.data.saved = "Last saved at \(Time().current())"
         } catch {
             NSLog(error.localizedDescription)
         }

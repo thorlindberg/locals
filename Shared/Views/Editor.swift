@@ -24,7 +24,6 @@ struct VisualEffect: NSViewRepresentable {
 
 struct Header: View {
     @Binding var data: Storage.Format
-    @Binding var saved: String
     var body: some View {
         if data.target != "" {
             HStack {
@@ -38,7 +37,7 @@ struct Header: View {
                     .fontWeight(.regular)
                     .foregroundColor(data.styles.color)
                 Spacer()
-                Text(saved)
+                Text(data.saved)
                     .fontWeight(.regular)
                     .opacity(0.5)
             }
@@ -55,7 +54,6 @@ struct Card: View {
     @Binding var progress: CGFloat
     @Binding var data: Storage.Format
     @Binding var alert: Bool
-    @Binding var saved: String
     var index: Range<Array<Storage.Format.Translations>.Index>.Element
     var string: Range<Array<Dictionary<String, Storage.Format.Text>.Keys.Element>.Index>.Element
     var strings: [Dictionary<String, Storage.Format.Text>.Keys.Element]
@@ -89,7 +87,7 @@ struct Card: View {
                                 data.translations.indices.forEach { index in
                                     data.translations[index].texts[strings[string]]!.pinned = !data.translations[index].texts[strings[string]]!.pinned
                                 }
-                                Storage(status: $status, progress: $progress, saved: $saved).write(status: status, selection: selection, data: data)
+                                Storage(data: $data, status: $status, progress: $progress).write(status: status, selection: selection)
                             }
                         }
                         Image(systemName: "xmark.circle.fill")
@@ -109,7 +107,7 @@ struct Card: View {
                                         data.translations.indices.forEach { index in
                                             data.translations[index].texts.removeValue(forKey: strings[string])
                                         }
-                                        Storage(status: $status, progress: $progress, saved: $saved).write(status: status, selection: selection, data: data)
+                                        Storage(data: $data, status: $status, progress: $progress).write(status: status, selection: selection)
                                     }
                                 }
                             }
@@ -125,7 +123,7 @@ struct Card: View {
                 TextField("Add translation", text: Binding(
                     get: { data.translations[index].texts[strings[string]]!.translation },
                     set: { data.translations[index].texts[strings[string]]?.translation = $0 }
-                ), onCommit: { withAnimation { Storage(status: $status, progress: $progress, saved: $saved).write(status: status, selection: selection, data: data)}})
+                ), onCommit: { withAnimation { Storage(data: $data, status: $status, progress: $progress).write(status: status, selection: selection)}})
                 .textFieldStyle(PlainTextFieldStyle())
             }
             .padding()
@@ -142,8 +140,6 @@ struct Editor: View {
     @Binding var data: Storage.Format
     @Binding var query: String
     @Binding var entry: String
-    @Binding var inspector: Bool
-    @Binding var saved: String
     
     @State var checking: Bool = false
     @State var clear: Bool = false
@@ -154,7 +150,7 @@ struct Editor: View {
             if selection != "" && data.target != "" {
                 VStack(spacing: 0) {
                     List {
-                        Section(header: Header(data: $data, saved: $saved)) {
+                        Section(header: Header(data: $data)) {
                             Spacer()
                                 .frame(height: 10)
                             LazyVGrid(columns: Array(repeating: .init(.adaptive(minimum: 600)), count: data.styles.columns), spacing: 0) {
@@ -171,7 +167,7 @@ struct Editor: View {
                                             .filter { data.filters.symbols ? true : !($0.allSatisfy({ ($0.isSymbol || $0.isPunctuation || $0.isCurrencySymbol || $0.isMathSymbol) })) } // symbols
                                             .filter { data.filters.unpinned ? true : data.translations[index].texts[$0]!.pinned } // unpinned
                                         ForEach(strings.indices, id: \.self) { string in
-                                            Card(selection: $selection, status: $status, progress: $progress, data: $data, alert: $alert, saved: $saved, index: index, string: string, strings: strings)
+                                            Card(selection: $selection, status: $status, progress: $progress, data: $data, alert: $alert, index: index, string: string, strings: strings)
                                         }
                                     }
                                 }
@@ -203,7 +199,7 @@ struct Editor: View {
                                             multi: false
                                         )
                                     }
-                                    Storage(status: $status, progress: $progress, saved: $saved).write(status: status, selection: selection, data: data)
+                                    Storage(data: $data, status: $status, progress: $progress).write(status: status, selection: selection)
                                     self.entry = ""
                                 }
                             })
@@ -232,7 +228,7 @@ struct Editor: View {
                 primaryButton: .default (Text("Okay")) {
                     self.alert = false
                     data.alerts = false
-                    Storage(status: $status, progress: $progress, saved: $saved).write(status: status, selection: selection, data: data)
+                    Storage(data: $data, status: $status, progress: $progress).write(status: status, selection: selection)
                 },
                 secondaryButton: .cancel (Text("Cancel")) {
                     self.alert = false
@@ -256,7 +252,7 @@ struct Editor: View {
                                 }
                             }
                         }
-                        Storage(status: $status, progress: $progress, saved: $saved).write(status: status, selection: selection, data: data)
+                        Storage(data: $data, status: $status, progress: $progress).write(status: status, selection: selection)
                     }
                 }) {
                     Image(systemName: "folder.fill.badge.plus")
@@ -267,7 +263,7 @@ struct Editor: View {
                     withAnimation {
                         Progress(status: $status, progress: $progress).load(string: "Translating strings to \(data.target)...")
                         Translation(status: $status, progress: $progress, data: $data).translate()
-                        Storage(status: $status, progress: $progress, saved: $saved).write(status: status, selection: selection, data: data)
+                        Storage(data: $data, status: $status, progress: $progress).write(status: status, selection: selection)
                     }
                 }) {
                     Image(systemName: "globe")
