@@ -28,6 +28,7 @@ struct Projects: View {
                 .textFieldStyle(RoundedBorderTextFieldStyle())
             if !files.contains(filename) && filename != "" && !filename.hasPrefix(".") {
                 Button(action: {
+                    self.data = Storage(data: $data).data
                     Storage(data: $data).write(selection: filename)
                     self.filename = ""
                     self.files = Storage(data: $data).identify()
@@ -91,6 +92,7 @@ struct Projects: View {
                                 }) {
                                     Text("Rename")
                                 }
+                                .accentColor(data.styles.color)
                                 .disabled(files.contains(rename) || rename == "" || rename.hasPrefix("."))
                                 .keyboardShortcut(.defaultAction)
                             }
@@ -209,13 +211,8 @@ struct Languages: View {
                             }
                         } else {
                             if data.translations[index].target {
-                                NavigationLink(destination:
-                                                Editor(selection: $selection, data: $data),
-                                               tag: data.translations[index].language,
-                                               selection: Binding(
-                                                get: { data.target },
-                                                set: { if $0 != nil { data.target = $0! } }
-                                               )
+                                NavigationLink(destination: Editor(selection: $selection, data: $data), tag: data.translations[index].language,
+                                selection: Binding(get: { data.target }, set: { if $0 != nil { data.target = $0! } })
                                 ) {
                                     Text("\(data.translations[index].language)")
                                 }

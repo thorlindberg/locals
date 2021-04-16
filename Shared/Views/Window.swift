@@ -16,6 +16,7 @@ struct Window: View {
         styles: Storage.Format.Styles(columns: 3, font: "San Francisco", size: CGFloat(14), weight: Font.Weight.regular, color: Color.accentColor, vibrancy: 1),
         extensions: ["swift" : true], translations: []
     )
+    @State var intro = !UserDefaults.standard.bool(forKey: "hasLaunchedBefore")
     
     var body: some View {
         NavigationView {
@@ -24,6 +25,18 @@ struct Window: View {
             Editor(selection: $selection, data: $data)
         }
         .frame(minWidth: 900, minHeight: 500)
+        .sheet(isPresented: $intro) {
+            VStack {
+                Text("Welcome!")
+                Button(action: {
+                    intro.toggle()
+                    UserDefaults.standard.set(true, forKey: "hasLaunchedBefore")
+                }) {
+                    Text("Let's start")
+                }
+            }
+            .padding()
+        }
     }
     
 }
