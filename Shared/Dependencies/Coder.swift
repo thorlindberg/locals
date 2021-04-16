@@ -127,7 +127,11 @@ struct Coder {
                         var output = ""
                         
                         data.translations[index].texts.keys.forEach { string in
-                            output += "\"\(string)\"" + " = " + "\"\(data.translations[index].texts[string]!.translation)\"" + "\n"
+                            if data.translations[index].texts[string]!.single {
+                                output += "\"\(string)\"" + " = " + "\"\(data.translations[index].texts[string]!.translation)\"" + "\n"
+                            } else {
+                                // multiline output
+                            }
                         }
                         
                         do {

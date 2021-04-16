@@ -5,7 +5,7 @@ struct Window: View {
     @State var toggle: String = "projects"
     @State var selection: String = ""
     @State var data: Storage.Format = Storage.Format(
-        base: "",
+        base: "English (United Kingdom)",
         target: "",
         alerts: true,
         saved: "",
@@ -23,7 +23,7 @@ struct Window: View {
                 .frame(minWidth: 200)
             Editor(selection: $selection, data: $data)
         }
-        .frame(minWidth: 980, minHeight: 300)
+        .frame(minWidth: 900, minHeight: 500)
     }
     
 }

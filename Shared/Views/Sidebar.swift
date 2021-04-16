@@ -42,21 +42,13 @@ struct Projects: View {
         List {
             Section(header: Text("")) {
                 ForEach(files, id: \.self) { file in
-                    NavigationLink(destination:
-                                    Editor(selection: $selection, data: $data),
-                                   tag: file,
-                                   selection: Binding(
-                                    get: { selection },
-                                    set: { if $0 != nil { self.selection = $0! } ; self.toggle = "languages" ; self.data = Storage(data: $data).read(selection: file) }
-                                   )
+                    NavigationLink(destination: Editor(selection: $selection, data: $data), tag: file, selection: Binding(
+                        get: { selection },
+                        set: { if $0 != nil { self.selection = $0! } ; self.toggle = "languages" ; self.data = Storage(data: $data).read(selection: file) }
+                    )
                     ) {
-                        HStack {
-                            Image("File")
-                                .resizable()
-                                .frame(width: 20, height: 20)
-                            Text(file)
-                            Spacer()
-                        }
+                        Label(file, systemImage: "doc.fill")
+                            .accentColor(data.styles.color)
                     }
                     .frame(height: 20)
                     .contextMenu {
@@ -508,10 +500,7 @@ struct Settings: View {
                     }) {
                         Text("Reset styles")
                     }
-                    .disabled(
-                        data.styles.columns == 1 && data.styles.font == "Helvetica Neue" && data.styles.size == CGFloat(14)
-                            && data.styles.weight == Font.Weight.regular && data.styles.color == Color.accentColor
-                    )
+                    .disabled(data.styles == Storage(data: $data).database.styles)
                 }
             }
             .padding()

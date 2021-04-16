@@ -75,14 +75,16 @@ struct Card: View {
                     HStack {
                         Text("#\(data.translations[index].texts[strings[string]]!.order)")
                             .fontWeight(.light)
+                            .foregroundColor(vibrant ? Color("Text") : reduced ? nil : nil)
                             .opacity(vibrant ? 0.5 : 0.25)
                         Spacer()
                         Text(data.translations[index].texts[strings[string]]!.single ? "S" : "M")
                             .fontWeight(.light)
+                            .foregroundColor(vibrant ? Color("Text") : reduced ? nil : nil)
                             .opacity(vibrant ? 0.5 : 0.25)
                         ZStack {
                             Image(systemName: "pin.fill")
-                                .foregroundColor(reduced ? data.styles.color : nil)
+                                .foregroundColor(vibrant ? Color("Text") : reduced ? data.styles.color : nil)
                                 .opacity(vibrant ? 0.8 : reduced ? 1 : 0.25)
                         }
                         .onTapGesture {
@@ -94,6 +96,7 @@ struct Card: View {
                             }
                         }
                         Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(vibrant ? Color("Text") : reduced ? nil : nil)
                             .opacity(vibrant ? 0.5 : 0.25)
                             .onTapGesture {
                                 if data.alerts {
@@ -122,7 +125,7 @@ struct Card: View {
                 Text("\(strings[string])")
                     .font(.custom(data.styles.font, size: data.styles.size))
                     .fontWeight(data.styles.weight)
-                    .foregroundColor(vibrant ? nil : data.styles.color)
+                    .foregroundColor(vibrant ? Color("Text") : data.styles.color)
                 TextField("Add translation", text: Binding(
                     get: { data.translations[index].texts[strings[string]]!.translation },
                     set: { data.translations[index].texts[strings[string]]?.translation = $0 }
