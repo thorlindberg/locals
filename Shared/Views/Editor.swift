@@ -483,19 +483,26 @@ struct Entries: View {
                         .cornerRadius(6)
                         .frame(height: 30)
                     Image(systemName: "line.horizontal.3.decrease.circle")
+                        .foregroundColor(popover ? data.styles.color : nil)
                 }
                 .frame(width: 40)
                 .onTapGesture {
                     self.popover.toggle()
                 }
                 .popover(isPresented: $popover) {
-                    List {
-                        Styles(selection: $selection, data: $data)
-                        Filters(selection: $selection, data: $data)
-                        // Settings(selection: $selection, data: $data)
+                    HStack(spacing: 0) {
+                        List {
+                            Styles(selection: $selection, data: $data)
+                        }
+                        .listStyle(SidebarListStyle())
+                        .frame(width: 250, height: 222)
+                        Divider()
+                        List {
+                            Filters(selection: $selection, data: $data)
+                        }
+                        .listStyle(SidebarListStyle())
+                        .frame(width: 170, height: 222)
                     }
-                    .listStyle(SidebarListStyle())
-                    .frame(width: 240, height: 420)
                 }
             }
             .padding(.horizontal)

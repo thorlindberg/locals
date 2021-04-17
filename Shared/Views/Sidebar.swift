@@ -90,13 +90,13 @@ struct Sidebar: View {
         }
         .frame(minWidth: 150)
         .onAppear {
-            if !UserDefaults.standard.bool(forKey: "hasLaunchedBefore") {
+            self.files = Storage(data: $data).identify()
+            if !UserDefaults.standard.bool(forKey: "hasLaunchedBefore") && !files.contains("Example") {
                 self.data = Storage(data: $data).data
                 Storage(data: $data).write(selection: "Example")
                 self.filename = ""
                 self.files = Storage(data: $data).identify()
             }
-            self.files = Storage(data: $data).identify()
             if files != [] {
                 self.selection = files[0]
                 self.data = Storage(data: $data).read(selection: selection)
