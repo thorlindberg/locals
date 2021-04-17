@@ -17,19 +17,20 @@ struct Sidebar: View {
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                 if !files.contains(filename) && filename != "" && !filename.hasPrefix(".") {
                     Button(action: {
-                        self.data = Storage(data: $data).data
+                        self.data = Storage(data: $data).database
                         Storage(data: $data).write(selection: filename)
                         self.filename = ""
                         self.files = Storage(data: $data).identify()
                     }) {
                         Image(systemName: "plus")
+                            .accentColor(data.styles.color)
                     }
                     .keyboardShortcut(.defaultAction)
                 }
             }
             .padding(.bottom)
             ForEach(files, id: \.self) { file in
-                NavigationLink(destination: Project(selection: $selection, data: $data), tag: file, selection: Binding(
+                NavigationLink(destination: Languages(selection: $selection, data: $data), tag: file, selection: Binding(
                     get: { selection },
                     set: { if $0 != nil { self.selection = $0! } ; self.data = Storage(data: $data).read(selection: file) }
                 )
@@ -96,6 +97,10 @@ struct Sidebar: View {
                 self.files = Storage(data: $data).identify()
             }
             self.files = Storage(data: $data).identify()
+            if files != [] {
+                self.selection = files[0]
+                self.data = Storage(data: $data).read(selection: selection)
+            }
         }
     }
     

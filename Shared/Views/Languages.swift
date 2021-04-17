@@ -13,7 +13,7 @@ struct Title: View {
     }
 }
 
-struct Project: View {
+struct Languages: View {
 
     @Binding var selection: String
     @Binding var data: Storage.Format
@@ -32,7 +32,7 @@ struct Project: View {
                                     Text("Base")
                                     Spacer()
                                 }
-                                .frame(width: 55)
+                                .frame(width: 80)
                                 Spacer()
                                 Picker("", selection: Binding(
                                     get: { data.base },

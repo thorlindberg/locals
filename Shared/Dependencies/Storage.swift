@@ -66,7 +66,7 @@ struct Storage {
     
     var database = Format(
         base: "English (United Kingdom)",
-        target: "",
+        target: "Japanese",
         alerts: true,
         saved: "",
         status: ["\(Time().current()) - Welcome to Locals"],
@@ -506,7 +506,7 @@ struct Storage {
                 
                 default:
                     
-                    // id : pinned : string : translation ;
+                    // id : pinned : string : translation : order ;
                     self.database.translations.indices.forEach { index in
                         if targets.contains(self.database.translations[index].language) {
                             baseData.translations[index].target = true
@@ -514,7 +514,7 @@ struct Storage {
                         if self.database.translations[index].id == line[0] {
                             if "_" == line[3] {
                                 baseData.translations[index].texts[line[2].replacingOccurrences(of: "/:", with: ":").replacingOccurrences(of: "/;", with: ";")] = Format.Text(
-                                    order: baseData.translations[index].texts.isEmpty ? 1 : baseData.translations[index].texts.values.map({$0.order}).max()! + 1,
+                                    order: Int(line[4])!,
                                     translation: "",
                                     pinned: Bool(line[1])!,
                                     single: true,
@@ -522,7 +522,7 @@ struct Storage {
                                 )
                             } else {
                                 baseData.translations[index].texts[line[2].replacingOccurrences(of: "/:", with: ":").replacingOccurrences(of: "/;", with: ";")] = Format.Text(
-                                    order: baseData.translations[index].texts.isEmpty ? 1 : baseData.translations[index].texts.values.map({$0.order}).max()! + 1,
+                                    order: Int(line[4])!,
                                     translation: line[3].replacingOccurrences(of: "/:", with: ":").replacingOccurrences(of: "/;", with: ";"),
                                     pinned: Bool(line[1])!,
                                     single: true,
@@ -615,7 +615,7 @@ struct Storage {
             output += " ; "
         }
         
-        // id : pinned : string : translation ;
+        // id : pinned : string : translation : order ;
         data.translations.indices.forEach { index in
             if data.translations[index].texts != [:] {
                 data.translations[index].texts.keys.forEach { string in
@@ -623,10 +623,11 @@ struct Storage {
                     output += String(data.translations[index].texts[string]!.pinned) + " : "
                     output += string.replacingOccurrences(of: ":", with: "/:").replacingOccurrences(of: ";", with: "/;") + " : "
                     if data.translations[index].texts[string]!.translation == "" {
-                        output += "_" + " ; "
+                        output += "_" + " : "
                     } else {
-                        output += data.translations[index].texts[string]!.translation.replacingOccurrences(of: ":", with: "/:").replacingOccurrences(of: ";", with: "/;") + " ; "
+                        output += data.translations[index].texts[string]!.translation.replacingOccurrences(of: ":", with: "/:").replacingOccurrences(of: ";", with: "/;") + " : "
                     }
+                    output += String(data.translations[index].texts[string]!.order) + " ; "
                 }
             }
         }

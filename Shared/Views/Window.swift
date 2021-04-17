@@ -5,7 +5,7 @@ struct Window: View {
     @State var selection: String = ""
     @State var data: Storage.Format = Storage.Format(
         base: "English (United Kingdom)",
-        target: "",
+        target: "Japanese",
         alerts: true,
         saved: "",
         status: ["\(Time().current()) - Welcome to Locals"],
@@ -20,7 +20,7 @@ struct Window: View {
     var body: some View {
         NavigationView {
             Sidebar(selection: $selection, data: $data)
-            Project(selection: $selection, data: $data)
+            Languages(selection: $selection, data: $data)
             Editor(selection: $selection, data: $data)
         }
         .frame(minWidth: 980, minHeight: 500)
