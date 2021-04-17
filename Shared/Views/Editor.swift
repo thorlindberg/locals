@@ -7,22 +7,7 @@ extension NSTextField {
     }
 }
 
-struct VisualEffect: NSViewRepresentable {
-    
-    func makeNSView(context: Context) -> NSVisualEffectView {
-        let view = NSVisualEffectView()
-        view.blendingMode = .withinWindow
-        view.isEmphasized = true
-        view.material = .popover
-        return view
-    }
-    
-    func updateNSView(_ nsView: NSVisualEffectView, context: Context) {
-    }
-    
-}
-
-struct Header: View {
+struct Path: View {
     @Binding var data: Storage.Format
     var body: some View {
         if data.target != "" {
@@ -140,6 +125,368 @@ struct Card: View {
     
 }
 
+struct Filters: View {
+    
+    @Binding var selection: String
+    @Binding var data: Storage.Format
+    
+    var body: some View {
+        List {
+            Section(header: Text("Filters")) {
+                VStack {
+                    HStack {
+                        Text("Single-line")
+                        Spacer()
+                        Toggle(isOn: Binding(
+                            get: { data.filters.singleline },
+                            set: { data.filters.singleline = $0 ; Storage(data: $data).write(selection: selection) }
+                        )) {
+                            Text("")
+                        }
+                        .toggleStyle(CheckboxToggleStyle())
+                    }
+                    HStack {
+                        Text("Multi-line")
+                        Spacer()
+                        Toggle(isOn: Binding(
+                            get: { data.filters.multiline },
+                            set: { data.filters.multiline = $0 ; Storage(data: $data).write(selection: selection) }
+                        )) {
+                            Text("")
+                        }
+                        .toggleStyle(CheckboxToggleStyle())
+                    }
+                    HStack {
+                        Text("Parenthesis")
+                        Spacer()
+                        Toggle(isOn: Binding(
+                            get: { data.filters.parenthesis },
+                            set: { data.filters.parenthesis = $0 ; Storage(data: $data).write(selection: selection) }
+                        )) {
+                            Text("")
+                        }
+                        .toggleStyle(CheckboxToggleStyle())
+                    }
+                    HStack {
+                        Text("Nummerical")
+                        Spacer()
+                        Toggle(isOn: Binding(
+                            get: { data.filters.nummerical },
+                            set: { data.filters.nummerical = $0 ; Storage(data: $data).write(selection: selection) }
+                        )) {
+                            Text("")
+                        }
+                        .toggleStyle(CheckboxToggleStyle())
+                    }
+                    HStack {
+                        Text("Symbols")
+                        Spacer()
+                        Toggle(isOn: Binding(
+                            get: { data.filters.symbols },
+                            set: { data.filters.symbols = $0 ; Storage(data: $data).write(selection: selection) }
+                        )) {
+                            Text("")
+                        }
+                        .toggleStyle(CheckboxToggleStyle())
+                    }
+                    HStack {
+                        Text("Unpinned")
+                        Spacer()
+                        Toggle(isOn: Binding(
+                            get: { data.filters.unpinned },
+                            set: { data.filters.unpinned = $0 ; Storage(data: $data).write(selection: selection) }
+                        )) {
+                            Text("")
+                        }
+                        .toggleStyle(CheckboxToggleStyle())
+                    }
+                }
+            }
+        }
+    }
+    
+}
+
+struct Styles: View {
+    
+    @Binding var selection: String
+    @Binding var data: Storage.Format
+    
+    let fonts: [String] = [
+        "American Typewriter", "Andale Mono", "Arial", "Avenir", "Baskerville", "Big Caslon", "Bodoni 72",
+        "Bradley Hand", "Calibri", "Cambria", "Chalkboard", "Chalkduster", "Charter", "Cochin", "Copperplate",
+        "Courier", "Didot", "Futura", "Geneva", "Georgia", "Gill Sans", "Helvetica", "Helvetica Neue", "Impact",
+        "Lucida Grande", "Luminari", "Marker Felt", "Menlo", "Monaco", "Noteworthy", "Optima", "Palatino", "Papyrus",
+        "Phosphate", "Rockwell", "San Francisco", "Skia", "Tahoma", "Times", "Times New Roman", "Verdana"
+    ]
+    
+    var body: some View {
+        List {
+            Section(header: Text("Styles")) {
+                VStack {
+                    HStack {
+                        HStack {
+                            Text("Columns")
+                            Spacer()
+                        }
+                        .frame(width: 65)
+                        Spacer()
+                        Picker("", selection: Binding(
+                            get: { data.styles.columns },
+                            set: { data.styles.columns = $0 ; Storage(data: $data).write(selection: selection) }
+                        )) {
+                            ForEach(Array(stride(from: 1, to: 6, by: 2)), id: \.self) { count in
+                                Text(String(count)).tag(count)
+                            }
+                        }
+                    }
+                    HStack {
+                        HStack {
+                            Text("Font")
+                            Spacer()
+                        }
+                        .frame(width: 65)
+                        Spacer()
+                        Picker("", selection: Binding(
+                            get: { data.styles.font },
+                            set: { data.styles.font = $0 ; Storage(data: $data).write(selection: selection) }
+                        )) {
+                            ForEach(fonts, id: \.self) { font in
+                                Text(font)
+                                    .font(.custom(font, size: 14))
+                                    .tag(font)
+                            }
+                        }
+                    }
+                    HStack {
+                        HStack {
+                            Text("Size")
+                            Spacer()
+                        }
+                        .frame(width: 65)
+                        Spacer()
+                        Picker("", selection: Binding(
+                            get: { data.styles.size },
+                            set: { data.styles.size = $0 ; Storage(data: $data).write(selection: selection) }
+                        )) {
+                            ForEach(Array(stride(from: 6, to: 102, by: 2)), id: \.self) { size in
+                                Text(String(size)).tag(CGFloat(size))
+                            }
+                        }
+                    }
+                    HStack {
+                        HStack {
+                            Text("Weight")
+                            Spacer()
+                        }
+                        .frame(width: 65)
+                        Spacer()
+                        Picker("", selection: Binding(
+                            get: { data.styles.weight },
+                            set: { data.styles.weight = $0 ; Storage(data: $data).write(selection: selection) }
+                        )) {
+                            Text("Regular").tag(Font.Weight.regular)
+                            Text("Heavy").tag(Font.Weight.heavy)
+                            Text("Black").tag(Font.Weight.black)
+                            Text("Bold").tag(Font.Weight.bold)
+                            Text("Semi-bold").tag(Font.Weight.semibold)
+                            Text("Medium").tag(Font.Weight.medium)
+                            Text("Thin").tag(Font.Weight.thin)
+                            Text("Light").tag(Font.Weight.light)
+                            Text("Ultra light").tag(Font.Weight.ultraLight)
+                        }
+                    }
+                    HStack {
+                        HStack {
+                            Text("Color")
+                            Spacer()
+                        }
+                        .frame(width: 65)
+                        Spacer()
+                        Picker("", selection: Binding(
+                            get: { data.styles.color },
+                            set: { data.styles.color = $0 ; Storage(data: $data).write(selection: selection) }
+                        )) {
+                            Text("Accent").foregroundColor(.black).tag(Color.accentColor)
+                            Text("Blue").foregroundColor(.blue).tag(Color.blue)
+                            Text("Gray").foregroundColor(.gray).tag(Color.gray)
+                            Text("Green").foregroundColor(.green).tag(Color.green)
+                            Text("Orange").foregroundColor(.orange).tag(Color.orange)
+                            Text("Pink").foregroundColor(.pink).tag(Color.pink)
+                            Text("Purple").foregroundColor(.purple).tag(Color.purple)
+                            Text("Red").foregroundColor(.red).tag(Color.red)
+                            Text("Yellow").foregroundColor(.yellow).tag(Color.yellow)
+                        }
+                    }
+                    HStack {
+                        HStack {
+                            Text("Vibrancy")
+                            Spacer()
+                        }
+                        .frame(width: 65)
+                        Spacer()
+                        Picker("", selection: Binding(
+                            get: { data.styles.vibrancy },
+                            set: { data.styles.vibrancy = $0 ; Storage(data: $data).write(selection: selection) }
+                        )) {
+                            Text("Reduced").tag(0)
+                            Text("Default").tag(1)
+                        }
+                    }
+                    HStack {
+                        Spacer()
+                        Button(action: {
+                            data.styles.columns = 3
+                            data.styles.font = "Helvetica Neue"
+                            data.styles.size = CGFloat(14)
+                            data.styles.weight = Font.Weight.regular
+                            data.styles.color = Color.orange
+                            data.styles.vibrancy = 1
+                            Storage(data: $data).write(selection: selection)
+                        }) {
+                            Text("Reset styles")
+                        }
+                        .disabled(data.styles == Storage(data: $data).database.styles)
+                    }
+                }
+            }
+        }
+    }
+    
+}
+
+struct Settings: View {
+    
+    @Binding var selection: String
+    @Binding var data: Storage.Format
+    
+    var body: some View {
+        List {
+            Section(header: Text("Settings")) {
+                HStack {
+                    Text("Alerts")
+                    Spacer()
+                    Toggle(isOn: Binding(
+                        get: { data.alerts },
+                        set: { data.alerts = $0 ; Storage(data: $data).write(selection: selection) }
+                    )) {
+                        Text("")
+                    }
+                    .toggleStyle(CheckboxToggleStyle())
+                }
+                .padding()
+                Divider()
+                VStack {
+                    ForEach(Array(data.extensions.keys), id: \.self) { format in
+                        HStack {
+                            Text(format.capitalized)
+                            Spacer()
+                            Toggle(isOn: Binding(
+                                get: { data.extensions[format]! },
+                                set: { data.extensions[format] = $0 ; Storage(data: $data).write(selection: selection) }
+                            )) {
+                                Text("")
+                            }
+                            .toggleStyle(CheckboxToggleStyle())
+                        }
+                    }
+                }
+                .padding()
+            }
+        }
+    }
+    
+}
+
+struct Entries: View {
+    
+    @Binding var selection: String
+    @Binding var data: Storage.Format
+    
+    @State var searching: Bool = false
+    
+    var body: some View {
+        
+        Divider()
+        ZStack {
+            Rectangle()
+                .opacity(0)
+                .frame(height: 55)
+            HStack(spacing: 10) {
+                ZStack {
+                    Rectangle()
+                        .foregroundColor(data.translations.filter({$0.language == data.target})[0].texts.keys.contains(data.fields.entry) ? .red : Color("Mode"))
+                        .opacity(data.translations.filter({$0.language == data.target})[0].texts.keys.contains(data.fields.entry) ? 0.5 : 1)
+                        .cornerRadius(6)
+                        .frame(height: 30)
+                    HStack(spacing: 7) {
+                        TextField("Add unique string", text: $data.fields.entry, onCommit: {
+                            if data.fields.entry.trimmingCharacters(in: .whitespaces) != "" && !data.translations.filter({$0.language == data.target})[0].texts.keys.contains(data.fields.entry) {
+                                data.translations.indices.forEach { index in
+                                    data.translations[index].texts[data.fields.entry] = Storage.Format.Text(
+                                        order: data.translations[index].texts.isEmpty ? 1 : data.translations[index].texts.values.map({$0.order}).max()! + 1,
+                                        translation: "",
+                                        pinned: false,
+                                        single: true,
+                                        multi: false
+                                    )
+                                }
+                                Storage(data: $data).write(selection: selection)
+                                data.fields.entry = ""
+                            }
+                        })
+                        .textFieldStyle(PlainTextFieldStyle())
+                        if data.fields.entry != "" {
+                            Image(systemName: "xmark.circle.fill")
+                                .opacity(0.5)
+                                .onTapGesture {
+                                    withAnimation {
+                                        data.fields.entry = ""
+                                    }
+                                }
+                        }
+                    }
+                    .padding(.horizontal)
+                }
+                ZStack {
+                    Rectangle()
+                        .foregroundColor(Color("Mode"))
+                        .opacity(data.translations.filter({$0.language == data.target})[0].texts.keys.contains(data.fields.entry) ? 0.5 : 1)
+                        .cornerRadius(6)
+                        .frame(height: 30)
+                    if searching {
+                        HStack(spacing: 7) {
+                            TextField("􀊫 Find a string", text: $data.fields.query)
+                                .textFieldStyle(PlainTextFieldStyle())
+                            Image(systemName: "xmark.circle.fill")
+                                .opacity(0.5)
+                                .onTapGesture {
+                                    withAnimation {
+                                        data.fields.query = ""
+                                        self.searching = false
+                                    }
+                                }
+                        }
+                        .padding(.horizontal)
+                    } else {
+                        Image(systemName: "magnifyingglass")
+                            .onTapGesture {
+                                withAnimation {
+                                    self.searching = true
+                                }
+                            }
+                    }
+                }
+                .frame(width: searching ? 200 : 40)
+            }
+            .padding(.horizontal)
+            .padding(.vertical, 10)
+        }
+        
+    }
+    
+}
+
 struct Editor: View {
     
     @Binding var selection: String
@@ -148,13 +495,15 @@ struct Editor: View {
     @State var checking: Bool = false
     @State var clear: Bool = false
     @State var alert: Bool = false
+    @State var filters: Bool = false
     
     var body: some View {
         ZStack {
             if selection != "" && data.target != "" {
                 VStack(spacing: 0) {
+                    Divider()
                     List {
-                        Section(header: Header(data: $data)) {
+                        Section(header: Path(data: $data)) {
                             LazyVGrid(columns: Array(repeating: .init(.adaptive(minimum: 600)), count: data.styles.columns), spacing: 10) {
                                 ForEach(data.translations.indices, id: \.self) { index in
                                     if data.translations[index].language == data.target {
@@ -176,48 +525,8 @@ struct Editor: View {
                             }
                         }
                     }
-                    Divider()
-                    ZStack {
-                        Rectangle()
-                            .opacity(0)
-                            .frame(height: 55)
-                        ZStack {
-                            Rectangle()
-                                .foregroundColor(data.translations.filter({$0.language == data.target})[0].texts.keys.contains(data.fields.entry) ? .red : Color("Mode"))
-                                .opacity(data.translations.filter({$0.language == data.target})[0].texts.keys.contains(data.fields.entry) ? 0.5 : 1)
-                                .cornerRadius(6)
-                                .frame(height: 30)
-                            TextField("Add unique string", text: $data.fields.entry, onCommit: {
-                                if data.fields.entry.trimmingCharacters(in: .whitespaces) != "" && !data.translations.filter({$0.language == data.target})[0].texts.keys.contains(data.fields.entry) {
-                                    data.translations.indices.forEach { index in
-                                        data.translations[index].texts[data.fields.entry] = Storage.Format.Text(
-                                            order: data.translations[index].texts.isEmpty ? 1 : data.translations[index].texts.values.map({$0.order}).max()! + 1,
-                                            translation: "",
-                                            pinned: false,
-                                            single: true,
-                                            multi: false
-                                        )
-                                    }
-                                    Storage(data: $data).write(selection: selection)
-                                    data.fields.entry = ""
-                                }
-                            })
-                            .textFieldStyle(PlainTextFieldStyle())
-                            .padding(.horizontal)
-                        }
-                        .padding(.horizontal)
-                        .padding(.vertical, 10)
-                    }
+                    Entries(selection: $selection, data: $data)
                 }
-                VStack(spacing: 0) {
-                    Rectangle()
-                        .foregroundColor(Color("Mode"))
-                        .frame(height: 60)
-                        .background(VisualEffect())
-                    Divider()
-                    Spacer()
-                }
-                .padding(.top, -60)
             }
         }
         .alert(isPresented: $alert) {
@@ -236,6 +545,88 @@ struct Editor: View {
         }
         .toolbar {
             ToolbarItemGroup(placement: .automatic) {
+                Button(action: {
+                    self.filters.toggle()
+                }) {
+                    Image(systemName: "line.horizontal.3.decrease.circle")
+                }
+                .disabled(selection == "")
+                .popover(isPresented: $filters) {
+                    HStack(spacing: 0) {
+                        Filters(selection: $selection, data: $data)
+                            .listStyle(SidebarListStyle())
+                            .frame(width: 150, height: 280)
+                        Divider()
+                        Styles(selection: $selection, data: $data)
+                            .listStyle(SidebarListStyle())
+                            .frame(width: 250, height: 280)
+                        Divider()
+                        Settings(selection: $selection, data: $data)
+                            .listStyle(SidebarListStyle())
+                            .frame(width: 150, height: 280)
+                    }
+                }
+                Button(action: {
+                    withAnimation {
+                        Progress(data: $data).load(string: "Translating strings to \(data.target)...")
+                        Translation(data: $data).translate()
+                        Storage(data: $data).write(selection: selection)
+                    }
+                }) {
+                    Image(systemName: "globe")
+                }
+                .disabled(selection == "") // DISABLE IF THERE ARE NO STRINGS OR BASE/TARGET LANGUAGE IS NOT VALID FOR TRANSLATION
+                .help("Auto-translate strings")
+                Spacer()
+                ZStack {
+                    VStack {
+                        Spacer()
+                        HStack {
+                            Rectangle()
+                                .foregroundColor(data.styles.color)
+                                .frame(width: 350 * data.progress, height: 1.5)
+                            Spacer()
+                        }
+                        .frame(width: 350, height: 1.5)
+                    }
+                    .frame(width: 350, height: 27)
+                    .mask(Rectangle().frame(width: 350, height: 27).cornerRadius(5))
+                    Menu {
+                        ForEach(data.status.indices.reversed(), id: \.self) { index in
+                            Text("\(data.status[index])")
+                                .font(.system(size: 10))
+                            Divider()
+                        }
+                    } label: {
+                        Text(data.status.last!)
+                            .font(.system(size: 10))
+                    }
+                    .frame(width: 350)
+                    .help("View project changelog, and revert to a previous version")
+                    HStack {
+                        Spacer()
+                        ZStack {
+                            if clear {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundColor(data.styles.color)
+                            } else if checking {
+                                Image(systemName: "xmark.circle")
+                                    .opacity(0.25)
+                            }
+                        }
+                        .onHover { hovering in
+                            self.clear = hovering ? true : false
+                        }
+                        .onTapGesture {
+                            data.status = ["\(Time().current()) - Cleared application changelog"]
+                        }
+                    }
+                    .padding(.horizontal, 22)
+                }
+                .onHover { hovering in
+                    withAnimation { self.checking = hovering ? true : false }
+                }
+                Spacer()
                 Button(action: {
                     Coder(data: $data).decode() { lines in
                         lines["S"]!.forEach { string in
@@ -265,69 +656,6 @@ struct Editor: View {
                 }
                 .disabled(selection == "")
                 .help("Import strings from an Xcode project folder")
-                /*
-                Button(action: {
-                    withAnimation {
-                        Progress(data: $data).load(string: "Translating strings to \(data.target)...")
-                        Translation(data: $data).translate()
-                        Storage(data: $data).write(selection: selection)
-                    }
-                }) {
-                    Image(systemName: "globe")
-                }
-                .disabled(selection == "") // DISABLE IF THERE ARE NO STRINGS OR BASE/TARGET LANGUAGE IS NOT VALID FOR TRANSLATION
-                .help("Auto-translate strings")
-                */
-                Spacer()
-                ZStack {
-                    VStack {
-                        Spacer()
-                        HStack {
-                            Rectangle()
-                                .foregroundColor(data.styles.color)
-                                .frame(width: 500 * data.progress, height: 1.5)
-                            Spacer()
-                        }
-                        .frame(width: 500, height: 1.5)
-                    }
-                    .frame(width: 500, height: 27)
-                    .mask(Rectangle().frame(width: 500, height: 27).cornerRadius(5))
-                    Menu {
-                        ForEach(data.status.indices.reversed(), id: \.self) { index in
-                            Text("\(data.status[index])")
-                                .font(.system(size: 10))
-                            Divider()
-                        }
-                    } label: {
-                        Text(data.status.last!)
-                            .font(.system(size: 10))
-                    }
-                    .frame(width: 500)
-                    .help("View project changelog, and revert to a previous version")
-                    HStack {
-                        Spacer()
-                        ZStack {
-                            if clear {
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundColor(data.styles.color)
-                            } else if checking {
-                                Image(systemName: "xmark.circle")
-                                    .opacity(0.25)
-                            }
-                        }
-                        .onHover { hovering in
-                            self.clear = hovering ? true : false
-                        }
-                        .onTapGesture {
-                            data.status = ["\(Time().current()) - Cleared application changelog"]
-                        }
-                    }
-                    .padding(.horizontal, 22)
-                }
-                .onHover { hovering in
-                    withAnimation { self.checking = hovering ? true : false }
-                }
-                Spacer()
                 MenuButton(label: Image(systemName: "arrow.up.doc")) {
                     Button(action: {
                         // COPY PROJECT AND SEND IT SOMEWHERE
