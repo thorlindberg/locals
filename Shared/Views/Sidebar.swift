@@ -131,7 +131,7 @@ struct Languages: View {
                 }) {
                     if editing {
                         Image(systemName: "line.horizontal.3.decrease.circle.fill")
-                            .foregroundColor(.accentColor)
+                            .foregroundColor(data.styles.color)
                     } else {
                         Image(systemName: "line.horizontal.3.decrease.circle")
                     }
@@ -157,7 +157,7 @@ struct Languages: View {
                 HStack {
                     if data.translations.allSatisfy({$0.target}) {
                         Text("Select all")
-                            .foregroundColor(.accentColor)
+                            .foregroundColor(data.styles.color)
                     } else {
                         Text("Select all")
                     }
@@ -195,7 +195,7 @@ struct Languages: View {
                             HStack {
                                 if data.translations[index].target {
                                     Text("\(data.translations[index].language)")
-                                        .foregroundColor(.accentColor)
+                                        .foregroundColor(data.styles.color)
                                 } else {
                                     Text("\(data.translations[index].language)")
                                 }
@@ -208,6 +208,7 @@ struct Languages: View {
                                 }
                                 .toggleStyle(CheckboxToggleStyle())
                                 .disabled(data.translations[index].target && data.translations.filter({$0.target}).count == 1)
+                                .accentColor(data.styles.color)
                             }
                         } else {
                             if data.translations[index].target {
@@ -518,14 +519,14 @@ struct Sidebar: View {
             Divider()
             HStack(spacing: 0) {
                 if toggle == "help" {
-                    Image(systemName: "info.circle.fill").foregroundColor(.accentColor)
+                    Image(systemName: "info.circle.fill").foregroundColor(data.styles.color)
                 } else {
                     Image(systemName: "info.circle")
                         .onTapGesture { self.toggle = "help" ; data.fields.query = "" }
                 }
                 Spacer()
                 if toggle == "projects" {
-                    Image(systemName: "folder.fill").foregroundColor(.accentColor)
+                    Image(systemName: "folder.fill").foregroundColor(data.styles.color)
                 } else {
                     Image(systemName: "folder")
                         .onTapGesture { self.toggle = "projects" ; data.fields.query = "" }
@@ -534,7 +535,7 @@ struct Sidebar: View {
                 if selection == "" {
                     Image(systemName: "textformat").opacity(0.25)
                 } else if toggle == "languages" {
-                    Image(systemName: "textformat").foregroundColor(.accentColor)
+                    Image(systemName: "textformat").foregroundColor(data.styles.color)
                 } else {
                     Image(systemName: "textformat")
                         .onTapGesture { self.toggle = "languages" ; data.fields.query = "" }
@@ -543,7 +544,7 @@ struct Sidebar: View {
                 if selection == "" {
                     Image(systemName: "magnifyingglass").opacity(0.25)
                 } else if toggle == "find" {
-                    Image(systemName: "magnifyingglass").foregroundColor(.accentColor)
+                    Image(systemName: "magnifyingglass").foregroundColor(data.styles.color)
                 } else {
                     Image(systemName: "magnifyingglass")
                         .onTapGesture { self.toggle = "find" }
@@ -552,7 +553,7 @@ struct Sidebar: View {
                 if selection == "" {
                     Image(systemName: "slider.horizontal.3").opacity(0.25)
                 } else if toggle == "settings" {
-                    Image(systemName: "slider.horizontal.3").foregroundColor(.accentColor)
+                    Image(systemName: "slider.horizontal.3").foregroundColor(data.styles.color)
                 } else {
                     Image(systemName: "slider.horizontal.3")
                         .onTapGesture { self.toggle = "settings" }

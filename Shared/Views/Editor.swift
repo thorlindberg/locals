@@ -82,10 +82,12 @@ struct Card: View {
                             .fontWeight(.light)
                             .foregroundColor(vibrant ? Color("Text") : reduced ? nil : nil)
                             .opacity(vibrant ? 0.5 : 0.25)
+                            .help(data.translations[index].texts[strings[string]]!.single ? "Singleline" : "Multiline")
                         ZStack {
                             Image(systemName: "pin.fill")
                                 .foregroundColor(vibrant ? Color("Text") : reduced ? data.styles.color : nil)
                                 .opacity(vibrant ? 0.8 : reduced ? 1 : 0.25)
+                                .help(data.translations[index].texts[strings[string]]!.pinned ? "Pin" : "Unpin")
                         }
                         .onTapGesture {
                             withAnimation {
@@ -326,22 +328,19 @@ struct Editor: View {
                     withAnimation { self.checking = hovering ? true : false }
                 }
                 Spacer()
-                /*
-                Button(action: {
-                    // Export localization project
-                }) {
-                    Image(systemName: "arrow.up.doc")
+                MenuButton(label: Image(systemName: "arrow.up.doc")) {
+                    Button(action: {
+                        // COPY PROJECT AND SEND IT SOMEWHERE
+                    }) {
+                        Label("Share project file", systemImage: "doc")
+                    }
+                    Button(action: {
+                        Coder(data: $data).encode()
+                    }) {
+                        Label("Export as .strings", systemImage: "folder")
+                    }
                 }
                 .disabled(selection == "" || data.target == "") // DISABLE IF NO STRINGS
-                .help("Export localization project")
-                */
-                Button(action: {
-                    Coder(data: $data).encode()
-                }) {
-                    Image(systemName: "square.and.arrow.up")
-                }
-                .disabled(selection == "" || data.target == "") // DISABLE IF NO STRINGS
-                .help("Export strings and translations")
             }
         }
     }
