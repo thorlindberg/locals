@@ -492,41 +492,39 @@ struct Editor: View {
     @Binding var selection: String
     @Binding var data: Storage.Format
     
-    @State var checking: Bool = false
-    @State var clear: Bool = false
     @State var alert: Bool = false
     @State var filters: Bool = false
     
     var body: some View {
-        ZStack {
+        VStack(spacing: 0) {
+            Divider()
             if selection != "" && data.target != "" {
-                VStack(spacing: 0) {
-                    Divider()
-                    List {
-                        Section(header: Path(data: $data)) {
-                            LazyVGrid(columns: Array(repeating: .init(.adaptive(minimum: 600)), count: data.styles.columns), spacing: 10) {
-                                ForEach(data.translations.indices, id: \.self) { index in
-                                    if data.translations[index].language == data.target {
-                                        let strings = Array(data.translations[index].texts.keys)
-                                            .sorted { data.translations[index].texts[$0]!.order < data.translations[index].texts[$1]!.order }
-                                            .sorted { data.translations[index].texts[$0]!.pinned == true && data.translations[index].texts[$1]!.pinned == false }
-                                            .filter { $0.lowercased().hasPrefix(data.fields.query.lowercased()) } // search strings
-                                            .filter { data.filters.singleline ? true : !data.translations[index].texts[$0]!.single } // single-line
-                                            .filter { data.filters.multiline ? true : !data.translations[index].texts[$0]!.multi } // multi-line
-                                            .filter { data.filters.parenthesis ? true : !($0.hasPrefix("(") && $0.hasSuffix(")")) } // parenthesis
-                                            .filter { data.filters.nummerical ? true : !($0.allSatisfy({ $0.isNumber })) } // nummerical
-                                            .filter { data.filters.symbols ? true : !($0.allSatisfy({ ($0.isSymbol || $0.isPunctuation || $0.isCurrencySymbol || $0.isMathSymbol) })) } // symbols
-                                            .filter { data.filters.unpinned ? true : data.translations[index].texts[$0]!.pinned } // unpinned
-                                        ForEach(strings.indices, id: \.self) { string in
-                                            Card(selection: $selection, data: $data, alert: $alert, index: index, string: string, strings: strings)
-                                        }
+                List {
+                    Section(header: Path(data: $data)) {
+                        LazyVGrid(columns: Array(repeating: .init(.adaptive(minimum: 600)), count: data.styles.columns), spacing: 10) {
+                            ForEach(data.translations.indices, id: \.self) { index in
+                                if data.translations[index].language == data.target {
+                                    let strings = Array(data.translations[index].texts.keys)
+                                        .sorted { data.translations[index].texts[$0]!.order < data.translations[index].texts[$1]!.order }
+                                        .sorted { data.translations[index].texts[$0]!.pinned == true && data.translations[index].texts[$1]!.pinned == false }
+                                        .filter { $0.lowercased().hasPrefix(data.fields.query.lowercased()) } // search strings
+                                        .filter { data.filters.singleline ? true : !data.translations[index].texts[$0]!.single } // single-line
+                                        .filter { data.filters.multiline ? true : !data.translations[index].texts[$0]!.multi } // multi-line
+                                        .filter { data.filters.parenthesis ? true : !($0.hasPrefix("(") && $0.hasSuffix(")")) } // parenthesis
+                                        .filter { data.filters.nummerical ? true : !($0.allSatisfy({ $0.isNumber })) } // nummerical
+                                        .filter { data.filters.symbols ? true : !($0.allSatisfy({ ($0.isSymbol || $0.isPunctuation || $0.isCurrencySymbol || $0.isMathSymbol) })) } // symbols
+                                        .filter { data.filters.unpinned ? true : data.translations[index].texts[$0]!.pinned } // unpinned
+                                    ForEach(strings.indices, id: \.self) { string in
+                                        Card(selection: $selection, data: $data, alert: $alert, index: index, string: string, strings: strings)
                                     }
                                 }
                             }
                         }
                     }
-                    Entries(selection: $selection, data: $data)
                 }
+                Entries(selection: $selection, data: $data)
+            } else {
+                Spacer()
             }
         }
         .alert(isPresented: $alert) {
@@ -603,28 +601,6 @@ struct Editor: View {
                     }
                     .frame(width: 350)
                     .help("View project changelog, and revert to a previous version")
-                    HStack {
-                        Spacer()
-                        ZStack {
-                            if clear {
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundColor(data.styles.color)
-                            } else if checking {
-                                Image(systemName: "xmark.circle")
-                                    .opacity(0.25)
-                            }
-                        }
-                        .onHover { hovering in
-                            self.clear = hovering ? true : false
-                        }
-                        .onTapGesture {
-                            data.status = ["\(Time().current()) - Cleared application changelog"]
-                        }
-                    }
-                    .padding(.horizontal, 22)
-                }
-                .onHover { hovering in
-                    withAnimation { self.checking = hovering ? true : false }
                 }
                 Spacer()
                 Button(action: {
@@ -652,11 +628,11 @@ struct Editor: View {
                         Storage(data: $data).write(selection: selection)
                     }
                 }) {
-                    Image(systemName: "folder.fill.badge.plus")
+                    Image(systemName: "arrow.down.doc")
                 }
                 .disabled(selection == "")
                 .help("Import strings from an Xcode project folder")
-                MenuButton(label: Image(systemName: "arrow.up.doc")) {
+                MenuButton(label: Image(systemName: "square.and.arrow.up")) {
                     Button(action: {
                         // COPY PROJECT AND SEND IT SOMEWHERE
                     }) {

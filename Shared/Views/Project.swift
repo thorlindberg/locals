@@ -23,90 +23,92 @@ struct Project: View {
     var body: some View {
         VStack(spacing: 0) {
             Divider()
-            List {
-                Section(header: Title(data: $data)) {
-                    if editing {
-                        HStack {
+            if selection != "" {
+                List {
+                    Section(header: Title(data: $data)) {
+                        if editing {
                             HStack {
-                                Text("Base")
+                                HStack {
+                                    Text("Base")
+                                    Spacer()
+                                }
+                                .frame(width: 55)
                                 Spacer()
-                            }
-                            .frame(width: 55)
-                            Spacer()
-                            Picker("", selection: Binding(
-                                get: { data.base },
-                                set: { data.base = $0 }
-                            )) {
-                                ForEach(data.translations, id: \.self) { translations in
-                                    Text("\(translations.language)").tag(translations.language)
+                                Picker("", selection: Binding(
+                                    get: { data.base },
+                                    set: { data.base = $0 }
+                                )) {
+                                    ForEach(data.translations, id: \.self) { translations in
+                                        Text("\(translations.language)").tag(translations.language)
+                                    }
                                 }
                             }
-                        }
-                        HStack {
-                            if data.translations.allSatisfy({$0.target}) {
-                                Text("Select all")
-                                    .foregroundColor(data.styles.color)
-                            } else {
-                                Text("Select all")
-                            }
-                            Spacer()
-                            Toggle(isOn: Binding(
-                                get: { data.translations.allSatisfy({$0.target}) },
-                                set: { _,_ in
-                                    if data.translations.allSatisfy({$0.target}) {
-                                        data.translations.indices.forEach { index in
-                                            if index != 0 {
-                                                data.translations[index].target = false
+                            HStack {
+                                if data.translations.allSatisfy({$0.target}) {
+                                    Text("Select all")
+                                        .foregroundColor(data.styles.color)
+                                } else {
+                                    Text("Select all")
+                                }
+                                Spacer()
+                                Toggle(isOn: Binding(
+                                    get: { data.translations.allSatisfy({$0.target}) },
+                                    set: { _,_ in
+                                        if data.translations.allSatisfy({$0.target}) {
+                                            data.translations.indices.forEach { index in
+                                                if index != 0 {
+                                                    data.translations[index].target = false
+                                                }
+                                            }
+                                        } else {
+                                            data.translations.indices.forEach { index in
+                                                data.translations[index].target = true
                                             }
                                         }
-                                    } else {
-                                        data.translations.indices.forEach { index in
-                                            data.translations[index].target = true
-                                        }
                                     }
+                                )) {
+                                    Text("")
                                 }
-                            )) {
-                                Text("")
+                                .toggleStyle(CheckboxToggleStyle())
                             }
-                            .toggleStyle(CheckboxToggleStyle())
+                            Divider()
                         }
-                        Divider()
-                    }
-                    ForEach(data.translations.indices, id: \.self) { index in
-                        if data.translations[index].language.lowercased().hasPrefix(data.fields.language.lowercased()) {
-                            if editing {
-                                HStack {
+                        ForEach(data.translations.indices, id: \.self) { index in
+                            if data.translations[index].language.lowercased().hasPrefix(data.fields.language.lowercased()) {
+                                if editing {
+                                    HStack {
+                                        if data.translations[index].target {
+                                            Text("\(data.translations[index].language)")
+                                                .foregroundColor(data.styles.color)
+                                        } else {
+                                            Text("\(data.translations[index].language)")
+                                        }
+                                        Spacer()
+                                        Toggle(isOn: Binding(
+                                            get: { data.translations[index].target },
+                                            set: { data.translations[index].target = $0 }
+                                        )) {
+                                            Text("")
+                                        }
+                                        .toggleStyle(CheckboxToggleStyle())
+                                        .disabled(data.translations[index].target && data.translations.filter({$0.target}).count == 1)
+                                        .accentColor(data.styles.color)
+                                    }
+                                } else {
                                     if data.translations[index].target {
-                                        Text("\(data.translations[index].language)")
-                                            .foregroundColor(data.styles.color)
-                                    } else {
-                                        Text("\(data.translations[index].language)")
-                                    }
-                                    Spacer()
-                                    Toggle(isOn: Binding(
-                                        get: { data.translations[index].target },
-                                        set: { data.translations[index].target = $0 }
-                                    )) {
-                                        Text("")
-                                    }
-                                    .toggleStyle(CheckboxToggleStyle())
-                                    .disabled(data.translations[index].target && data.translations.filter({$0.target}).count == 1)
-                                    .accentColor(data.styles.color)
-                                }
-                            } else {
-                                if data.translations[index].target {
-                                    NavigationLink(destination: Editor(selection: $selection, data: $data), tag: data.translations[index].language,
-                                    selection: Binding(get: { data.target }, set: { if $0 != nil { data.target = $0! } })
-                                    ) {
-                                        Text("\(data.translations[index].language)")
-                                    }
-                                    .frame(height: 20)
-                                    .contextMenu {
-                                        Button(action: {
-                                            data.translations[index].target = false
-                                            Storage(data: $data).write(selection: selection)
-                                        }) {
-                                            Text("Disable target")
+                                        NavigationLink(destination: Editor(selection: $selection, data: $data), tag: data.translations[index].language,
+                                        selection: Binding(get: { data.target }, set: { if $0 != nil { data.target = $0! } })
+                                        ) {
+                                            Text("\(data.translations[index].language)")
+                                        }
+                                        .frame(height: 20)
+                                        .contextMenu {
+                                            Button(action: {
+                                                data.translations[index].target = false
+                                                Storage(data: $data).write(selection: selection)
+                                            }) {
+                                                Text("Disable target")
+                                            }
                                         }
                                     }
                                 }
@@ -114,11 +116,13 @@ struct Project: View {
                         }
                     }
                 }
-            }
-            .onAppear {
-                if data.target == "" && data.translations.filter({$0.target}).count != 0 {
-                    data.target = data.translations.filter({$0.target})[0].language
+                .onAppear {
+                    if data.target == "" && data.translations.filter({$0.target}).count != 0 {
+                        data.target = data.translations.filter({$0.target})[0].language
+                    }
                 }
+            } else {
+                Spacer()
             }
         }
         .frame(minWidth: 230)
@@ -137,6 +141,7 @@ struct Project: View {
                     Text(editing ? "Save" : "Edit")
                         .foregroundColor(editing ? data.styles.color : nil)
                 }
+                .disabled(selection == "")
             }
         }
     }
