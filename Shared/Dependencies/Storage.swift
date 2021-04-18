@@ -67,14 +67,14 @@ struct Storage {
     var database = Format(
         base: "English (United Kingdom)",
         target: "Japanese",
-        alerts: true,
+        alerts: !UserDefaults.standard.bool(forKey: "hasLaunchedBefore"),
         saved: "",
         status: ["\(Time().current()) - Welcome to Locals"],
         progress: CGFloat.zero,
         fields: Format.Fields(query: "", entry: "", rename: "", language: ""),
         filters: Format.Filters(unpinned: true, singleline: true, multiline: true, parenthesis: true, nummerical: true, symbols: true),
         styles: Format.Styles(columns: 3, font: "San Francisco", size: CGFloat(14), weight: Font.Weight.regular, color: Color.orange, vibrancy: 1),
-        extensions: ["swift" : true],
+        extensions: ["swift" : true, "hwift" : true, "jwift" : true, "qwift" : true],
         translations: [
             Format.Translations(
                 id: "1",

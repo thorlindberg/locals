@@ -264,21 +264,21 @@ struct Settings: View {
     @Binding var data: Storage.Format
     
     var body: some View {
-        Section(header: Text("Settings")) {
+        Section(header: Text("Import extensions")) {
             HStack {
-                Text("Alerts")
-                Spacer()
-                Toggle(isOn: Binding(
-                    get: { data.alerts },
-                    set: { data.alerts = $0 ; Storage(data: $data).write(selection: selection) }
-                )) {
-                    Text("")
+                /*
+                HStack {
+                    Text("Alerts")
+                    Spacer()
+                    Toggle(isOn: Binding(
+                        get: { data.alerts },
+                        set: { data.alerts = $0 ; Storage(data: $data).write(selection: selection) }
+                    )) {
+                        Text("")
+                    }
+                    .toggleStyle(CheckboxToggleStyle())
                 }
-                .toggleStyle(CheckboxToggleStyle())
-            }
-            .padding()
-            Divider()
-            VStack {
+                */
                 ForEach(Array(data.extensions.keys), id: \.self) { format in
                     HStack {
                         Text(format.capitalized)
@@ -293,7 +293,6 @@ struct Settings: View {
                     }
                 }
             }
-            .padding()
         }
     }
     
@@ -400,7 +399,6 @@ struct Entries: View {
     @Binding var data: Storage.Format
     
     @State var searching: Bool = false
-    @State var popover: Bool = false
     
     var body: some View {
         
@@ -476,34 +474,6 @@ struct Entries: View {
                         self.searching = true
                     }
                 }
-                ZStack {
-                    Rectangle()
-                        .foregroundColor(Color("Mode"))
-                        .opacity(data.translations.filter({$0.language == data.target})[0].texts.keys.contains(data.fields.entry) ? 0.5 : 1)
-                        .cornerRadius(6)
-                        .frame(height: 30)
-                    Image(systemName: "line.horizontal.3.decrease.circle")
-                        .foregroundColor(popover ? data.styles.color : nil)
-                }
-                .frame(width: 40)
-                .onTapGesture {
-                    self.popover.toggle()
-                }
-                .popover(isPresented: $popover) {
-                    HStack(spacing: 0) {
-                        List {
-                            Styles(selection: $selection, data: $data)
-                        }
-                        .listStyle(SidebarListStyle())
-                        .frame(width: 250, height: 222)
-                        Divider()
-                        List {
-                            Filters(selection: $selection, data: $data)
-                        }
-                        .listStyle(SidebarListStyle())
-                        .frame(width: 170, height: 222)
-                    }
-                }
             }
             .padding(.horizontal)
             .padding(.vertical, 10)
@@ -519,6 +489,7 @@ struct Editor: View {
     @Binding var data: Storage.Format
     
     @State var alert: Bool = false
+    @State var popover: Bool = false
     
     var body: some View {
         VStack(spacing: 0) {
@@ -578,6 +549,35 @@ struct Editor: View {
         }
         .toolbar {
             ToolbarItemGroup(placement: .automatic) {
+                Button(action: {
+                    self.popover.toggle()
+                }) {
+                    Image(systemName: "line.horizontal.3.decrease.circle")
+                }
+                .disabled(selection == "")
+                .popover(isPresented: $popover) {
+                    VStack(spacing: 0) {
+                        List {
+                            Settings(selection: $selection, data: $data)
+                        }
+                        .listStyle(SidebarListStyle())
+                        .frame(width: 420, height: 70)
+                        Divider()
+                        HStack(spacing: 0) {
+                            List {
+                                Styles(selection: $selection, data: $data)
+                            }
+                            .listStyle(SidebarListStyle())
+                            .frame(width: 250, height: 222)
+                            Divider()
+                            List {
+                                Filters(selection: $selection, data: $data)
+                            }
+                            .listStyle(SidebarListStyle())
+                            .frame(width: 170, height: 222)
+                        }
+                    }
+                }
                 Button(action: {
                     Coder(data: $data).decode() { lines in
                         lines["S"]!.forEach { string in
@@ -648,6 +648,12 @@ struct Editor: View {
                     .help("View project changelog, and revert to a previous version")
                 }
                 Spacer()
+                Button(action: {
+                    // COPY LOCALPROJ FILE TO A DESTINATION FOLDER
+                }) {
+                    Image(systemName: "arrow.up.doc")
+                }
+                .disabled(selection == "")
                 Button(action: {
                     Coder(data: $data).encode()
                 }) {
