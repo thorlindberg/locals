@@ -46,7 +46,7 @@ struct Welcome: View {
                 Text("Xcode")
                 Spacer()
             }
-            .padding(35)
+            .padding(25)
             .transition(.moveIn)
         case "locals":
             VStack {
@@ -66,7 +66,7 @@ struct Welcome: View {
                 Text("Locals")
                 Spacer()
             }
-            .padding(35)
+            .padding(25)
             .transition(.moveIn)
         case "strings":
             VStack {
@@ -86,103 +86,113 @@ struct Welcome: View {
                 Text("Strings")
                 Spacer()
             }
-            .padding(35)
+            .padding(25)
             .transition(.moveIn)
         default:
-            VStack {
-                Image("Icon")
-                    .resizable()
-                    .frame(width: 64, height: 64)
-                Text("Welcome to Locals")
-                    .font(.system(size: 30))
-                    .fontWeight(.bold)
-                Spacer()
-                Button(action: {
-                    withAnimation {
-                        self.section = "xcode"
-                    }
-                }) {
-                    HStack {
-                        Image("xcodeproj")
-                            .resizable()
-                            .frame(width: 32, height: 32)
-                            .padding(.trailing, 7)
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text("Imports Xcode projects")
-                                .fontWeight(.bold)
-                            Text("And automatically retrieves strings")
+            ZStack {
+                VStack {
+                    Image("Icon")
+                        .resizable()
+                        .frame(width: 64, height: 64)
+                    Text("Welcome to Locals")
+                        .font(.system(size: 30))
+                        .fontWeight(.bold)
+                        .padding(.bottom, 2)
+                    Text("Version 1.0.0 Release")
+                        .font(.system(size: 15))
+                        .opacity(0.5)
+                    Spacer()
+                    Button(action: {
+                        withAnimation {
+                            self.section = "xcode"
                         }
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .opacity(0.5)
-                            .padding(.trailing, 10)
-                    }
-                    .frame(height: 40)
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(PlainButtonStyle())
-                Divider()
-                Button(action: {
-                    withAnimation {
-                        self.section = "locals"
-                    }
-                }) {
-                    HStack {
-                        Image("localproj")
-                            .resizable()
-                            .frame(width: 32, height: 32)
-                            .padding(.trailing, 7)
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text("Auto-saves your work")
-                                .fontWeight(.bold)
-                            Text("In the application's storage")
+                    }) {
+                        HStack {
+                            Image("xcodeproj")
+                                .resizable()
+                                .frame(width: 32, height: 32)
+                                .padding(.trailing, 7)
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("Imports Xcode projects")
+                                    .fontWeight(.bold)
+                                Text("And automatically retrieves strings")
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .opacity(0.5)
+                                .padding(.trailing, 10)
                         }
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .opacity(0.5)
-                            .padding(.trailing, 10)
+                        .frame(height: 40)
+                        .contentShape(Rectangle())
                     }
-                    .frame(height: 40)
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(PlainButtonStyle())
-                Divider()
-                Button(action: {
-                    withAnimation {
-                        self.section = "strings"
-                    }
-                }) {
-                    HStack {
-                        Image("strings")
-                            .resizable()
-                            .frame(width: 32, height: 32)
-                            .padding(.trailing, 7)
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text("Exports localization files")
-                                .fontWeight(.bold)
-                            Text("Ready for importing into Xcode")
+                    .buttonStyle(PlainButtonStyle())
+                    Divider()
+                    Button(action: {
+                        withAnimation {
+                            self.section = "locals"
                         }
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .opacity(0.5)
-                            .padding(.trailing, 10)
+                    }) {
+                        HStack {
+                            Image("localproj")
+                                .resizable()
+                                .frame(width: 32, height: 32)
+                                .padding(.trailing, 7)
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("Auto-saves your work")
+                                    .fontWeight(.bold)
+                                Text("In the application's storage")
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .opacity(0.5)
+                                .padding(.trailing, 10)
+                        }
+                        .frame(height: 40)
+                        .contentShape(Rectangle())
                     }
-                    .frame(height: 40)
-                    .contentShape(Rectangle())
+                    .buttonStyle(PlainButtonStyle())
+                    Divider()
+                    Button(action: {
+                        withAnimation {
+                            self.section = "strings"
+                        }
+                    }) {
+                        HStack {
+                            Image("strings")
+                                .resizable()
+                                .frame(width: 32, height: 32)
+                                .padding(.trailing, 7)
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("Exports localization files")
+                                    .fontWeight(.bold)
+                                Text("Ready for importing into Xcode")
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .opacity(0.5)
+                                .padding(.trailing, 10)
+                        }
+                        .frame(height: 40)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(PlainButtonStyle())
                 }
-                .buttonStyle(PlainButtonStyle())
-                Spacer()
-                Button(action: {
-                    intro.toggle()
-                    UserDefaults.standard.set(true, forKey: "hasLaunchedBefore")
-                }) {
-                    Text("Let's start localizing!")
+                .padding(50)
+                VStack {
+                    HStack {
+                        Button(action: {
+                            intro.toggle()
+                            UserDefaults.standard.set(true, forKey: "hasLaunchedBefore")
+                        }) {
+                            Image(systemName: "xmark")
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        Spacer()
+                    }
+                    Spacer()
                 }
-                .buttonStyle(PlainButtonStyle())
-                .foregroundColor(data.styles.color)
+                .padding(25)
             }
-            .padding(.vertical, 35)
-            .padding(.horizontal, 55)
             .transition(.moveOut)
         }
     }
