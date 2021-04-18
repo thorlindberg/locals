@@ -2,6 +2,7 @@ import SwiftUI
 
 struct Sidebar: View {
     
+    @Binding var intro: Bool
     @Binding var selection: String
     @Binding var data: Storage.Format
     
@@ -12,22 +13,15 @@ struct Sidebar: View {
     
     var body: some View {
         List {
-            HStack {
-                TextField("Add project", text: $filename)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
+            TextField("Add project", text: $filename, onCommit: {
                 if !files.contains(filename) && filename != "" && !filename.hasPrefix(".") {
-                    Button(action: {
-                        self.data = Storage(data: $data).database
-                        Storage(data: $data).write(selection: filename)
-                        self.filename = ""
-                        self.files = Storage(data: $data).identify()
-                    }) {
-                        Image(systemName: "plus")
-                            .accentColor(data.styles.color)
-                    }
-                    .keyboardShortcut(.defaultAction)
+                    self.data = Storage(data: $data).database
+                    Storage(data: $data).write(selection: filename)
+                    self.filename = ""
+                    self.files = Storage(data: $data).identify()
                 }
-            }
+            })
+            .textFieldStyle(RoundedBorderTextFieldStyle())
             .padding(.bottom)
             ForEach(files, id: \.self) { file in
                 NavigationLink(destination: Languages(selection: $selection, data: $data), tag: file, selection: Binding(
@@ -100,6 +94,15 @@ struct Sidebar: View {
             if files != [] {
                 self.selection = files[0]
                 self.data = Storage(data: $data).read(selection: selection)
+            }
+        }
+        .toolbar {
+            ToolbarItemGroup(placement: .automatic) {
+                Button(action: {
+                    self.intro.toggle()
+                }) {
+                    Image(systemName: "sparkles.rectangle.stack")
+                }
             }
         }
     }

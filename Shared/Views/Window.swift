@@ -19,22 +19,14 @@ struct Window: View {
     
     var body: some View {
         NavigationView {
-            Sidebar(selection: $selection, data: $data)
+            Sidebar(intro: $intro, selection: $selection, data: $data)
             Languages(selection: $selection, data: $data)
             Editor(selection: $selection, data: $data)
         }
-        .frame(minWidth: 980, minHeight: 500)
+        .frame(minWidth: 920, minHeight: 500)
         .sheet(isPresented: $intro) {
-            VStack {
-                Text("Welcome!")
-                Button(action: {
-                    intro.toggle()
-                    UserDefaults.standard.set(true, forKey: "hasLaunchedBefore")
-                }) {
-                    Text("Let's start")
-                }
-            }
-            .padding()
+            Welcome(intro: $intro, data: $data)
+                .frame(width: 440, height: 440)
         }
     }
     
