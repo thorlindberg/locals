@@ -98,9 +98,7 @@ struct Sidebar: View {
         }
         .toolbar {
             ToolbarItemGroup(placement: .automatic) {
-                Button(action: {
-                    self.intro.toggle()
-                }) {
+                Toggle(isOn: $intro) {
                     Image(systemName: "sparkles.rectangle.stack")
                 }
             }

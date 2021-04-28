@@ -398,6 +398,7 @@ struct Entries: View {
     @Binding var selection: String
     @Binding var data: Storage.Format
     
+    @State var entering: Bool = true
     @State var searching: Bool = false
     
     var body: some View {
@@ -415,34 +416,46 @@ struct Entries: View {
                         .opacity(data.translations.filter({$0.language == data.target})[0].texts.keys.contains(data.fields.entry) ? 0.5 : 1)
                         .cornerRadius(6)
                         .frame(height: 30)
-                    HStack(spacing: 7) {
-                        TextField("Add unique string", text: $data.fields.entry, onCommit: {
-                            if data.fields.entry.trimmingCharacters(in: .whitespaces) != "" && !data.translations.filter({$0.language == data.target})[0].texts.keys.contains(data.fields.entry) {
-                                data.translations.indices.forEach { index in
-                                    self.data.translations[index].texts[data.fields.entry] = Storage.Format.Text(
-                                        order: data.translations[index].texts.isEmpty ? 1 : data.translations[index].texts.values.map({$0.order}).max()! + 1,
-                                        translation: "",
-                                        pinned: false,
-                                        single: true,
-                                        multi: false
-                                    )
-                                }
-                                data.fields.entry = ""
-                                Storage(data: $data).write(selection: selection)
-                            }
-                        })
-                        .textFieldStyle(PlainTextFieldStyle())
-                        if data.fields.entry != "" {
-                            Image(systemName: "xmark.circle.fill")
-                                .opacity(0.5)
-                                .onTapGesture {
-                                    withAnimation {
-                                        data.fields.entry = ""
+                    if entering {
+                        HStack(spacing: 7) {
+                            TextField("Add unique string", text: $data.fields.entry, onCommit: {
+                                if data.fields.entry.trimmingCharacters(in: .whitespaces) != "" && !data.translations.filter({$0.language == data.target})[0].texts.keys.contains(data.fields.entry) {
+                                    data.translations.indices.forEach { index in
+                                        self.data.translations[index].texts[data.fields.entry] = Storage.Format.Text(
+                                            order: data.translations[index].texts.isEmpty ? 1 : data.translations[index].texts.values.map({$0.order}).max()! + 1,
+                                            translation: "",
+                                            pinned: false,
+                                            single: true,
+                                            multi: false
+                                        )
                                     }
+                                    data.fields.entry = ""
+                                    Storage(data: $data).write(selection: selection)
                                 }
+                            })
+                            .textFieldStyle(PlainTextFieldStyle())
+                            if data.fields.entry != "" {
+                                Image(systemName: "xmark.circle.fill")
+                                    .opacity(0.5)
+                                    .onTapGesture {
+                                        withAnimation {
+                                            data.fields.entry = ""
+                                        }
+                                    }
+                            }
                         }
+                        .padding(.horizontal)
+                    } else {
+                        Image(systemName: "plus")
                     }
-                    .padding(.horizontal)
+                }
+                .frame(maxWidth: entering ? .infinity : 40)
+                .onTapGesture {
+                    withAnimation {
+                        self.entering = true
+                        self.searching = false
+                        data.fields.query = ""
+                    }
                 }
                 ZStack {
                     Rectangle()
@@ -454,23 +467,25 @@ struct Entries: View {
                         HStack(spacing: 7) {
                             TextField("􀊫 Find a string", text: $data.fields.query)
                                 .textFieldStyle(PlainTextFieldStyle())
-                            Image(systemName: "xmark.circle.fill")
-                                .opacity(0.5)
-                                .onTapGesture {
-                                    withAnimation {
-                                        data.fields.query = ""
-                                        self.searching = false
+                            if data.fields.query != "" {
+                                Image(systemName: "xmark.circle.fill")
+                                    .opacity(0.5)
+                                    .onTapGesture {
+                                        withAnimation {
+                                            data.fields.query = ""
+                                        }
                                     }
-                                }
+                            }
                         }
                         .padding(.horizontal)
                     } else {
                         Image(systemName: "magnifyingglass")
                     }
                 }
-                .frame(width: searching ? 200 : 40)
+                .frame(maxWidth: searching ? .infinity : 40)
                 .onTapGesture {
                     withAnimation {
+                        self.entering = false
                         self.searching = true
                     }
                 }
@@ -550,35 +565,6 @@ struct Editor: View {
         .toolbar {
             ToolbarItemGroup(placement: .automatic) {
                 Button(action: {
-                    self.popover.toggle()
-                }) {
-                    Image(systemName: "line.horizontal.3.decrease.circle")
-                }
-                .disabled(selection == "")
-                .popover(isPresented: $popover) {
-                    VStack(spacing: 0) {
-                        List {
-                            Settings(selection: $selection, data: $data)
-                        }
-                        .listStyle(SidebarListStyle())
-                        .frame(width: 420, height: 70)
-                        Divider()
-                        HStack(spacing: 0) {
-                            List {
-                                Styles(selection: $selection, data: $data)
-                            }
-                            .listStyle(SidebarListStyle())
-                            .frame(width: 250, height: 222)
-                            Divider()
-                            List {
-                                Filters(selection: $selection, data: $data)
-                            }
-                            .listStyle(SidebarListStyle())
-                            .frame(width: 170, height: 222)
-                        }
-                    }
-                }
-                Button(action: {
                     Coder(data: $data).decode() { lines in
                         lines["S"]!.forEach { string in
                             data.translations.indices.forEach { index in
@@ -606,8 +592,7 @@ struct Editor: View {
                     Image(systemName: "arrow.down.doc")
                 }
                 .disabled(selection == "")
-                .help("Import strings from an Xcode project folder")
-                /*
+                .help("Import an Xcode project folder")
                 Button(action: {
                     withAnimation {
                         Progress(data: $data).load(string: "Translating strings to \(data.target)...")
@@ -617,9 +602,8 @@ struct Editor: View {
                 }) {
                     Image(systemName: "globe")
                 }
-                .disabled(selection == "" || data.target == "" || data.translations[0].texts.isEmpty)
-                .help("Auto-translate strings")
-                */
+                .disabled(true || selection == "" || data.target == "" || data.translations[0].texts.isEmpty)
+                .help("Coming soon: Auto-translate strings")
                 Spacer()
                 ZStack {
                     VStack {
@@ -627,13 +611,13 @@ struct Editor: View {
                         HStack {
                             Rectangle()
                                 .foregroundColor(data.styles.color)
-                                .frame(width: 400 * data.progress, height: 1.5)
+                                .frame(width: 300 * data.progress, height: 1.5)
                             Spacer()
                         }
-                        .frame(width: 400, height: 1.5)
+                        .frame(width: 300, height: 1.5)
                     }
-                    .frame(width: 400, height: 27)
-                    .mask(Rectangle().frame(width: 400, height: 27).cornerRadius(5))
+                    .frame(width: 300, height: 27)
+                    .mask(Rectangle().frame(width: 300, height: 27).cornerRadius(5))
                     Menu {
                         ForEach(data.status.indices.reversed(), id: \.self) { index in
                             Text("\(data.status[index])")
@@ -644,22 +628,48 @@ struct Editor: View {
                         Text(data.status.last!)
                             .font(.system(size: 10))
                     }
-                    .frame(width: 400)
+                    .frame(width: 300)
                     .help("View project changelog, and revert to a previous version")
                 }
                 Spacer()
                 Button(action: {
-                    // COPY LOCALPROJ FILE TO A DESTINATION FOLDER
+                    self.popover.toggle()
                 }) {
-                    Image(systemName: "arrow.up.doc")
+                    Image(systemName: "line.horizontal.3.decrease.circle")
                 }
                 .disabled(selection == "")
+                .popover(isPresented: $popover) {
+                    VStack(spacing: 0) {
+                        /*
+                        List {
+                            Settings(selection: $selection, data: $data)
+                        }
+                        .listStyle(SidebarListStyle())
+                        .frame(width: 420, height: 70)
+                        Divider()
+                        */
+                        HStack(spacing: 0) {
+                            List {
+                                Styles(selection: $selection, data: $data)
+                            }
+                            .listStyle(SidebarListStyle())
+                            .frame(width: 250, height: 222)
+                            Divider()
+                            List {
+                                Filters(selection: $selection, data: $data)
+                            }
+                            .listStyle(SidebarListStyle())
+                            .frame(width: 170, height: 222)
+                        }
+                    }
+                }
                 Button(action: {
                     Coder(data: $data).encode()
                 }) {
                     Image(systemName: "square.and.arrow.up")
                 }
                 .disabled(selection == "" || data.target == "" || data.translations[0].texts.isEmpty)
+                .help("Export translations as .strings files")
             }
         }
     }

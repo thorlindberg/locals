@@ -74,7 +74,7 @@ struct Storage {
         fields: Format.Fields(query: "", entry: "", rename: "", language: ""),
         filters: Format.Filters(unpinned: true, singleline: true, multiline: true, parenthesis: true, nummerical: true, symbols: true),
         styles: Format.Styles(columns: 3, font: "San Francisco", size: CGFloat(14), weight: Font.Weight.regular, color: Color.orange, vibrancy: 1),
-        extensions: ["swift" : true, "hwift" : true, "jwift" : true, "qwift" : true],
+        extensions: ["swift" : true, "h" : true, "m" : true],
         translations: [
             Format.Translations(
                 id: "1",
