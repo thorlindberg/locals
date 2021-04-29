@@ -22,7 +22,6 @@ struct Sidebar: View {
                 }
             })
             .textFieldStyle(RoundedBorderTextFieldStyle())
-            .padding(.bottom)
             ForEach(files, id: \.self) { file in
                 NavigationLink(destination: Languages(selection: $selection, data: $data), tag: file, selection: Binding(
                     get: { selection },
@@ -32,7 +31,6 @@ struct Sidebar: View {
                     Label(file, systemImage: "doc.fill")
                         .accentColor(data.styles.color)
                 }
-                .frame(height: 20)
                 .contextMenu {
                     Button(action: {
                         self.renaming.toggle()
