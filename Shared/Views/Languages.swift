@@ -2,19 +2,13 @@ import SwiftUI
 
 struct Languages: View {
 
-    @Binding var intro: Bool
     @Binding var document: Document
-    @State var editing: Bool = false
     
     var body: some View {
         List {
-            if editing {
+            if document.data.toggles.editing {
                 HStack {
-                    HStack {
-                        Text("Base")
-                        Spacer()
-                    }
-                    .frame(width: 80)
+                    Text("Base")
                     Spacer()
                     Picker("", selection: Binding(
                         get: { document.data.base },
@@ -25,12 +19,13 @@ struct Languages: View {
                         }
                     }
                 }
+                Divider()
                 HStack {
                     if document.data.translations.allSatisfy({$0.target}) {
-                        Text("Select all")
+                        Text("Unselect all languages")
                             .foregroundColor(document.data.styles.color)
                     } else {
-                        Text("Select all")
+                        Text("Select all languages")
                     }
                     Spacer()
                     Toggle(isOn: Binding(
@@ -57,7 +52,7 @@ struct Languages: View {
             }
             ForEach(document.data.translations.indices, id: \.self) { index in
                 if document.data.translations[index].language.lowercased().hasPrefix(document.data.fields.language.lowercased()) {
-                    if editing {
+                    if document.data.toggles.editing {
                         HStack {
                             if document.data.translations[index].target {
                                 Text("\(document.data.translations[index].language)")
@@ -105,12 +100,41 @@ struct Languages: View {
         .accentColor(document.data.styles.color)
         .toolbar {
             ToolbarItemGroup(placement: .automatic) {
+                /*
                 Toggle(isOn: $intro) {
                     Image(systemName: "sparkles.rectangle.stack")
                 }
-                Toggle(isOn: $editing) {
-                    Text(editing ? "Save" : "Edit")
-                        .foregroundColor(editing ? document.data.styles.color : nil)
+                Button(action: {
+                    NSApp.keyWindow?.firstResponder?.tryToPerform(#selector(NSSplitViewController.toggleSidebar(_:)), with: nil)
+                }) {
+                    Image(systemName: "rectangle.leftthird.inset.fill")
+                }
+                */
+                Spacer()
+                Button(action: {
+                    self.document.data.toggles.popover.toggle()
+                }) {
+                    Image(systemName: "line.horizontal.3.decrease.circle")
+                }
+                .popover(isPresented: $document.data.toggles.popover) {
+                    VStack(spacing: 0) {
+                        List {
+                            Styles(document: $document)
+                        }
+                        .listStyle(SidebarListStyle())
+                        .frame(height: 195)
+                        Divider()
+                        List {
+                            Filters(document: $document)
+                        }
+                        .listStyle(SidebarListStyle())
+                        .frame(height: 215)
+                    }
+                    .frame(width: 250)
+                }
+                Toggle(isOn: $document.data.toggles.editing) {
+                    Text(document.data.toggles.editing ? "Save" : "Edit")
+                        .foregroundColor(document.data.toggles.editing ? document.data.styles.color : nil)
                 }
             }
         }

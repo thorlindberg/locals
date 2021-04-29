@@ -14,12 +14,23 @@ struct Document: FileDocument {
         
         var base: String
         var target: String
-        var alerts: Bool
+        var tooltip: String
+        var toggles: Toggles
         var fields: Fields
         var filters: Filters
         var styles: Styles
         var extensions: [String:Bool]
         var translations: [Translations]
+        
+        struct Toggles: Hashable {
+            var intro: Bool
+            var alerts: Bool
+            var popover: Bool
+            var editing: Bool
+            var alert: Bool
+            var importing: Bool
+            var exporting: Bool
+        }
         
         struct Fields: Hashable {
             var query: String
@@ -66,14 +77,17 @@ struct Document: FileDocument {
     }
     
     // tell the system which file type to support
-    let localproj: UTType = .localproj
     static var readableContentTypes = [UTType.localproj]
 
     // by default our document is empty
     var data = Format(
         base: "English (United Kingdom)",
-        target: "Japanese",
-        alerts: !UserDefaults.standard.bool(forKey: "hasLaunchedBefore"),
+        target: "",
+        tooltip: "",
+        toggles: Format.Toggles(
+            intro: !UserDefaults.standard.bool(forKey: "hasLaunchedBefore"), alerts: !UserDefaults.standard.bool(forKey: "hasLaunchedBefore"),
+            popover: false, editing: false, alert: false, importing: false, exporting: false
+        ),
         fields: Format.Fields(query: "", entry: "", rename: "", language: ""),
         filters: Format.Filters(unpinned: true, singleline: true, multiline: true, parenthesis: true, nummerical: true, symbols: true),
         styles: Format.Styles(columns: 3, font: "San Francisco", size: CGFloat(14), weight: Font.Weight.regular, color: Color.orange, vibrancy: 1),
@@ -149,7 +163,7 @@ struct Document: FileDocument {
                 case "alerts":
                     
                     // "alerts" : Bool ;
-                    data.alerts = Bool(line[1])!
+                    data.toggles.alerts = Bool(line[1])!
                 
                 case "targets":
                     
@@ -245,7 +259,7 @@ struct Document: FileDocument {
         output += "base : " + data.base + " ; "
         
         // "alerts" : Bool ;
-        output += "alerts : " + String(data.alerts) + " ; "
+        output += "alerts : " + String(data.toggles.alerts) + " ; "
         
         // "targets" : language , language , language ;
         output += "targets : "

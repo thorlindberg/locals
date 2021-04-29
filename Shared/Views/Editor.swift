@@ -7,21 +7,6 @@ extension NSTextField {
     }
 }
 
-struct VisualEffect: NSViewRepresentable {
-    
-  func makeNSView(context: Context) -> NSVisualEffectView {
-    let view = NSVisualEffectView()
-    view.blendingMode = .withinWindow
-    view.isEmphasized = true
-    view.material = .popover
-    return view
-  }
-    
-  func updateNSView(_ nsView: NSVisualEffectView, context: Context) {
-  }
-    
-}
-
 struct Filters: View {
     
     @Binding var document: Document
@@ -275,7 +260,6 @@ struct Settings: View {
 struct Card: View {
     
     @Binding var document: Document
-    @Binding var alert: Bool
     var index: Range<Array<Document.Format.Translations>.Index>.Element
     var string: Range<Array<Dictionary<String, Document.Format.Text>.Keys.Element>.Index>.Element
     var strings: [Dictionary<String, Document.Format.Text>.Keys.Element]
@@ -338,8 +322,8 @@ struct Card: View {
                             .foregroundColor(vibrant ? Color("Text") : reduced ? nil : nil)
                             .opacity(vibrant ? 0.5 : 0.25)
                             .onTapGesture {
-                                if document.data.alerts {
-                                    self.alert.toggle()
+                                if document.data.toggles.alerts {
+                                    document.data.toggles.alert.toggle()
                                 } else {
                                     withAnimation {
                                         document.data.translations.indices.forEach { t in
@@ -367,8 +351,6 @@ struct Card: View {
 struct Entries: View {
     
     @Binding var document: Document
-    @State var entering: Bool = true
-    @State var searching: Bool = false
     
     var body: some View {
         
@@ -377,87 +359,41 @@ struct Entries: View {
             Rectangle()
                 .opacity(0)
                 .frame(height: 55)
-                .background(VisualEffect())
-            HStack(spacing: 10) {
-                ZStack {
-                    Rectangle()
-                        .foregroundColor(document.data.translations.filter({$0.language == document.data.target})[0].texts.keys.contains(document.data.fields.entry) ? .red : Color("Mode"))
-                        .opacity(document.data.translations.filter({$0.language == document.data.target})[0].texts.keys.contains(document.data.fields.entry) ? 0.5 : 1)
-                        .cornerRadius(6)
-                        .frame(height: 30)
-                    if entering {
-                        HStack(spacing: 7) {
-                            TextField("Add unique string", text: $document.data.fields.entry, onCommit: {
-                                if document.data.fields.entry.trimmingCharacters(in: .whitespaces) != "" && !document.data.translations.filter({$0.language == document.data.target})[0].texts.keys.contains(document.data.fields.entry) {
-                                    document.data.translations.indices.forEach { index in
-                                        self.document.data.translations[index].texts[document.data.fields.entry] = Document.Format.Text(
-                                            order: document.data.translations[index].texts.isEmpty ? 1 : document.data.translations[index].texts.values.map({$0.order}).max()! + 1,
-                                            translation: "",
-                                            pinned: false,
-                                            single: true,
-                                            multi: false
-                                        )
-                                    }
+            ZStack {
+                Rectangle()
+                    .foregroundColor(document.data.translations.filter({$0.language == document.data.target})[0].texts.keys.contains(document.data.fields.entry) ? .red : Color("Mode"))
+                    .opacity(document.data.translations.filter({$0.language == document.data.target})[0].texts.keys.contains(document.data.fields.entry) ? 0.5 : 1)
+                    .cornerRadius(6)
+                    .frame(height: 30)
+                HStack(spacing: 7) {
+                    TextField("Add unique string", text: $document.data.fields.entry, onCommit: {
+                        if document.data.fields.entry.trimmingCharacters(in: .whitespaces) != "" && !document.data.translations.filter({$0.language == document.data.target})[0].texts.keys.contains(document.data.fields.entry) {
+                            document.data.translations.indices.forEach { index in
+                                self.document.data.translations[index].texts[document.data.fields.entry] = Document.Format.Text(
+                                    order: document.data.translations[index].texts.isEmpty ? 1 : document.data.translations[index].texts.values.map({$0.order}).max()! + 1,
+                                    translation: "",
+                                    pinned: false,
+                                    single: true,
+                                    multi: false
+                                )
+                            }
+                            document.data.fields.entry = ""
+                        }
+                    })
+                    .textFieldStyle(PlainTextFieldStyle())
+                    if document.data.fields.entry != "" {
+                        Image(systemName: "xmark.circle.fill")
+                            .opacity(0.5)
+                            .onTapGesture {
+                                withAnimation {
                                     document.data.fields.entry = ""
                                 }
-                            })
-                            .textFieldStyle(PlainTextFieldStyle())
-                            if document.data.fields.entry != "" {
-                                Image(systemName: "xmark.circle.fill")
-                                    .opacity(0.5)
-                                    .onTapGesture {
-                                        withAnimation {
-                                            document.data.fields.entry = ""
-                                        }
-                                    }
                             }
-                        }
-                        .padding(.horizontal)
-                    } else {
-                        Image(systemName: "plus")
                     }
                 }
-                .frame(maxWidth: entering ? .infinity : 40)
-                .onTapGesture {
-                    withAnimation {
-                        self.entering = true
-                        self.searching = false
-                        document.data.fields.query = ""
-                    }
-                }
-                ZStack {
-                    Rectangle()
-                        .foregroundColor(Color("Mode"))
-                        .opacity(document.data.translations.filter({$0.language == document.data.target})[0].texts.keys.contains(document.data.fields.entry) ? 0.5 : 1)
-                        .cornerRadius(6)
-                        .frame(height: 30)
-                    if searching {
-                        HStack(spacing: 7) {
-                            TextField("􀊫 Find a string", text: $document.data.fields.query)
-                                .textFieldStyle(PlainTextFieldStyle())
-                            if document.data.fields.query != "" {
-                                Image(systemName: "xmark.circle.fill")
-                                    .opacity(0.5)
-                                    .onTapGesture {
-                                        withAnimation {
-                                            document.data.fields.query = ""
-                                        }
-                                    }
-                            }
-                        }
-                        .padding(.horizontal)
-                    } else {
-                        Image(systemName: "magnifyingglass")
-                    }
-                }
-                .frame(maxWidth: searching ? .infinity : 40)
-                .onTapGesture {
-                    withAnimation {
-                        self.entering = false
-                        self.searching = true
-                    }
-                }
+                .padding(.horizontal)
             }
+            .frame(maxWidth: .infinity)
             .padding(.horizontal)
             .padding(.vertical, 10)
         }
@@ -469,13 +405,11 @@ struct Entries: View {
 struct Editor: View {
     
     @Binding var document: Document
-    @State var alert: Bool = false
-    @State var popover: Bool = false
     
     var body: some View {
         VStack(spacing: 0) {
             if document.data.target != "" {
-                ZStack {
+                VStack(spacing: 0) {
                     List {
                         if !document.data.translations[0].texts.isEmpty {
                             ForEach(document.data.translations.indices, id: \.self) { index in
@@ -491,64 +425,35 @@ struct Editor: View {
                                         .filter { document.data.filters.symbols ? true : !($0.allSatisfy({ ($0.isSymbol || $0.isPunctuation || $0.isCurrencySymbol || $0.isMathSymbol) })) } // symbols
                                         .filter { document.data.filters.unpinned ? true : document.data.translations[index].texts[$0]!.pinned } // unpinned
                                     ForEach(strings.indices, id: \.self) { string in
-                                        Card(document: $document, alert: $alert, index: index, string: string, strings: strings)
+                                        Card(document: $document, index: index, string: string, strings: strings)
                                     }
                                 }
                             }
                         }
                     }
-                    VStack(spacing: 0) {
-                        Spacer()
-                        Entries(document: $document)
-                            .disabled(document.data.target == "")
-                    }
+                    Entries(document: $document)
+                        .disabled(document.data.target == "")
                 }
             } else {
                 Spacer()
             }
         }
-        .alert(isPresented: $alert) {
+        .alert(isPresented: $document.data.toggles.alert) {
             Alert(
                 title: Text("Are you sure?"),
                 message: Text("Deleting an entry removes it from your entire project. This action is irreversible."),
                 primaryButton: .default (Text("Understood")) {
-                    self.alert = false
-                    document.data.alerts = false
+                    document.data.toggles.alert = false
+                    document.data.toggles.alerts = false
                 },
                 secondaryButton: .cancel (Text("Cancel")) {
-                    self.alert = false
+                    document.data.toggles.alert = false
                 }
             )
         }
         .toolbar {
             ToolbarItemGroup(placement: .automatic) {
-                Button(action: {
-                    Coder(document: $document).decode() { lines in
-                        lines["S"]!.forEach { string in
-                            document.data.translations.indices.forEach { index in
-                                if !document.data.translations[index].texts.keys.contains(string) {
-                                    document.data.translations[index].texts[string] = Document.Format.Text(
-                                        order: document.data.translations[index].texts.isEmpty ? 1 : document.data.translations[index].texts.values.map({$0.order}).max()! + 1,
-                                        translation: "", pinned: false, single: true, multi: false
-                                    )
-                                }
-                            }
-                        }
-                        lines["M"]!.forEach { string in
-                            document.data.translations.indices.forEach { index in
-                                if !document.data.translations[index].texts.keys.contains(string) {
-                                    document.data.translations[index].texts[string] = Document.Format.Text(
-                                        order: document.data.translations[index].texts.isEmpty ? 1 : document.data.translations[index].texts.values.map({$0.order}).max()! + 1,
-                                        translation: "", pinned: false, single: false, multi: true
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }) {
-                    Image(systemName: "arrow.down.doc")
-                }
-                .help("Import an Xcode project folder")
+                /*
                 Button(action: {
                     withAnimation {
                         Translation(document: $document).translate()
@@ -557,43 +462,65 @@ struct Editor: View {
                     Image(systemName: "globe")
                 }
                 .disabled(true || document.data.target == "" || document.data.translations[0].texts.isEmpty)
-                .help("Coming soon: Auto-translate strings")
-                Button(action: {
-                    self.popover.toggle()
-                }) {
-                    Image(systemName: "line.horizontal.3.decrease.circle")
+                .help("Auto-translate strings")
+                */
+                Toggle(isOn: $document.data.toggles.importing) {
+                    Image(systemName: "folder.badge.plus")
                 }
-                .popover(isPresented: $popover) {
-                    VStack(spacing: 0) {
-                        /*
-                        List {
-                            Settings(),document: $document)
-                        }
-                        .listStyle(SidebarListStyle())
-                        .frame(width: 420, height: 70)
-                        Divider()
-                        */
-                        VStack(spacing: 0) {
-                            List {
-                                Styles(document: $document)
+                .disabled(document.data.target == "")
+                .help("Import an Xcode project folder")
+                .fileImporter(
+                    isPresented: $document.data.toggles.importing, allowedContentTypes: [.folder], allowsMultipleSelection: true
+                ) { result in
+                    do {
+                        guard let folder: URL = try result.get().first else { return }
+                        Coder(document: $document).decode(folder: folder) { lines in
+                            lines["S"]!.forEach { string in
+                                document.data.translations.indices.forEach { index in
+                                    if !document.data.translations[index].texts.keys.contains(string) {
+                                        document.data.translations[index].texts[string] = Document.Format.Text(
+                                            order: document.data.translations[index].texts.isEmpty ? 1 : document.data.translations[index].texts.values.map({$0.order}).max()! + 1,
+                                            translation: "", pinned: false, single: true, multi: false
+                                        )
+                                    }
+                                }
                             }
-                            .listStyle(SidebarListStyle())
-                            Divider()
-                            List {
-                                Filters(document: $document)
+                            lines["M"]!.forEach { string in
+                                document.data.translations.indices.forEach { index in
+                                    if !document.data.translations[index].texts.keys.contains(string) {
+                                        document.data.translations[index].texts[string] = Document.Format.Text(
+                                            order: document.data.translations[index].texts.isEmpty ? 1 : document.data.translations[index].texts.values.map({$0.order}).max()! + 1,
+                                            translation: "", pinned: false, single: false, multi: true
+                                        )
+                                    }
+                                }
                             }
-                            .listStyle(SidebarListStyle())
                         }
-                        .frame(width: 250, height: 450)
+                    } catch {
+                        print("Unable to read folder contents")
+                        print(error.localizedDescription)
                     }
                 }
-                Button(action: {
-                    Coder(document: $document).encode()
-                }) {
+                Toggle(isOn: $document.data.toggles.exporting) {
                     Image(systemName: "square.and.arrow.up")
                 }
                 .disabled(document.data.target == "" || document.data.translations[0].texts.isEmpty)
                 .help("Export translations as .strings files")
+                .fileImporter(
+                    isPresented: $document.data.toggles.exporting, allowedContentTypes: [.folder], allowsMultipleSelection: false
+                ) { result in
+                    do {
+                        guard let folder: URL = try result.get().first else { return }
+                        Coder(document: $document).encode(folder: folder)
+                    } catch {
+                        print("Unable to export as .strings")
+                        print(error.localizedDescription)
+                    }
+                }
+                TextField("􀊫 Find a string", text: $document.data.fields.query)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .frame(width: 200)
+                    .disabled(document.data.target == "")
             }
         }
     }

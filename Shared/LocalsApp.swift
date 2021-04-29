@@ -6,5 +6,8 @@ struct LocalsApp: App {
         DocumentGroup(newDocument: Document()) { file in
             Window(document: file.$document)
         }
+        .commands {
+            SidebarCommands()
+        }
     }
 }

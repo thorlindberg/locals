@@ -2,9 +2,7 @@ import SwiftUI
 
 struct Welcome: View {
     
-    @Binding var intro: Bool
     @Binding var document: Document
-    @State var tooltip: String = ""
     
     var body: some View {
         ZStack {
@@ -31,13 +29,13 @@ struct Welcome: View {
                         Text("And automatically retrieves strings")
                     }
                     Spacer()
-                    Image(systemName: tooltip == "xcodeproj" ? "questionmark.circle.fill" : "questionmark.circle")
+                    Image(systemName: document.data.tooltip == "xcodeproj" ? "questionmark.circle.fill" : "questionmark.circle")
                         .opacity(0.5)
                         .padding(.trailing, 10)
                         .onHover { hovering in
-                            tooltip = hovering ? "xcodeproj" : ""
+                            document.data.tooltip = hovering ? "xcodeproj" : ""
                         }
-                        .popover(isPresented: Binding(get: { tooltip == "xcodeproj" ? true : false }, set: { tooltip = $0 ? "xcodeproj" : "" })) {
+                        .popover(isPresented: Binding(get: { document.data.tooltip == "xcodeproj" ? true : false }, set: { document.data.tooltip = $0 ? "xcodeproj" : "" })) {
                             Text("Click the 􀈽 button, then select an Xcode project folder, and click \"Open\" to import its strings.")
                                 .lineSpacing(5)
                                 .font(.system(size: 12))
@@ -58,13 +56,13 @@ struct Welcome: View {
                         Text("In the application's storage")
                     }
                     Spacer()
-                    Image(systemName: tooltip == "localproj" ? "questionmark.circle.fill" : "questionmark.circle")
+                    Image(systemName: document.data.tooltip == "localproj" ? "questionmark.circle.fill" : "questionmark.circle")
                         .opacity(0.5)
                         .padding(.trailing, 10)
                         .onHover { hovering in
-                            tooltip = hovering ? "localproj" : ""
+                            document.data.tooltip = hovering ? "localproj" : ""
                         }
-                        .popover(isPresented: Binding(get: { tooltip == "localproj" ? true : false }, set: { tooltip = $0 ? "localproj" : "" })) {
+                        .popover(isPresented: Binding(get: { document.data.tooltip == "localproj" ? true : false }, set: { document.data.tooltip = $0 ? "localproj" : "" })) {
                             Text("Your work is automatically saved to the application's storage, whenever you edit anything. Look at the window's top-right corner to see when a project was last saved.")
                                 .lineSpacing(5)
                                 .font(.system(size: 12))
@@ -85,13 +83,13 @@ struct Welcome: View {
                         Text("Ready for importing into Xcode")
                     }
                     Spacer()
-                    Image(systemName: tooltip == "strings" ? "questionmark.circle.fill" : "questionmark.circle")
+                    Image(systemName: document.data.tooltip == "strings" ? "questionmark.circle.fill" : "questionmark.circle")
                         .opacity(0.5)
                         .padding(.trailing, 10)
                         .onHover { hovering in
-                            tooltip = hovering ? "strings" : ""
+                            document.data.tooltip = hovering ? "strings" : ""
                         }
-                        .popover(isPresented: Binding(get: { tooltip == "strings" ? true : false }, set: { tooltip = $0 ? "strings" : "" })) {
+                        .popover(isPresented: Binding(get: { document.data.tooltip == "strings" ? true : false }, set: { document.data.tooltip = $0 ? "strings" : "" })) {
                             Text("Click the 􀈂 button, then select a destination folder, and click \"Export\" to export strings for selected languages. In Xcode you can import these exported strings into your Xcode project, to localize your project.")
                                 .lineSpacing(5)
                                 .font(.system(size: 12))
@@ -105,7 +103,7 @@ struct Welcome: View {
             VStack {
                 HStack {
                     Button(action: {
-                        intro.toggle()
+                        document.data.toggles.intro.toggle()
                         UserDefaults.standard.set(true, forKey: "hasLaunchedBefore")
                     }) {
                         Image(systemName: "xmark")
