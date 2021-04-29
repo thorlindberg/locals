@@ -8,6 +8,7 @@ extension UTType {
 }
 
 struct Document: FileDocument {
+    
     // data structure
     struct Format: Hashable {
         
@@ -64,6 +65,11 @@ struct Document: FileDocument {
         
     }
     
+    // tell the system which file type to support
+    let localproj: UTType = .localproj
+    static var readableContentTypes = [UTType.localproj]
+
+    // by default our document is empty
     var data = Format(
         base: "English (United Kingdom)",
         target: "Japanese",
@@ -114,14 +120,17 @@ struct Document: FileDocument {
             Format.Translations(id: "39", language: "Hindi", abbreviation: "(hi)", request: "hi", target: false, texts: [:])
         ]
     )
-    
-    func read(text: String) -> Format {
-        
-        var baseData = self.data
-        
-        do {
+
+    // a simple initializer that creates new, empty documents
+    init() {
+        var data = data
+    }
+
+    // this initializer loads data that has been saved previously
+    init(configuration: ReadConfiguration) throws {
+        if let text = configuration.file.regularFileContents {
             
-            let savedString = text
+            let savedString = String(decoding: text, as: UTF8.self)
             let savedArray = savedString.components(separatedBy: " ; ")
             
             var targets: [String] = []
@@ -135,12 +144,12 @@ struct Document: FileDocument {
                 case "base":
                     
                     // "base" : language ;
-                    baseData.base = line[1]
+                    data.base = line[1]
                 
                 case "alerts":
                     
                     // "alerts" : Bool ;
-                    baseData.alerts = Bool(line[1])!
+                    data.alerts = Bool(line[1])!
                 
                 case "targets":
                     
@@ -152,54 +161,54 @@ struct Document: FileDocument {
                 case "filters":
                     
                     // "filters" : unpinned : singleline : multiline : parenthesis : nummerical : symbols ;
-                    baseData.filters.unpinned = Bool(line[1])!
-                    baseData.filters.singleline = Bool(line[2])!
-                    baseData.filters.multiline = Bool(line[3])!
-                    baseData.filters.parenthesis = Bool(line[4])!
-                    baseData.filters.nummerical = Bool(line[5])!
-                    baseData.filters.symbols = Bool(line[6])!
+                    data.filters.unpinned = Bool(line[1])!
+                    data.filters.singleline = Bool(line[2])!
+                    data.filters.multiline = Bool(line[3])!
+                    data.filters.parenthesis = Bool(line[4])!
+                    data.filters.nummerical = Bool(line[5])!
+                    data.filters.symbols = Bool(line[6])!
                 
                 case "styles":
                     
                     // "styles" : columns : font : size : weight : color : vibrancy ;
-                    baseData.styles.columns = Int(line[1])!
-                    baseData.styles.font = line[2]
-                    baseData.styles.size = CGFloat(Int(line[3])!)
-                    if line[4] == "Regular" { baseData.styles.weight = Font.Weight.regular }
-                    if line[4] == "Heavy" { baseData.styles.weight = Font.Weight.heavy }
-                    if line[4] == "Black" { baseData.styles.weight = Font.Weight.black }
-                    if line[4] == "Bold" { baseData.styles.weight = Font.Weight.bold }
-                    if line[4] == "Semi-bold" { baseData.styles.weight = Font.Weight.semibold }
-                    if line[4] == "Medium" { baseData.styles.weight = Font.Weight.medium }
-                    if line[4] == "Thin" { baseData.styles.weight = Font.Weight.thin }
-                    if line[4] == "Light" { baseData.styles.weight = Font.Weight.light }
-                    if line[4] == "Ultra light" { baseData.styles.weight = Font.Weight.ultraLight }
-                    if line[5] == "Accent" { baseData.styles.color = Color.accentColor }
-                    if line[5] == "Blue" { baseData.styles.color = Color.blue }
-                    if line[5] == "Gray" { baseData.styles.color = Color.gray }
-                    if line[5] == "Green" { baseData.styles.color = Color.green }
-                    if line[5] == "Orange" { baseData.styles.color = Color.orange }
-                    if line[5] == "Pink" { baseData.styles.color = Color.pink }
-                    if line[5] == "Purple" { baseData.styles.color = Color.purple }
-                    if line[5] == "Red" { baseData.styles.color = Color.red }
-                    if line[5] == "Yellow" { baseData.styles.color = Color.yellow }
-                    baseData.styles.vibrancy = Int(line[6])!
+                    data.styles.columns = Int(line[1])!
+                    data.styles.font = line[2]
+                    data.styles.size = CGFloat(Int(line[3])!)
+                    if line[4] == "Regular" { data.styles.weight = Font.Weight.regular }
+                    if line[4] == "Heavy" { data.styles.weight = Font.Weight.heavy }
+                    if line[4] == "Black" { data.styles.weight = Font.Weight.black }
+                    if line[4] == "Bold" { data.styles.weight = Font.Weight.bold }
+                    if line[4] == "Semi-bold" { data.styles.weight = Font.Weight.semibold }
+                    if line[4] == "Medium" { data.styles.weight = Font.Weight.medium }
+                    if line[4] == "Thin" { data.styles.weight = Font.Weight.thin }
+                    if line[4] == "Light" { data.styles.weight = Font.Weight.light }
+                    if line[4] == "Ultra light" { data.styles.weight = Font.Weight.ultraLight }
+                    if line[5] == "Accent" { data.styles.color = Color.accentColor }
+                    if line[5] == "Blue" { data.styles.color = Color.blue }
+                    if line[5] == "Gray" { data.styles.color = Color.gray }
+                    if line[5] == "Green" { data.styles.color = Color.green }
+                    if line[5] == "Orange" { data.styles.color = Color.orange }
+                    if line[5] == "Pink" { data.styles.color = Color.pink }
+                    if line[5] == "Purple" { data.styles.color = Color.purple }
+                    if line[5] == "Red" { data.styles.color = Color.red }
+                    if line[5] == "Yellow" { data.styles.color = Color.yellow }
+                    data.styles.vibrancy = Int(line[6])!
                 
                 case "extension":
                     
                     // "extension" : extension : bool ;
-                    baseData.extensions[line[1]] = Bool(line[2])
+                    data.extensions[line[1]] = Bool(line[2])
                 
                 default:
                     
                     // id : pinned : string : translation : order ;
-                    self.data.translations.indices.forEach { index in
-                        if targets.contains(self.data.translations[index].language) {
-                            baseData.translations[index].target = true
+                    data.translations.indices.forEach { index in
+                        if targets.contains(data.translations[index].language) {
+                            data.translations[index].target = true
                         }
-                        if self.data.translations[index].id == line[0] {
+                        if data.translations[index].id == line[0] {
                             if "_" == line[3] {
-                                baseData.translations[index].texts[line[2].replacingOccurrences(of: "/:", with: ":").replacingOccurrences(of: "/;", with: ";")] = Format.Text(
+                                data.translations[index].texts[line[2].replacingOccurrences(of: "/:", with: ":").replacingOccurrences(of: "/;", with: ";")] = Format.Text(
                                     order: Int(line[4])!,
                                     translation: "",
                                     pinned: Bool(line[1])!,
@@ -207,7 +216,7 @@ struct Document: FileDocument {
                                     multi: false
                                 )
                             } else {
-                                baseData.translations[index].texts[line[2].replacingOccurrences(of: "/:", with: ":").replacingOccurrences(of: "/;", with: ";")] = Format.Text(
+                                data.translations[index].texts[line[2].replacingOccurrences(of: "/:", with: ":").replacingOccurrences(of: "/;", with: ";")] = Format.Text(
                                     order: Int(line[4])!,
                                     translation: line[3].replacingOccurrences(of: "/:", with: ":").replacingOccurrences(of: "/;", with: ";"),
                                     pinned: Bool(line[1])!,
@@ -222,14 +231,13 @@ struct Document: FileDocument {
                 
             }
             
-            print("Read project")
-            return baseData
-            
+        } else {
+            throw CocoaError(.fileReadCorruptFile)
         }
-        
     }
-    
-    func write(data: Format) -> String {
+
+    // this will be called when the system wants to write our data to disk
+    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
         
         var output = ""
         
@@ -315,34 +323,8 @@ struct Document: FileDocument {
             }
         }
         
-        return output // .dropLast(3)
+        return FileWrapper(regularFileWithContents: Data(output.dropLast(3).utf8))
         
     }
     
-    // tell the system which file type to support
-    let localproj: UTType = .localproj
-    static var readableContentTypes = [UTType.localproj]
-
-    // by default our document is empty
-    var text = ""
-
-    // a simple initializer that creates new, empty documents
-    init(initialText: String = "") {
-        text = initialText
-    }
-
-    // this initializer loads data that has been saved previously
-    init(configuration: ReadConfiguration) throws {
-        if let data = configuration.file.regularFileContents {
-            text = String(decoding: data, as: UTF8.self)
-        } else {
-            throw CocoaError(.fileReadCorruptFile)
-        }
-    }
-
-    // this will be called when the system wants to write our data to disk
-    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
-        let data = Data(text.utf8)
-        return FileWrapper(regularFileWithContents: data)
-    }
 }
