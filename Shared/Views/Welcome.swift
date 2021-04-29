@@ -3,7 +3,7 @@ import SwiftUI
 struct Welcome: View {
     
     @Binding var intro: Bool
-    @Binding var data: Storage.Format
+    @Binding var document: Document
     @State var tooltip: String = ""
     
     var body: some View {
@@ -147,7 +147,7 @@ extension AnyTransition {
 struct Welcome: View {
     
     @Binding var intro: Bool
-    @Binding var data: Storage.Format
+    @Binding var document: Document
     @State var section: String = "intro"
     
     var body: some View {

@@ -4,7 +4,7 @@ import SwiftUI
 
 struct Coder {
     
-    @Binding var data: Storage.Format
+    @Binding var document: Document
     
     func decode(completion: @escaping ([String:[String]]) -> Void) {
         
@@ -31,13 +31,13 @@ struct Coder {
                                     files.append(fileURL)
                                 }
                             } catch {
-                                Progress(data: $data).load(string: "Failed to import Xcode project")
+                                print("Failed to import Xcode project")
                             }
                         }
                     }
                     files.forEach { file in
-                        if data.extensions.keys.contains(file.absoluteString.components(separatedBy: ".").last!.lowercased()) {
-                            if data.extensions[file.absoluteString.components(separatedBy: ".").last!.lowercased()]! {
+                        if document.data.extensions.keys.contains(file.absoluteString.components(separatedBy: ".").last!.lowercased()) {
+                            if document.data.extensions[file.absoluteString.components(separatedBy: ".").last!.lowercased()]! {
                                 do {
                                     let savedData = try Data(contentsOf: file)
                                     let savedString = String(data: savedData, encoding: .utf8)
@@ -88,12 +88,12 @@ struct Coder {
                                         }
                                     }
                                 } catch {
-                                    Progress(data: $data).load(string: "Failed to import Xcode project")
+                                    print("Failed to import Xcode project")
                                 }
                             }
                         }
                     }
-                    Progress(data: $data).load(string: "Imported Xcode project")
+                    print("Imported Xcode project")
                     completion(["S" : singleline, "M" : multiline])
                 }
             }
@@ -119,16 +119,16 @@ struct Coder {
                 
                 let directory = dialog.url!
                 
-                data.translations.indices.forEach { index in
+                document.data.translations.indices.forEach { index in
                     
-                    if data.translations[index].target {
+                    if document.data.translations[index].target {
                         
-                        let filename = data.translations[index].language
+                        let filename = document.data.translations[index].language
                         var output = ""
                         
-                        data.translations[index].texts.keys.forEach { string in
-                            if data.translations[index].texts[string]!.single {
-                                output += "\"\(string)\"" + " = " + "\"\(data.translations[index].texts[string]!.translation)\"" + "\n"
+                        document.data.translations[index].texts.keys.forEach { string in
+                            if document.data.translations[index].texts[string]!.single {
+                                output += "\"\(string)\"" + " = " + "\"\(document.data.translations[index].texts[string]!.translation)\"" + "\n"
                             } else {
                                 // multiline output
                             }
@@ -137,14 +137,14 @@ struct Coder {
                         do {
                             try output.write(to: directory.appendingPathComponent(filename + ".strings"), atomically: true, encoding: String.Encoding.utf8)
                         } catch {
-                            Progress(data: $data).load(string: "Failed to export .strings file")
+                            print("Failed to export .strings file")
                         }
                         
                     }
                     
                 }
                 
-                Progress(data: $data).load(string: "Exported .strings files")
+                print("Exported .strings files")
                 
             }
         }

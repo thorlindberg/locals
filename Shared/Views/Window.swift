@@ -1,33 +1,18 @@
 import SwiftUI
 
 struct Window: View {
-    
-    @State var selection: String = ""
-    @State var data: Storage.Format = Storage.Format(
-        base: "English (United Kingdom)",
-        target: "Japanese",
-        alerts: !UserDefaults.standard.bool(forKey: "hasLaunchedBefore"),
-        saved: "",
-        status: ["\(Time().current()) - Welcome to Locals"],
-        progress: CGFloat.zero,
-        fields: Storage.Format.Fields(query: "", entry: "", rename: "", language: ""),
-        filters: Storage.Format.Filters(unpinned: true, singleline: true, multiline: true, parenthesis: true, nummerical: true, symbols: true),
-        styles: Storage.Format.Styles(columns: 3, font: "San Francisco", size: CGFloat(14), weight: Font.Weight.regular, color: Color.orange, vibrancy: 1),
-        extensions: ["swift" : true, "h" : true, "m" : true], translations: []
-    )
+    @Binding var document: Document
     @State var intro = !UserDefaults.standard.bool(forKey: "hasLaunchedBefore")
-    
     var body: some View {
         NavigationView {
-            Sidebar(intro: $intro, selection: $selection, data: $data)
-            Languages(selection: $selection, data: $data)
-            Editor(selection: $selection, data: $data)
+            Languages(intro: $intro, document: $document)
+                .frame(minWidth: 230)
+            Editor(document: $document)
         }
-        .frame(minWidth: 900, minHeight: 500)
+        .frame(minWidth: 840, minHeight: 540)
         .sheet(isPresented: $intro) {
-            Welcome(intro: $intro, data: $data)
+            Welcome(intro: $intro, document: $document)
                 .frame(width: 440, height: 440)
         }
     }
-    
 }

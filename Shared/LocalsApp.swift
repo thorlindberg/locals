@@ -3,11 +3,8 @@ import SwiftUI
 @main
 struct LocalsApp: App {
     var body: some Scene {
-        WindowGroup {
-            Window()
-        }
-        .commands {
-            SidebarCommands()
+        DocumentGroup(newDocument: Document()) { file in
+            Window(document: file.$document)
         }
     }
 }
