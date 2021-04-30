@@ -3,7 +3,7 @@ import UniformTypeIdentifiers
 
 extension UTType {
     static var localproj: UTType {
-        UTType.types(tag: "localproj", tagClass: .filenameExtension, conformingTo: nil).first!
+        UTType.types(tag: "localproj", tagClass: .filenameExtension, conformingTo: UTType.data).first!
     }
 }
 
