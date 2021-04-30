@@ -100,38 +100,7 @@ struct Languages: View {
         .accentColor(document.data.styles.color)
         .toolbar {
             ToolbarItemGroup(placement: .automatic) {
-                /*
-                Toggle(isOn: $intro) {
-                    Image(systemName: "sparkles.rectangle.stack")
-                }
-                Button(action: {
-                    NSApp.keyWindow?.firstResponder?.tryToPerform(#selector(NSSplitViewController.toggleSidebar(_:)), with: nil)
-                }) {
-                    Image(systemName: "rectangle.leftthird.inset.fill")
-                }
-                */
                 Spacer()
-                Button(action: {
-                    self.document.data.toggles.popover.toggle()
-                }) {
-                    Image(systemName: "line.horizontal.3.decrease.circle")
-                }
-                .popover(isPresented: $document.data.toggles.popover) {
-                    VStack(spacing: 0) {
-                        List {
-                            Styles(document: $document)
-                        }
-                        .listStyle(SidebarListStyle())
-                        .frame(height: 195)
-                        Divider()
-                        List {
-                            Filters(document: $document)
-                        }
-                        .listStyle(SidebarListStyle())
-                        .frame(height: 215)
-                    }
-                    .frame(width: 250)
-                }
                 Toggle(isOn: $document.data.toggles.editing) {
                     Text(document.data.toggles.editing ? "Save" : "Edit")
                         .foregroundColor(document.data.toggles.editing ? document.data.styles.color : nil)

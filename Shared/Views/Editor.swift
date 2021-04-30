@@ -218,45 +218,6 @@ struct Styles: View {
     
 }
 
-struct Settings: View {
-    
-    @Binding var document: Document
-    
-    var body: some View {
-        Section(header: Text("Import extensions")) {
-            HStack {
-                /*
-                HStack {
-                    Text("Alerts")
-                    Spacer()
-                    Toggle(isOn: Binding(
-                        get: { document.data.alerts },
-                        set: { document.data.alerts = $0 }
-                    )) {
-                        Text("")
-                    }
-                    .toggleStyle(CheckboxToggleStyle())
-                }
-                */
-                ForEach(Array(document.data.extensions.keys), id: \.self) { format in
-                    HStack {
-                        Text(format.capitalized)
-                        Spacer()
-                        Toggle(isOn: Binding(
-                            get: { document.data.extensions[format]! },
-                            set: { document.data.extensions[format] = $0 }
-                        )) {
-                            Text("")
-                        }
-                        .toggleStyle(CheckboxToggleStyle())
-                    }
-                }
-            }
-        }
-    }
-    
-}
-
 struct Card: View {
     
     @Binding var document: Document
@@ -293,17 +254,6 @@ struct Card: View {
                     }
                     Spacer()
                     VStack {
-                        /*
-                        Text("#\(document.data.translations[index].texts[strings[string]]!.order)")
-                            .fontWeight(.light)
-                            .foregroundColor(vibrant ? Color("Text") : reduced ? nil : nil)
-                            .opacity(vibrant ? 0.5 : 0.25)
-                        Text(document.data.translations[index].texts[strings[string]]!.single ? "S" : "M")
-                            .fontWeight(.light)
-                            .foregroundColor(vibrant ? Color("Text") : reduced ? nil : nil)
-                            .opacity(vibrant ? 0.5 : 0.25)
-                            .help(document.data.translations[index].texts[strings[string]]!.single ? "Singleline" : "Multiline")
-                        */
                         ZStack {
                             Image(systemName: "pin.fill")
                                 .foregroundColor(vibrant ? Color("Text") : reduced ? document.data.styles.color : nil)
@@ -369,7 +319,7 @@ struct Entries: View {
                     TextField("Add unique string", text: $document.data.fields.entry, onCommit: {
                         if document.data.fields.entry.trimmingCharacters(in: .whitespaces) != "" && !document.data.translations.filter({$0.language == document.data.target})[0].texts.keys.contains(document.data.fields.entry) {
                             document.data.translations.indices.forEach { index in
-                                self.document.data.translations[index].texts[document.data.fields.entry] = Document.Format.Text(
+                                document.data.translations[index].texts[document.data.fields.entry] = Document.Format.Text(
                                     order: document.data.translations[index].texts.isEmpty ? 1 : document.data.translations[index].texts.values.map({$0.order}).max()! + 1,
                                     translation: "",
                                     pinned: false,
@@ -517,10 +467,37 @@ struct Editor: View {
                         print(error.localizedDescription)
                     }
                 }
-                TextField("􀊫 Find a string", text: $document.data.fields.query)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .frame(width: 200)
-                    .disabled(document.data.target == "")
+                ZStack {
+                    TextField("􀊫 Find a string", text: $document.data.fields.query)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .frame(width: 200)
+                        .disabled(document.data.target == "" || document.data.translations[0].texts.isEmpty)
+                    HStack {
+                        Spacer()
+                        Image(systemName: "line.horizontal.3.decrease.circle")
+                            .opacity(document.data.toggles.popover ? 1 : 0.5)
+                            .padding(.trailing, 7)
+                            .onTapGesture {
+                                document.data.toggles.popover.toggle()
+                            }
+                    }
+                }
+                .popover(isPresented: $document.data.toggles.popover) {
+                    VStack(spacing: 0) {
+                        List {
+                            Styles(document: $document)
+                        }
+                        .listStyle(SidebarListStyle())
+                        .frame(height: 195)
+                        Divider()
+                        List {
+                            Filters(document: $document)
+                        }
+                        .listStyle(SidebarListStyle())
+                        .frame(height: 215)
+                    }
+                    .frame(width: 240)
+                }
             }
         }
     }
