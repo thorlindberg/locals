@@ -360,8 +360,23 @@ struct Editor: View {
         VStack(spacing: 0) {
             if document.data.target != "" {
                 VStack(spacing: 0) {
-                    List {
-                        if !document.data.translations[0].texts.isEmpty {
+                    if document.data.translations[0].texts.isEmpty || document.data.toggles.dropping {
+                        Spacer()
+                        ZStack {
+                            Image(systemName: "viewfinder")
+                                .font(.system(size: 150))
+                                .opacity(0.05)
+                            Image(systemName: "folder.fill.badge.plus")
+                                .font(.system(size: 50))
+                                .opacity(0.1)
+                        }
+                        .padding(.bottom, 30)
+                        Text("Drop a folder here to import strings")
+                            .fontWeight(.bold)
+                            .opacity(0.2)
+                        Spacer()
+                    } else {
+                        List {
                             ForEach(document.data.translations.indices, id: \.self) { index in
                                 if document.data.translations[index].language == document.data.target {
                                     let strings = Array(document.data.translations[index].texts.keys)

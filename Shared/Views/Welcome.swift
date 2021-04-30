@@ -36,7 +36,7 @@ struct Welcome: View {
                             document.data.tooltip = hovering ? "xcodeproj" : ""
                         }
                         .popover(isPresented: Binding(get: { document.data.tooltip == "xcodeproj" ? true : false }, set: { document.data.tooltip = $0 ? "xcodeproj" : "" })) {
-                            Text("Click the 􀈽 button, then select an Xcode project folder, and click \"Open\" to import its strings.")
+                            Text("Click the 􀈽 button and select an Xcode project folder, or drag the folder into the editor, to import its strings.")
                                 .lineSpacing(5)
                                 .font(.system(size: 12))
                                 .frame(width: 210)
@@ -53,7 +53,7 @@ struct Welcome: View {
                     VStack(alignment: .leading, spacing: 3) {
                         Text("Auto-saves your work")
                             .fontWeight(.bold)
-                        Text("In the application's storage")
+                        Text("Avoid lost work due to crashes")
                     }
                     Spacer()
                     Image(systemName: document.data.tooltip == "localproj" ? "questionmark.circle.fill" : "questionmark.circle")
@@ -63,7 +63,7 @@ struct Welcome: View {
                             document.data.tooltip = hovering ? "localproj" : ""
                         }
                         .popover(isPresented: Binding(get: { document.data.tooltip == "localproj" ? true : false }, set: { document.data.tooltip = $0 ? "localproj" : "" })) {
-                            Text("Your work is automatically saved to the application's storage, whenever you edit anything. Look at the window's top-right corner to see when a project was last saved.")
+                            Text("Your work is automatically saved by the application. If the application or your Mac crashes, your work is recovered.")
                                 .lineSpacing(5)
                                 .font(.system(size: 12))
                                 .frame(width: 260)
@@ -90,7 +90,7 @@ struct Welcome: View {
                             document.data.tooltip = hovering ? "strings" : ""
                         }
                         .popover(isPresented: Binding(get: { document.data.tooltip == "strings" ? true : false }, set: { document.data.tooltip = $0 ? "strings" : "" })) {
-                            Text("Click the 􀈂 button, then select a destination folder, and click \"Export\" to export strings for selected languages. In Xcode you can import these exported strings into your Xcode project, to localize your project.")
+                            Text("Click the 􀈂 button and select a folder to export strings for selected languages. Xcode can import exported strings, to localize your project.")
                                 .lineSpacing(5)
                                 .font(.system(size: 12))
                                 .frame(width: 270)

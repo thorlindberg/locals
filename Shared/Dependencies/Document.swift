@@ -50,7 +50,6 @@ struct Document: FileDocument {
         }
         
         struct Styles: Hashable {
-            var columns: Int
             var font: String
             var size: CGFloat
             var weight: Font.Weight
@@ -91,7 +90,7 @@ struct Document: FileDocument {
         ),
         fields: Format.Fields(query: "", entry: "", rename: "", language: ""),
         filters: Format.Filters(unpinned: true, singleline: true, multiline: true, parenthesis: true, nummerical: true, symbols: true),
-        styles: Format.Styles(columns: 3, font: "San Francisco", size: CGFloat(14), weight: Font.Weight.regular, color: Color.orange, vibrancy: 1),
+        styles: Format.Styles(font: "San Francisco", size: CGFloat(14), weight: Font.Weight.regular, color: Color.orange, vibrancy: 1),
         extensions: ["swift" : true, "h" : true, "m" : true],
         translations: [
             Format.Translations(id: "1", language: "English (United Kingdom)", abbreviation: "(en-GB)", request: "en", target: false, texts: [:]),
@@ -136,9 +135,7 @@ struct Document: FileDocument {
         ]
     )
 
-    // a simple initializer that creates new, empty documents
     init() {
-        var data = data
     }
 
     // this initializer loads data that has been saved previously
@@ -185,29 +182,28 @@ struct Document: FileDocument {
                 
                 case "styles":
                     
-                    // "styles" : columns : font : size : weight : color : vibrancy ;
-                    data.styles.columns = Int(line[1])!
-                    data.styles.font = line[2]
-                    data.styles.size = CGFloat(Int(line[3])!)
-                    if line[4] == "Regular" { data.styles.weight = Font.Weight.regular }
-                    if line[4] == "Heavy" { data.styles.weight = Font.Weight.heavy }
-                    if line[4] == "Black" { data.styles.weight = Font.Weight.black }
-                    if line[4] == "Bold" { data.styles.weight = Font.Weight.bold }
-                    if line[4] == "Semi-bold" { data.styles.weight = Font.Weight.semibold }
-                    if line[4] == "Medium" { data.styles.weight = Font.Weight.medium }
-                    if line[4] == "Thin" { data.styles.weight = Font.Weight.thin }
-                    if line[4] == "Light" { data.styles.weight = Font.Weight.light }
-                    if line[4] == "Ultra light" { data.styles.weight = Font.Weight.ultraLight }
-                    if line[5] == "Accent" { data.styles.color = Color.accentColor }
-                    if line[5] == "Blue" { data.styles.color = Color.blue }
-                    if line[5] == "Gray" { data.styles.color = Color.gray }
-                    if line[5] == "Green" { data.styles.color = Color.green }
-                    if line[5] == "Orange" { data.styles.color = Color.orange }
-                    if line[5] == "Pink" { data.styles.color = Color.pink }
-                    if line[5] == "Purple" { data.styles.color = Color.purple }
-                    if line[5] == "Red" { data.styles.color = Color.red }
-                    if line[5] == "Yellow" { data.styles.color = Color.yellow }
-                    data.styles.vibrancy = Int(line[6])!
+                    // "styles" : font : size : weight : color : vibrancy ;
+                    data.styles.font = line[1]
+                    data.styles.size = CGFloat(Int(line[2])!)
+                    if line[3] == "Regular" { data.styles.weight = Font.Weight.regular }
+                    if line[3] == "Heavy" { data.styles.weight = Font.Weight.heavy }
+                    if line[3] == "Black" { data.styles.weight = Font.Weight.black }
+                    if line[3] == "Bold" { data.styles.weight = Font.Weight.bold }
+                    if line[3] == "Semi-bold" { data.styles.weight = Font.Weight.semibold }
+                    if line[3] == "Medium" { data.styles.weight = Font.Weight.medium }
+                    if line[3] == "Thin" { data.styles.weight = Font.Weight.thin }
+                    if line[3] == "Light" { data.styles.weight = Font.Weight.light }
+                    if line[3] == "Ultra light" { data.styles.weight = Font.Weight.ultraLight }
+                    if line[4] == "Accent" { data.styles.color = Color.accentColor }
+                    if line[4] == "Blue" { data.styles.color = Color.blue }
+                    if line[4] == "Gray" { data.styles.color = Color.gray }
+                    if line[4] == "Green" { data.styles.color = Color.green }
+                    if line[4] == "Orange" { data.styles.color = Color.orange }
+                    if line[4] == "Pink" { data.styles.color = Color.pink }
+                    if line[4] == "Purple" { data.styles.color = Color.purple }
+                    if line[4] == "Red" { data.styles.color = Color.red }
+                    if line[4] == "Yellow" { data.styles.color = Color.yellow }
+                    data.styles.vibrancy = Int(line[5])!
                 
                 case "extension":
                     
@@ -289,7 +285,6 @@ struct Document: FileDocument {
         
         // "styles" : font : size : weight : color : vibrancy ;
         output += "styles : "
-        output += String(data.styles.columns) + " : "
         output += data.styles.font + " : "
         output += String(Int(data.styles.size)) + " : "
         if data.styles.weight == Font.Weight.regular { output += "Regular" + " : " }
