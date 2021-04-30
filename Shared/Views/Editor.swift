@@ -221,6 +221,7 @@ struct Styles: View {
 struct Card: View {
     
     @Binding var document: Document
+    @State var text: String = ""
     var index: Range<Array<Document.Format.Translations>.Index>.Element
     var string: Range<Array<Dictionary<String, Document.Format.Text>.Keys.Element>.Index>.Element
     var strings: [Dictionary<String, Document.Format.Text>.Keys.Element]
@@ -246,10 +247,7 @@ struct Card: View {
                             .font(.custom(document.data.styles.font, size: document.data.styles.size))
                             .fontWeight(document.data.styles.weight)
                             .foregroundColor(vibrant ? Color("Text") : document.data.styles.color)
-                        TextField("Add translation", text: Binding(
-                            get: { document.data.translations[index].texts[strings[string]]!.translation },
-                            set: { document.data.translations[index].texts[strings[string]]?.translation = $0 }
-                        ))
+                        TextField("Add translation", text: $text, onCommit: { document.data.translations[index].texts[strings[string]]?.translation = text })
                         .textFieldStyle(PlainTextFieldStyle())
                     }
                     Spacer()
@@ -292,6 +290,9 @@ struct Card: View {
                     }
                 }
                 .padding()
+            }
+            .onAppear {
+                text = document.data.translations[index].texts[strings[string]]!.translation
             }
         }
     }
