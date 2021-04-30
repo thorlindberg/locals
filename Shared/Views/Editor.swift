@@ -384,6 +384,37 @@ struct Editor: View {
                     Entries(document: $document)
                         .disabled(document.data.target == "")
                 }
+                .onDrop(of: ["public.file-url"], isTargeted: $document.data.toggles.dropping, perform: { itemProvider -> Bool in
+                    if let item = itemProvider.first {
+                        _ = item.loadObject(ofClass: URL.self) { (url, error) in
+                            if let folder = url {
+                                Coder(document: $document).decode(folder: folder) { lines in
+                                    lines["S"]!.forEach { string in
+                                        document.data.translations.indices.forEach { index in
+                                            if !document.data.translations[index].texts.keys.contains(string) {
+                                                document.data.translations[index].texts[string] = Document.Format.Text(
+                                                    order: document.data.translations[index].texts.isEmpty ? 1 : document.data.translations[index].texts.values.map({$0.order}).max()! + 1,
+                                                    translation: "", pinned: false, single: true, multi: false
+                                                )
+                                            }
+                                        }
+                                    }
+                                    lines["M"]!.forEach { string in
+                                        document.data.translations.indices.forEach { index in
+                                            if !document.data.translations[index].texts.keys.contains(string) {
+                                                document.data.translations[index].texts[string] = Document.Format.Text(
+                                                    order: document.data.translations[index].texts.isEmpty ? 1 : document.data.translations[index].texts.values.map({$0.order}).max()! + 1,
+                                                    translation: "", pinned: false, single: false, multi: true
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    return true
+                })
             } else {
                 Spacer()
             }

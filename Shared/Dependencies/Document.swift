@@ -30,6 +30,7 @@ struct Document: FileDocument {
             var alert: Bool
             var importing: Bool
             var exporting: Bool
+            var dropping: Bool
         }
         
         struct Fields: Hashable {
@@ -86,7 +87,7 @@ struct Document: FileDocument {
         tooltip: "",
         toggles: Format.Toggles(
             intro: !UserDefaults.standard.bool(forKey: "hasLaunchedBefore"), alerts: !UserDefaults.standard.bool(forKey: "hasLaunchedBefore"),
-            popover: false, editing: false, alert: false, importing: false, exporting: false
+            popover: false, editing: false, alert: false, importing: false, exporting: false, dropping: false
         ),
         fields: Format.Fields(query: "", entry: "", rename: "", language: ""),
         filters: Format.Filters(unpinned: true, singleline: true, multiline: true, parenthesis: true, nummerical: true, symbols: true),
