@@ -98,7 +98,7 @@ struct Coder {
                 
                 document.data.translations[index].texts.keys.forEach { string in
                     if document.data.translations[index].texts[string]!.single {
-                        output += "\"\(string)\"" + " = " + "\"\(document.data.translations[index].texts[string]!.translation)\"" + "\n"
+                        output += "\"\(string)\"" + " = " + "\"\(document.data.translations[index].texts[string]!.translation)\"" + ";" + "\n"
                     } else {
                         // multiline output
                     }

@@ -105,6 +105,7 @@ struct Languages: View {
                     Text(document.data.toggles.editing ? "Save" : "Edit")
                         .foregroundColor(document.data.toggles.editing ? document.data.styles.color : nil)
                 }
+                .help(document.data.toggles.editing ? "Save languages" : "Edit languages")
             }
         }
     }

@@ -399,8 +399,8 @@ struct Editor: View {
                     Entries(document: $document)
                         .disabled(document.data.target == "")
                 }
-                .onDrop(of: ["public.file-url"], isTargeted: $document.data.toggles.dropping, perform: { itemProvider -> Bool in
-                    if let item = itemProvider.first {
+                .onDrop(of: ["public.file-url"], isTargeted: $document.data.toggles.dropping, perform: { provider -> Bool in
+                    if let item = provider.first {
                         _ = item.loadObject(ofClass: URL.self) { (url, error) in
                             if let folder = url {
                                 Coder(document: $document).decode(folder: folder) { lines in
