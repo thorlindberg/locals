@@ -101,24 +101,6 @@ struct Styles: View {
     var body: some View {
         Section(header: Text("Styles")) {
             VStack {
-                /*
-                HStack {
-                    HStack {
-                        Text("Columns")
-                        Spacer()
-                    }
-                    .frame(width: 65)
-                    Spacer()
-                    Picker("", selection: Binding(
-                        get: { document.data.styles.columns },
-                        set: { document.data.styles.columns = $0 }
-                    )) {
-                        ForEach(Array(stride(from: 1, to: 10, by: 2)), id: \.self) { count in
-                            Text(String(count)).tag(count)
-                        }
-                    }
-                }
-                */
                 HStack {
                     HStack {
                         Text("Font")
@@ -450,17 +432,6 @@ struct Editor: View {
         }
         .toolbar {
             ToolbarItemGroup(placement: .automatic) {
-                /*
-                Button(action: {
-                    withAnimation {
-                        Translation(document: $document).translate()
-                    }
-                }) {
-                    Image(systemName: "globe")
-                }
-                .disabled(true || document.data.target == "" || document.data.translations[0].texts.isEmpty)
-                .help("Auto-translate strings")
-                */
                 Toggle(isOn: $document.data.toggles.importing) {
                     Image(systemName: "folder.badge.plus")
                 }
