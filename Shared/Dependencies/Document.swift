@@ -216,6 +216,8 @@ struct Document: FileDocument {
                     data.translations.indices.forEach { index in
                         if targets.contains(data.translations[index].language) {
                             data.translations[index].target = true
+                        } else {
+                            data.translations[index].target = false
                         }
                         if data.translations[index].id == line[0] {
                             if "_" == line[3] {
